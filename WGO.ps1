@@ -21,25 +21,25 @@ if (-not $isAdmin) {
     try {
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "powershell.exe"
-        $psi.Verb = "runas"
 
-        if ($PSCommandPath) {
-            # Running from a saved .ps1 file - relaunch that same file.
-            $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+        if ([string]::IsNullOrEmpty($PSCommandPath)) {
+            # Script foi executado via "irm ... | iex" (sem arquivo fisico no disco).
+            # Nesse caso $PSCommandPath fica vazio, entao nao podemos usar -File.
+            # A instancia elevada precisa baixar e executar o script novamente pela URL.
+            $scriptUrl = "https://raw.githubusercontent.com/Khotyz/WGO/main/WGO.ps1"
+            $encodedCommand = [Convert]::ToBase64String(
+                [Text.Encoding]::Unicode.GetBytes("irm '$scriptUrl' | iex")
+            )
+            $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encodedCommand"
         } else {
-            # Running via "irm <url> | iex" - there is no script file, so
-            # $PSCommandPath is empty and "-File `"`"" fails instantly, which is
-            # why the elevated window used to flash and close right after the
-            # UAC prompt. Instead, grab the source of the code that is
-            # currently executing and relaunch it, elevated, via -EncodedCommand.
-            $scriptText = $MyInvocation.MyCommand.ScriptBlock.Ast.Extent.Text
-            $encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($scriptText))
-            $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encoded"
+            # Script executado a partir de um arquivo .ps1 salvo em disco.
+            $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
         }
 
+        $psi.Verb = "runas"
         [System.Diagnostics.Process]::Start($psi) | Out-Null
     } catch {
-        [System.Windows.Forms.MessageBox]::Show("WGO needs to run as Administrator.", "WGO", "OK", "Warning") | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("WGO precisa ser executado como Administrador.", "WGO", "OK", "Warning") | Out-Null
     }
     exit
 }
