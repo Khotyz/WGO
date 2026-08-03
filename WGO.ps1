@@ -23,16 +23,12 @@ if (-not $isAdmin) {
         $psi.FileName = "powershell.exe"
 
         if ([string]::IsNullOrEmpty($PSCommandPath)) {
-            # Script foi executado via "irm ... | iex" (sem arquivo fisico no disco).
-            # Nesse caso $PSCommandPath fica vazio, entao nao podemos usar -File.
-            # A instancia elevada precisa baixar e executar o script novamente pela URL.
             $scriptUrl = "https://raw.githubusercontent.com/Khotyz/WGO/main/WGO.ps1"
             $encodedCommand = [Convert]::ToBase64String(
                 [Text.Encoding]::Unicode.GetBytes("irm '$scriptUrl' | iex")
             )
             $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encodedCommand"
         } else {
-            # Script executado a partir de um arquivo .ps1 salvo em disco.
             $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
         }
 
@@ -487,7 +483,7 @@ $Lang['zh-CN'] = @{
 $Global:CurrentLangCode = "pt-BR"
 
 # ============================================================================
-# 3. XAML - INTERFACE GRAFICA (DARK MODE ESTILO WINDOWS 11)
+# 3. XAML - INTERFACE GRAFICA
 # ============================================================================
 
 [xml]$xaml = @"
@@ -1001,43 +997,9 @@ $Global:CurrentLangCode = "pt-BR"
 $reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
-# ----------------------------------------------------------------------------
-# WHY THE INSTALLER / OPTIMIZATIONS DID NOTHING (root cause)
-# ----------------------------------------------------------------------------
-# The previous implementation tried to reuse the UI's own Runspace from a
-# background [System.Threading.Tasks.Task]::Run thread by pointing
-# [Runspace]::DefaultRunspace at it. That runspace is NOT idle, though - it is
-# the exact runspace that is, at that very moment, blocked inside
-# "$window.ShowDialog()" at the bottom of this script. A single local Runspace
-# can only run one pipeline at a time; invoking anything on it concurrently
-# from a different OS thread throws immediately (pipeline already
-# running / invalid runspace state), BEFORE execution ever reaches any
-# try/catch inside the task. Since the Task was started with "| Out-Null" and
-# never awaited/observed, .NET's TPL silently swallowed that exception - which
-# is exactly why every background button (Create Restore Point, Run Selected,
-# Install Chocolatey, Install Selected) looked like it did nothing and wrote
-# nothing to the log, not even an error.
-#
-# THE FIX
-# ----------------------------------------------------------------------------
-# Every background task now gets its OWN dedicated Runspace (via
-# runspacefactory), completely independent from the UI runspace, so there is
-# never any contention. To keep it self-contained we copy the exact bodies of
-# the functions it needs (Write-Log, T, Install-WgoApp, etc.) into that
-# runspace, and share only plain data (hashtables/arrays/strings) with it -
-# never WPF objects. Background code therefore NEVER touches $window/$ctrl
-# directly (that would throw, since WPF controls are thread-affine); instead
-# it only enqueues log lines into a thread-safe ConcurrentQueue, which the UI
-# thread drains on a DispatcherTimer tick. Anything that truly must update the
-# UI (re-enabling a button, refreshing the Chocolatey status line) is done via
-# an -OnCompleted callback that Start-WgoBackgroundTask guarantees runs on the
-# UI thread AFTER the worker runspace has finished.
+
 $Global:WgoLogQueue = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
 
-# Last-resort error reporter: shows a MessageBox directly. Safe to call from
-# ANY thread (including a background worker runspace) because
-# System.Windows.Forms.MessageBox.Show does not require WPF's Dispatcher - it
-# only needs an STA thread, which every runspace here (UI and workers) has.
 function Show-WgoFatalError {
     param([string]$Message)
     [System.Windows.Forms.MessageBox]::Show(
@@ -1047,13 +1009,6 @@ function Show-WgoFatalError {
     ) | Out-Null
 }
 
-# Runs a scriptblock on a dedicated background Runspace. The scriptblock may
-# start with its own param() block; values passed via -ArgumentList are bound
-# to it positionally, exactly like calling a .ps1 with positional arguments
-# (this replaces GetNewClosure() closures, which do not survive being moved
-# into a different runspace). If -OnCompleted is supplied, it is invoked on
-# the UI thread once the background work has finished (success or failure),
-# so it can safely touch $window/$ctrl (re-enable buttons, refresh status).
 function Start-WgoBackgroundTask {
     param(
         [Parameter(Mandatory = $true)][scriptblock]$ScriptBlock,
@@ -1691,20 +1646,6 @@ function Set-WgoPagefile {
 # ============================================================================
 # 13. FUNCAO 8 - INSTALADOR DE APLICATIVOS (CHOCOLATEY)
 # ============================================================================
-#
-# App installation was migrated from winget to Chocolatey. The previous winget-based
-# approach silently failed to install anything (GOG Galaxy, Steam, etc.) because the
-# "winget" App Execution Alias frequently does not resolve correctly for an elevated
-# (Administrator) PowerShell session that was launched via Verb=runas, which is exactly
-# how WGO relaunches itself. Chocolatey does not have this limitation: it installs to
-# C:\ProgramData\chocolatey and its choco.exe is a normal executable, so it works
-# reliably in the elevated session WGO already runs in.
-#
-# Flow: on the first "Install Selected" click, WGO checks whether Chocolatey is already
-# present; if not, it downloads and installs it automatically using the official
-# bootstrap script, refreshes PATH/ChocolateyInstall for the current process (so choco
-# can be used immediately, without restarting the script), and only then proceeds to
-# install the selected applications with "choco install <id> -y".
 
 $Global:WgoChocoPath = $null
 
