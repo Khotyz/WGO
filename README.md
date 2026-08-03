@@ -32,8 +32,6 @@ irm https://raw.githubusercontent.com/Khotyz/WGO/main/WGO.ps1 | iex
 
 This downloads and runs the latest version of the script directly, with no manual download needed. The script will request elevation automatically if it isn't already running as Administrator.
 
-> If your default branch isn't `main`, adjust the URL accordingly (e.g. `master`).
-
 ## Run locally
 
 1. Download `WGO.ps1` from this repository.
