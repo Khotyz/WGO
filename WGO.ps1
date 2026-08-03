@@ -1,15 +1,15 @@
 #Requires -Version 5.1
 <#
     WGO - Windows General Optimizations
-    Ferramenta grafica (WPF/XAML) para otimizacao, remocao de bloatware,
-    privacidade, ajustes visuais e instalacao de utilitarios no Windows 10/11.
+    GUI (WPF/XAML) tool for optimization, bloatware removal, privacy,
+    visual tweaks and utility installation on Windows 10/11.
 
-    Execute como Administrador. Algumas acoes (Group Policy / Registry HKLM,
-    Checkpoint-Computer, remocao de AppX provisionados) exigem elevacao.
+    Run as Administrator. Some actions (Group Policy / Registry HKLM,
+    Checkpoint-Computer, provisioned AppX removal) require elevation.
 #>
 
 # ============================================================================
-# 0. ELEVACAO / PRE-REQUISITOS
+# 0. ELEVATION / PREREQUISITES
 # ============================================================================
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Windows.Forms
@@ -41,7 +41,7 @@ if (-not $isAdmin) {
 }
 
 # ============================================================================
-# 1. HELPER PARA CARACTERES NAO-ASCII (uso estrito de [char]0xXXXX)
+# 1. NON-ASCII CHARACTER HELPER (strict use of [char]0xXXXX)
 # ============================================================================
 
 function U {
@@ -49,26 +49,26 @@ function U {
     -join ($Codes | ForEach-Object { [char]$_ })
 }
 
-# Acentos / caracteres especiais pt-BR
-$c_ccedil = [char]0x00E7   # c
-$c_atil   = [char]0x00E3   # a til
-$c_aacute = [char]0x00E1   # a agudo
-$c_eacute = [char]0x00E9   # e agudo
-$c_ecirc  = [char]0x00EA   # e circunflexo
-$c_iacute = [char]0x00ED   # i agudo
-$c_oacute = [char]0x00F3   # o agudo
-$c_ocirc  = [char]0x00F4   # o circunflexo
-$c_otil   = [char]0x00F5   # o til
-$c_uacute = [char]0x00FA   # u agudo
-$c_acirc  = [char]0x00E2   # a circunflexo
+# pt-BR accented characters
+$c_ccedil = [char]0x00E7
+$c_atil   = [char]0x00E3
+$c_aacute = [char]0x00E1
+$c_eacute = [char]0x00E9
+$c_ecirc  = [char]0x00EA
+$c_iacute = [char]0x00ED
+$c_oacute = [char]0x00F3
+$c_ocirc  = [char]0x00F4
+$c_otil   = [char]0x00F5
+$c_uacute = [char]0x00FA
+$c_acirc  = [char]0x00E2
 
-# Caracteres especiais es-ES
-$c_enye   = [char]0x00F1   # n til
-$c_iexcl  = [char]0x00A1   # inverted !
-$c_iques  = [char]0x00BF   # inverted ?
+# es-ES special characters
+$c_enye   = [char]0x00F1
+$c_iexcl  = [char]0x00A1
+$c_iques  = [char]0x00BF
 
 # ============================================================================
-# 2. DICIONARIOS DE TRADUCAO (en-US / pt-BR / es-ES / zh-CN)
+# 2. TRANSLATION DICTIONARIES (en-US / pt-BR / es-ES / zh-CN)
 # ============================================================================
 
 $Lang = @{}
@@ -104,6 +104,10 @@ $Lang['en-US'] = @{
     AppSteamDesc      = "Digital game store and launcher by Valve."
     AppEpicDesc       = "Epic Games digital store and launcher."
     AppGogDesc        = "DRM-free digital game store and launcher."
+    AppSevenZipDesc   = "Free, open-source file archiver with a very high compression ratio."
+    AppWiztreeDesc    = "Extremely fast disk space analyzer, an alternative to WinDirStat."
+    AppMoonlightDesc  = "Open-source game streaming client, used to connect to a Sunshine or NVIDIA GameStream host."
+    AppSunshineDesc   = "Self-hosted, open-source game stream host for Moonlight, with low-latency GPU-accelerated encoding."
     MsgReady          = "Ready."
     MsgDone           = "Done."
 
@@ -205,6 +209,10 @@ $Lang['pt-BR'] = @{
     AppSteamDesc      = "Loja e launcher de jogos digitais da Valve."
     AppEpicDesc       = "Loja e launcher digital da Epic Games."
     AppGogDesc        = "Loja e launcher de jogos digitais livres de DRM."
+    AppSevenZipDesc   = "Compactador de arquivos gratuito e de c" + $c_oacute + "digo aberto, com alt" + $c_iacute + "ssima taxa de compress" + $c_atil + "o."
+    AppWiztreeDesc    = "Analisador de espa" + $c_ccedil + "o em disco extremamente r" + $c_aacute + "pido, alternativa ao WinDirStat."
+    AppMoonlightDesc  = "Cliente de streaming de jogos de c" + $c_oacute + "digo aberto, usado para conectar a um host Sunshine ou NVIDIA GameStream."
+    AppSunshineDesc   = "Host de streaming de jogos auto-hospedado e de c" + $c_oacute + "digo aberto para o Moonlight, com codifica" + $c_ccedil + $c_atil + "o acelerada por GPU e baixa lat" + $c_ecirc + "ncia."
     MsgReady          = "Pronto."
     MsgDone           = "Conclu" + $c_iacute + "do."
 
@@ -306,6 +314,10 @@ $Lang['es-ES'] = @{
     AppSteamDesc      = "Tienda y launcher de juegos digitales de Valve."
     AppEpicDesc       = "Tienda y launcher digital de Epic Games."
     AppGogDesc        = "Tienda y launcher de juegos digitales libres de DRM."
+    AppSevenZipDesc   = "Compresor de archivos gratuito y de c" + [char]0x00F3 + "digo abierto, con una tasa de compresi" + [char]0x00F3 + "n muy alta."
+    AppWiztreeDesc    = "Analizador de espacio en disco extremadamente r" + [char]0x00E1 + "pido, alternativa a WinDirStat."
+    AppMoonlightDesc  = "Cliente de transmisi" + [char]0x00F3 + "n de juegos de c" + [char]0x00F3 + "digo abierto, usado para conectarse a un host Sunshine o NVIDIA GameStream."
+    AppSunshineDesc   = "Host de transmisi" + [char]0x00F3 + "n de juegos autoalojado y de c" + [char]0x00F3 + "digo abierto para Moonlight, con codificaci" + [char]0x00F3 + "n acelerada por GPU y baja latencia."
     MsgReady          = "Listo."
     MsgDone           = "Completado."
 
@@ -410,6 +422,10 @@ $Lang['zh-CN'] = @{
     AppSteamDesc      = "Valve " + (ZH 0x6570,0x5B57) + (ZH 0x6E38,0x620F) + (ZH 0x5546,0x5E97)
     AppEpicDesc       = "Epic Games " + (ZH 0x6570,0x5B57) + (ZH 0x5546,0x5E97)
     AppGogDesc        = (ZH 0x65E0) + " DRM " + (ZH 0x6570,0x5B57) + (ZH 0x6E38,0x620F) + (ZH 0x5546,0x5E97)
+    AppSevenZipDesc   = (ZH 0x514D,0x8D39) + (ZH 0x5F00,0x6E90) + (ZH 0x7684) + (ZH 0x6587,0x4EF6,0x538B,0x7F29,0x5DE5,0x5177) + "," + (ZH 0x538B,0x7F29,0x7387) + (ZH 0x6781,0x9AD8)
+    AppWiztreeDesc    = (ZH 0x901F,0x5EA6,0x6781,0x5FEB) + (ZH 0x7684) + (ZH 0x78C1,0x76D8,0x7A7A,0x95F4,0x5206,0x6790,0x5DE5,0x5177) + "," + (ZH 0x662F) + " WinDirStat " + (ZH 0x7684,0x66FF,0x4EE3,0x54C1)
+    AppMoonlightDesc  = (ZH 0x5F00,0x6E90,0x6E38,0x620F,0x4E32,0x6D41,0x5BA2,0x6237,0x7AEF) + "," + (ZH 0x7528,0x4E8E,0x8FDE,0x63A5) + " Sunshine " + (ZH 0x6216) + " NVIDIA GameStream " + (ZH 0x4E3B,0x673A)
+    AppSunshineDesc   = (ZH 0x81EA,0x6258,0x7BA1,0x7684,0x5F00,0x6E90,0x6E38,0x620F,0x4E32,0x6D41,0x4E3B,0x673A) + "," + (ZH 0x914D,0x5408) + " Moonlight " + (ZH 0x4F7F,0x7528) + "," + (ZH 0x652F,0x6301) + " GPU " + (ZH 0x786C,0x4EF6,0x52A0,0x901F,0x7F16,0x7801) + "," + (ZH 0x5EF6,0x8FDF,0x6781,0x4F4E)
     MsgReady          = (ZH 0x5C31,0x7EEA)
     MsgDone           = (ZH 0x5B8C,0x6210)
 
@@ -483,7 +499,7 @@ $Lang['zh-CN'] = @{
 $Global:CurrentLangCode = "pt-BR"
 
 # ============================================================================
-# 3. XAML - INTERFACE GRAFICA
+# 3. XAML - GRAPHICAL INTERFACE
 # ============================================================================
 
 [xml]$xaml = @"
@@ -983,6 +999,34 @@ $Global:CurrentLangCode = "pt-BR"
                                     </StackPanel>
                                 </Border>
 
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkSevenZip" Content="7-Zip" FontWeight="Bold" Tag="7zip"/>
+                                        <TextBlock x:Name="txtSevenZipDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkWiztree" Content="WizTree" FontWeight="Bold" Tag="wiztree"/>
+                                        <TextBlock x:Name="txtWiztreeDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkMoonlight" Content="Moonlight" FontWeight="Bold" Tag="moonlight"/>
+                                        <TextBlock x:Name="txtMoonlightDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkSunshine" Content="Sunshine" FontWeight="Bold" Tag="sunshine"/>
+                                        <TextBlock x:Name="txtSunshineDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
                             </StackPanel>
                         </GroupBox>
                         <Button x:Name="btnInstallApps" Content="Install Selected" HorizontalAlignment="Left" Padding="20,10" FontSize="14"/>
@@ -1075,7 +1119,7 @@ function Start-WgoBackgroundTask {
 }
 
 # ============================================================================
-# 4. RECUPERAR CONTROLES NOMEADOS
+# 4. RETRIEVE NAMED CONTROLS
 # ============================================================================
 
 $ctrl = @{}
@@ -1100,12 +1144,16 @@ $names = @(
     'chkQbt','txtQbtDesc',
     'chkSteam','txtSteamDesc',
     'chkEpic','txtEpicDesc',
-    'chkGog','txtGogDesc'
+    'chkGog','txtGogDesc',
+    'chkSevenZip','txtSevenZipDesc',
+    'chkWiztree','txtWiztreeDesc',
+    'chkMoonlight','txtMoonlightDesc',
+    'chkSunshine','txtSunshineDesc'
 )
 foreach ($n in $names) { $ctrl[$n] = $window.FindName($n) }
 
 # ============================================================================
-# 5. LOG / UTILIDADES DE UI
+# 5. LOG / UI UTILITIES
 # ============================================================================
 
 function Write-Log {
@@ -1218,10 +1266,18 @@ function Update-UILanguage {
     $ctrl['txtEpicDesc'].Text            = $t.AppEpicDesc
     $ctrl['chkGog'].Content              = "GOG Galaxy"
     $ctrl['txtGogDesc'].Text             = $t.AppGogDesc
+    $ctrl['chkSevenZip'].Content          = "7-Zip"
+    $ctrl['txtSevenZipDesc'].Text        = $t.AppSevenZipDesc
+    $ctrl['chkWiztree'].Content           = "WizTree"
+    $ctrl['txtWiztreeDesc'].Text         = $t.AppWiztreeDesc
+    $ctrl['chkMoonlight'].Content         = "Moonlight"
+    $ctrl['txtMoonlightDesc'].Text       = $t.AppMoonlightDesc
+    $ctrl['chkSunshine'].Content          = "Sunshine"
+    $ctrl['txtSunshineDesc'].Text        = $t.AppSunshineDesc
 }
 
 # ============================================================================
-# 6. FUNCAO 1 - PONTO DE RESTAURACAO
+# 6. FUNCTION 1 - RESTORE POINT
 # ============================================================================
 
 function New-WgoRestorePoint {
@@ -1241,7 +1297,7 @@ function New-WgoRestorePoint {
 }
 
 # ============================================================================
-# 7. FUNCAO 2 - REMOCAO DE BLOATWARE (WHITELIST EXPANDIDA)
+# 7. FUNCTION 2 - BLOATWARE REMOVAL (EXPANDED WHITELIST)
 # ============================================================================
 
 $BloatwareWhitelist = @(
@@ -1339,7 +1395,7 @@ function Remove-WgoBloatware {
 }
 
 # ============================================================================
-# 8. FUNCAO 3 - PESQUISA 100% LOCAL (SEM BING / EDGE WEB SEARCH)
+# 8. FUNCTION 3 - 100% LOCAL SEARCH (NO BING / EDGE WEB SEARCH)
 # ============================================================================
 
 function Set-WgoLocalSearch {
@@ -1362,7 +1418,7 @@ function Set-WgoLocalSearch {
 }
 
 # ============================================================================
-# 9. FUNCAO 4 - EFEITOS VISUAIS PERSONALIZADOS
+# 9. FUNCTION 4 - CUSTOM VISUAL EFFECTS
 # ============================================================================
 
 function Set-WgoVisualEffects {
@@ -1378,7 +1434,7 @@ function Set-WgoVisualEffects {
         # VisualFXSetting = 3 (custom)
         New-ItemProperty -Path $vfxKey -Name "VisualFXSetting" -Value 3 -PropertyType DWord -Force | Out-Null
 
-        # HABILITADOS
+        # Enabled
         New-ItemProperty -Path $desktopKey -Name "MinAnimate" -Value 1 -PropertyType String -Force | Out-Null
         New-ItemProperty -Path $desktopKey -Name "DragFullWindows" -Value 1 -PropertyType String -Force | Out-Null
         New-ItemProperty -Path $advKey -Name "IconsOnly" -Value 0 -PropertyType DWord -Force | Out-Null
@@ -1387,7 +1443,7 @@ function Set-WgoVisualEffects {
         New-ItemProperty -Path $desktopKey -Name "FontSmoothingType" -Value 2 -PropertyType DWord -Force | Out-Null
         New-ItemProperty -Path $desktopKey -Name "ListviewShadow" -Value 1 -PropertyType DWord -Force | Out-Null
 
-        # DESATIVADOS
+        # Disabled
         New-ItemProperty -Path $advKey -Name "TaskbarAnimations" -Value 0 -PropertyType DWord -Force | Out-Null
         New-ItemProperty -Path $desktopKey -Name "ComboBoxAnimation" -Value 0 -PropertyType String -Force | Out-Null
         New-ItemProperty -Path $desktopKey -Name "MenuAnimation" -Value 0 -PropertyType String -Force | Out-Null
@@ -1406,7 +1462,7 @@ function Set-WgoVisualEffects {
 }
 
 # ============================================================================
-# 10. FUNCAO 5 - PRIVACIDADE PROFUNDA / TELEMETRIA (GPEDIT / REGISTRY)
+# 10. FUNCTION 5 - DEEP PRIVACY / TELEMETRY (GPEDIT / REGISTRY)
 # ============================================================================
 
 function Set-WgoPrivacyPolicies {
@@ -1440,7 +1496,7 @@ function Set-WgoPrivacyPolicies {
         New-ItemProperty -Path $paths.WER -Name "Disabled" -Value 1 -PropertyType DWord -Force | Out-Null
         New-ItemProperty -Path $paths.WER -Name "DoReport" -Value 0 -PropertyType DWord -Force | Out-Null
 
-        # CEIP (SQMClient) + tarefas agendadas relacionadas
+        # CEIP (SQMClient) + related scheduled tasks
         New-ItemProperty -Path $paths.SQMClient -Name "CEIPEnable" -Value 0 -PropertyType DWord -Force | Out-Null
         $ceipTasks = @(
             "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator",
@@ -1472,7 +1528,7 @@ function Set-WgoPrivacyPolicies {
 }
 
 # ============================================================================
-# 10-B. FUNCAO 5-B - OPCOES ADICIONAIS DE TELEMETRIA
+# 10-B. FUNCTION 5-B - ADDITIONAL TELEMETRY OPTIONS
 # ============================================================================
 
 function Set-WgoExtraPrivacy {
@@ -1582,7 +1638,7 @@ function Set-WgoExtraPrivacy {
 }
 
 # ============================================================================
-# 11. FUNCAO 6 - BLOQUEIO DE DRIVERS AUTOMATICOS (WINDOWS UPDATE)
+# 11. FUNCTION 6 - BLOCK AUTOMATIC DRIVERS (WINDOWS UPDATE)
 # ============================================================================
 
 function Set-WgoBlockDriverUpdates {
@@ -1604,7 +1660,7 @@ function Set-WgoBlockDriverUpdates {
 }
 
 # ============================================================================
-# 12. FUNCAO 7 - AJUSTE DE MEMORIA VIRTUAL (PAGEFILE)
+# 12. FUNCTION 7 - VIRTUAL MEMORY (PAGEFILE) TUNING
 # ============================================================================
 
 function Set-WgoPagefile {
@@ -1615,7 +1671,7 @@ function Set-WgoPagefile {
 
         Write-Log (T 'LogPagefileRam' $ramMB $pageMB) "INFO"
 
-        # Desabilitar gerenciamento automatico
+        # Disable automatic management
         $cs2 = Get-CimInstance -ClassName Win32_ComputerSystem
         if ($cs2.AutomaticManagedPagefile) {
             Set-CimInstance -InputObject $cs2 -Property @{ AutomaticManagedPagefile = $false } -ErrorAction Stop
@@ -1644,7 +1700,7 @@ function Set-WgoPagefile {
 }
 
 # ============================================================================
-# 13. FUNCAO 8 - INSTALADOR DE APLICATIVOS (CHOCOLATEY)
+# 13. FUNCTION 8 - APPLICATION INSTALLER (CHOCOLATEY)
 # ============================================================================
 
 $Global:WgoChocoPath = $null
@@ -1753,7 +1809,7 @@ function Test-WgoChocolatey {
 }
 
 # ============================================================================
-# 13b. CATALOGO DE APPS (winget id + choco id por chave)
+# 13b. APP CATALOG (winget id + choco id per key)
 # ============================================================================
 
 # Central catalog: the key matches each CheckBox's Tag in the XAML.
@@ -1769,6 +1825,10 @@ $Global:WgoAppCatalog = @{
     'steam'                   = @{ Name = "Steam";                     WingetId = "Valve.Steam";                          ChocoId = "steam" }
     'epicgameslauncher'       = @{ Name = "Epic Games Launcher";       WingetId = "EpicGames.EpicGamesLauncher";          ChocoId = "epicgameslauncher" }
     'goggalaxy'               = @{ Name = "GOG Galaxy";                WingetId = "GOG.Galaxy";                           ChocoId = "goggalaxy" }
+    '7zip'                    = @{ Name = "7-Zip";                     WingetId = "7zip.7zip";                            ChocoId = "7zip.install" }
+    'wiztree'                 = @{ Name = "WizTree";                   WingetId = "AntibodySoftware.WizTree";             ChocoId = "wiztree" }
+    'moonlight'               = @{ Name = "Moonlight";                 WingetId = "MoonlightGameStreamingProject.Moonlight"; ChocoId = "moonlight-qt" }
+    'sunshine'                = @{ Name = "Sunshine";                  WingetId = "LizardByte.Sunshine";                  ChocoId = "sunshine" }
 }
 
 # Locates winget.exe (App Installer), caching the resolved path like Find-WgoChocolatey.
@@ -1920,7 +1980,7 @@ function Install-WgoApp {
 }
 
 # ============================================================================
-# 13c. FUNCOES PERMITIDAS DENTRO DE UM WORKER RUNSPACE (background tasks)
+# 13c. FUNCTIONS ALLOWED INSIDE A WORKER RUNSPACE (background tasks)
 # ============================================================================
 # Used by Start-WgoBackgroundTask to clone these functions into each
 # dedicated worker Runspace it creates. Keep this list in sync whenever a
@@ -1937,7 +1997,7 @@ $Global:WgoSharedFunctionNames = @(
 )
 
 # ============================================================================
-# 14. EVENTOS DE INTERFACE
+# 14. UI EVENTS
 # ============================================================================
 
 $ctrl['cmbLanguage'].Add_SelectionChanged({
@@ -2043,7 +2103,11 @@ $ctrl['btnInstallApps'].Add_Click({
         @{ Chk = $ctrl['chkQbt'];     Name = "qBittorrent" },
         @{ Chk = $ctrl['chkSteam'];   Name = "Steam" },
         @{ Chk = $ctrl['chkEpic'];    Name = "Epic Games Launcher" },
-        @{ Chk = $ctrl['chkGog'];     Name = "GOG Galaxy" }
+        @{ Chk = $ctrl['chkGog'];     Name = "GOG Galaxy" },
+        @{ Chk = $ctrl['chkSevenZip']; Name = "7-Zip" },
+        @{ Chk = $ctrl['chkWiztree'];  Name = "WizTree" },
+        @{ Chk = $ctrl['chkMoonlight']; Name = "Moonlight" },
+        @{ Chk = $ctrl['chkSunshine'];  Name = "Sunshine" }
     )
 
     $selected = @()
@@ -2088,7 +2152,7 @@ $ctrl['btnInstallApps'].Add_Click({
 })
 
 # ============================================================================
-# 15. INICIALIZACAO
+# 15. STARTUP
 # ============================================================================
 
 Update-UILanguage -Code $Global:CurrentLangCode
