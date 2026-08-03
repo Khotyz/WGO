@@ -1,0 +1,2142 @@
+#Requires -Version 5.1
+<#
+    WGO - Windows General Optimizations
+    Ferramenta grafica (WPF/XAML) para otimizacao, remocao de bloatware,
+    privacidade, ajustes visuais e instalacao de utilitarios no Windows 10/11.
+
+    Execute como Administrador. Algumas acoes (Group Policy / Registry HKLM,
+    Checkpoint-Computer, remocao de AppX provisionados) exigem elevacao.
+#>
+
+# ============================================================================
+# 0. ELEVACAO / PRE-REQUISITOS
+# ============================================================================
+
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Windows.Forms
+
+$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+$isAdmin = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $isAdmin) {
+    try {
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "powershell.exe"
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+        $psi.Verb = "runas"
+        [System.Diagnostics.Process]::Start($psi) | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("WGO precisa ser executado como Administrador.", "WGO", "OK", "Warning") | Out-Null
+    }
+    exit
+}
+
+# ============================================================================
+# 1. HELPER PARA CARACTERES NAO-ASCII (uso estrito de [char]0xXXXX)
+# ============================================================================
+
+function U {
+    param([int[]]$Codes)
+    -join ($Codes | ForEach-Object { [char]$_ })
+}
+
+# Acentos / caracteres especiais pt-BR
+$c_ccedil = [char]0x00E7   # c
+$c_atil   = [char]0x00E3   # a til
+$c_aacute = [char]0x00E1   # a agudo
+$c_eacute = [char]0x00E9   # e agudo
+$c_ecirc  = [char]0x00EA   # e circunflexo
+$c_iacute = [char]0x00ED   # i agudo
+$c_oacute = [char]0x00F3   # o agudo
+$c_ocirc  = [char]0x00F4   # o circunflexo
+$c_otil   = [char]0x00F5   # o til
+$c_uacute = [char]0x00FA   # u agudo
+$c_acirc  = [char]0x00E2   # a circunflexo
+
+# Caracteres especiais es-ES
+$c_enye   = [char]0x00F1   # n til
+$c_iexcl  = [char]0x00A1   # inverted !
+$c_iques  = [char]0x00BF   # inverted ?
+
+# ============================================================================
+# 2. DICIONARIOS DE TRADUCAO (en-US / pt-BR / es-ES / zh-CN)
+# ============================================================================
+
+$Lang = @{}
+
+$Lang['en-US'] = @{
+    AppTitle          = "WGO - Windows General Optimizations"
+    TabOptimizations  = "Optimizations & Privacy"
+    TabInstaller      = "App Installer"
+    LblLanguage       = "Language:"
+    GrpRestore        = "System Safety"
+    BtnCreateRestore  = "Create Restore Point"
+    GrpBloat          = "Bloatware & AI Apps Removal"
+    ChkBloat          = "Remove bloatware / AI apps (keeps Store, Xbox, Edge/WebView2, runtimes)"
+    GrpSearch         = "Start Menu Search"
+    ChkSearch         = "Force 100% local search (disable Bing/Edge web search)"
+    GrpVisual         = "Visual Effects"
+    ChkVisual         = "Apply custom performance visual effects profile"
+    GrpPrivacy        = "Deep Privacy / Telemetry"
+    ChkPrivacy        = "Block telemetry, WER, CEIP, Activity Feed, Location (Group Policy)"
+    GrpDrivers        = "Windows Update Drivers"
+    ChkDrivers        = "Block automatic driver installation via Windows Update"
+    GrpPagefile       = "Virtual Memory (Pagefile)"
+    ChkPagefile       = "Set static pagefile size (RAM x 1.5)"
+    BtnRunSelected    = "Run Selected Optimizations"
+    GrpInstaller      = "Useful Applications"
+    BtnInstallApps    = "Install Selected"
+    LogHeader         = "Execution Log"
+    AppFirefoxDesc    = "Highly recommended browser that does not use the Chromium engine, offering real privacy, more user control and full support for effective ad blockers (like uBlock Origin)."
+    AppNanaZipDesc    = "Lightweight, modern archiver natively integrated into the new Windows 11 context menu."
+    AppNppDesc        = "Fast, lightweight and essential text editor to replace the default Notepad."
+    AppFdmDesc        = "Powerful download manager with HTTP/HTTPS file acceleration."
+    AppQbtDesc        = "Open-source BitTorrent client, extremely lightweight, free of ads, bloatware or unwanted bundled software."
+    AppSteamDesc      = "Digital game store and launcher by Valve."
+    AppEpicDesc       = "Epic Games digital store and launcher."
+    AppGogDesc        = "DRM-free digital game store and launcher."
+    MsgReady          = "Ready."
+    MsgDone           = "Done."
+
+    GrpExtraPrivacy    = "Additional Telemetry Blocking"
+    ChkAdvertisingId   = "Disable advertising ID (personalized ads)"
+    ChkTailoredExp     = "Disable tailored experiences / Windows suggestions & tips"
+    ChkDiagTrackSvc    = "Disable Connected User Experiences and Telemetry service (DiagTrack) and dmwappushservice"
+    ChkCopilotBlock    = "Block Copilot, Recall and AI data analysis via policy"
+    ChkInputTelemetry  = "Disable typing/handwriting personalization and clipboard cloud sync"
+
+    LogRestoreTry      = "Attempting to create a System Restore Point..."
+    LogRestoreOk       = "Restore Point created successfully."
+    LogRestoreFail     = "Failed to create Restore Point: {0}"
+    LogRestoreHint     = "Check that System Protection is enabled (SystemPropertiesProtection.exe) and that the script is elevated."
+    LogBloatStart      = "Starting removal of bloatware / AI apps..."
+    LogBloatUserRemoved = "Removed (user): {0}"
+    LogBloatProvRemoved = "Removed (provisioned): {0}"
+    LogBloatError      = "Error removing {0}: {1}"
+    LogBloatDone       = "Bloatware removal finished. Whitelisted items were preserved."
+    LogSearchStart     = "Configuring Start Menu search as 100% local..."
+    LogSearchOk        = "Local search applied successfully (DisableSearchBoxSuggestions, BingSearchEnabled, CortanaConsent)."
+    LogSearchError     = "Error configuring local search: {0}"
+    LogVisualStart     = "Applying custom Visual Effects profile..."
+    LogVisualOk        = "Visual effects applied: window animations, drag content, thumbnails, translucent selection, smoothed fonts and icon shadows kept enabled; other effects disabled."
+    LogVisualError     = "Error applying visual effects: {0}"
+    LogPrivacyStart    = "Applying telemetry blocking and deep privacy policies..."
+    LogPrivacyOk       = "Telemetry, WER, CEIP, App Compat, Location and Timeline policies applied via HKLM (Group Policy)."
+    LogPrivacyError    = "Error applying privacy policies (check administrator elevation): {0}"
+    LogExtraStart      = "Applying additional telemetry-blocking options..."
+    LogExtraAdvOk      = "Advertising ID disabled."
+    LogExtraTailoredOk = "Tailored experiences / Windows suggestions disabled."
+    LogExtraDiagTrackOk = "DiagTrack and dmwappushservice services stopped and disabled."
+    LogExtraCopilotOk  = "Copilot, Recall and AI data analysis blocked via policy."
+    LogExtraInputOk    = "Typing personalization and clipboard cloud sync disabled."
+    LogExtraError      = "Error applying additional telemetry option ({0}): {1}"
+    LogExtraDone       = "Additional telemetry-blocking options finished."
+    LogDriversStart    = "Blocking automatic driver installation via Windows Update..."
+    LogDriversOk       = "Automatic driver installation via Windows Update blocked."
+    LogDriversError    = "Error blocking automatic drivers: {0}"
+    LogPagefileRam     = "Detected RAM: {0} MB. Calculated pagefile size (RAM x 1.5): {1} MB."
+    LogPagefileOk      = "Pagefile configured successfully: Initial and Maximum = {0} MB (fixed, no fragmentation)."
+    LogPagefileError   = "Error configuring pagefile: {0}"
+    LogChocoSearching = "Checking whether Chocolatey is installed..."
+    LogChocoFound     = "Chocolatey found at: {0}"
+    LogChocoNotFound  = "Chocolatey could not be installed automatically. Install it manually from https://chocolatey.org/install and try again."
+    LogChocoInstalling      = "Chocolatey was not found. Installing Chocolatey automatically..."
+    LogChocoInstallOk = "Chocolatey installed successfully."
+    LogChocoInstallFailed = "Failed to install Chocolatey: {0}"
+    LogInstallStart    = "Starting installation: {0} ({1})..."
+    LogTryingWinget       = "Trying winget for {0}..."
+    LogWingetFailedFallback = "Winget could not install {0} ({1}), falling back to Chocolatey..."
+    LogWingetNotAvailable  = "Winget is not available for {0}, falling back to Chocolatey..."
+    LogInstallOk       = "{0} installed successfully."
+    LogInstallAlready  = "{0} is already installed (no action needed)."
+    LogInstallWarn     = "{0} returned exit code {1}. Check the log at {2}"
+    LogInstallError    = "Error installing {0}: {1}"
+    LogLangChanged     = "Language changed to {0}."
+    LogOptStart        = "======== Starting execution of selected optimizations ========"
+    LogOptDone         = "======== Execution finished ========"
+    LogInstallBatchStart = "======== Starting installation of selected applications ========"
+    LogInstallBatchDone  = "======== Application installation finished ========"
+    LogNoAppsSelected  = "No application was selected."
+    TxtChocoRequired   = "Apps below are installed automatically via winget (built into Windows) whenever possible. Chocolatey is used as an automatic fallback for apps winget can't find - install it below just in case."
+    ChocoStatusFound   = "Chocolatey is installed. You're ready to install apps below."
+    ChocoStatusNotFound = "Chocolatey was not detected on this system yet."
+    BtnInstallChoco    = "Install Chocolatey"
+    LogChocoRequiredFirst = "Chocolatey is not installed. Click 'Install Chocolatey' above first."
+    LogUnhandledError  = "Unexpected error: {0}"
+}
+
+$Lang['pt-BR'] = @{
+    AppTitle          = "WGO - Windows General Optimizations"
+    TabOptimizations  = "Otimiza" + $c_ccedil + $c_otil + "es & Privacidade"
+    TabInstaller      = "Instalador de Apps"
+    LblLanguage       = "Idioma:"
+    GrpRestore        = "Seguran" + $c_ccedil + "a do Sistema"
+    BtnCreateRestore  = "Criar Ponto de Restaura" + $c_ccedil + $c_atil + "o"
+    GrpBloat          = "Remo" + $c_ccedil + $c_atil + "o de Bloatwares e Apps de IA"
+    ChkBloat          = "Remover bloatwares / apps de IA (mant" + $c_eacute + "m Store, Xbox, Edge/WebView2, runtimes)"
+    GrpSearch         = "Pesquisa do Menu Iniciar"
+    ChkSearch         = "For" + $c_ccedil + "ar pesquisa 100% local (desativar busca web Bing/Edge)"
+    GrpVisual         = "Efeitos Visuais"
+    ChkVisual         = "Aplicar perfil de efeitos visuais personalizado de desempenho"
+    GrpPrivacy        = "Privacidade Profunda / Telemetria"
+    ChkPrivacy        = "Bloquear telemetria, WER, CEIP, Feed de Atividades, Localiza" + $c_ccedil + $c_atil + "o (Diretiva de Grupo)"
+    GrpDrivers        = "Drivers via Windows Update"
+    ChkDrivers        = "Bloquear instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers pelo Windows Update"
+    GrpPagefile       = "Mem" + $c_oacute + "ria Virtual (Pagefile)"
+    ChkPagefile       = "Definir tamanho est" + $c_aacute + "tico da mem" + $c_oacute + "ria paginada (RAM x 1.5)"
+    BtnRunSelected    = "Executar Otimiza" + $c_ccedil + $c_otil + "es Selecionadas"
+    GrpInstaller      = "Aplicativos " + $c_uacute + "teis"
+    BtnInstallApps    = "Instalar Selecionados"
+    LogHeader         = "Log de Execu" + $c_ccedil + $c_atil + "o"
+    AppFirefoxDesc    = "Navegador altamente recomendado por n" + $c_atil + "o utilizar o motor Chromium, oferecendo privacidade real, maior controle do usu" + $c_aacute + "rio e suporte completo a bloqueadores de an" + $c_uacute + "ncios eficientes (como uBlock Origin)."
+    AppNanaZipDesc    = "Compactador/descompactador de arquivos leve, moderno e nativamente integrado ao novo menu de contexto do Windows 11."
+    AppNppDesc        = "Editor de texto r" + $c_aacute + "pido, leve e essencial para substitui" + $c_ccedil + $c_atil + "o do Bloco de Notas padr" + $c_atil + "o."
+    AppFdmDesc        = "Gerenciador de downloads poderoso com acelera" + $c_ccedil + $c_atil + "o de arquivos HTTP/HTTPS."
+    AppQbtDesc        = "Cliente BitTorrent de c" + $c_oacute + "digo aberto, extremamente leve, livre de an" + $c_uacute + "ncios, bloatware ou softwares indesejados."
+    AppSteamDesc      = "Loja e launcher de jogos digitais da Valve."
+    AppEpicDesc       = "Loja e launcher digital da Epic Games."
+    AppGogDesc        = "Loja e launcher de jogos digitais livres de DRM."
+    MsgReady          = "Pronto."
+    MsgDone           = "Conclu" + $c_iacute + "do."
+
+    GrpExtraPrivacy    = "Bloqueio Adicional de Telemetria"
+    ChkAdvertisingId   = "Desativar ID de publicidade (an" + $c_uacute + "ncios personalizados)"
+    ChkTailoredExp     = "Desativar experi" + $c_ecirc + "ncias personalizadas / sugest" + $c_otil + "es e dicas do Windows"
+    ChkDiagTrackSvc    = "Desativar servi" + $c_ccedil + "o Connected User Experiences and Telemetry (DiagTrack) e dmwappushservice"
+    ChkCopilotBlock    = "Bloquear Copilot, Recall e an" + $c_aacute + "lise de dados por IA via diretiva"
+    ChkInputTelemetry  = "Desativar personaliza" + $c_ccedil + $c_atil + "o de digita" + $c_ccedil + $c_atil + "o/escrita e sincroniza" + $c_ccedil + $c_atil + "o de " + $c_aacute + "rea de transfer" + $c_ecirc + "ncia na nuvem"
+
+    LogRestoreTry      = "Tentando criar Ponto de Restaura" + $c_ccedil + $c_atil + "o do Sistema..."
+    LogRestoreOk       = "Ponto de Restaura" + $c_ccedil + $c_atil + "o criado com sucesso."
+    LogRestoreFail     = "Falha ao criar Ponto de Restaura" + $c_ccedil + $c_atil + "o: {0}"
+    LogRestoreHint     = "Verifique se a Prote" + $c_ccedil + $c_atil + "o do Sistema est" + $c_aacute + " ativada (SystemPropertiesProtection.exe) e se o script est" + $c_aacute + " elevado."
+    LogBloatStart      = "Iniciando remo" + $c_ccedil + $c_atil + "o de bloatware / apps de IA..."
+    LogBloatUserRemoved = "Removido (usu" + $c_aacute + "rio): {0}"
+    LogBloatProvRemoved = "Removido (provisionado): {0}"
+    LogBloatError      = "Erro ao remover {0} : {1}"
+    LogBloatDone       = "Remo" + $c_ccedil + $c_atil + "o de bloatware finalizada. Itens da whitelist foram preservados."
+    LogSearchStart     = "Configurando pesquisa do Menu Iniciar como 100% local..."
+    LogSearchOk        = "Pesquisa local aplicada com sucesso (DisableSearchBoxSuggestions, BingSearchEnabled, CortanaConsent)."
+    LogSearchError     = "Erro ao configurar pesquisa local: {0}"
+    LogVisualStart     = "Aplicando perfil de Efeitos Visuais personalizado..."
+    LogVisualOk        = "Efeitos visuais aplicados: anima" + $c_ccedil + $c_otil + "es de janela, arraste de conte" + $c_uacute + "do, miniaturas, sele" + $c_ccedil + $c_atil + "o translucida, fontes suavizadas e sombras de icones mantidos ativos; demais efeitos desativados."
+    LogVisualError     = "Erro ao aplicar efeitos visuais: {0}"
+    LogPrivacyStart    = "Aplicando pol" + $c_iacute + "ticas de bloqueio de telemetria e privacidade profunda..."
+    LogPrivacyOk       = "Pol" + $c_iacute + "ticas de telemetria, WER, CEIP, App Compat, Localiza" + $c_ccedil + $c_atil + "o e Timeline aplicadas via HKLM (GPO)."
+    LogPrivacyError    = "Erro ao aplicar pol" + $c_iacute + "ticas de privacidade (verifique eleva" + $c_ccedil + $c_atil + "o de administrador): {0}"
+    LogExtraStart      = "Aplicando op" + $c_ccedil + $c_otil + "es adicionais de bloqueio de telemetria..."
+    LogExtraAdvOk      = "ID de publicidade desativado."
+    LogExtraTailoredOk = "Experi" + $c_ecirc + "ncias personalizadas / sugest" + $c_otil + "es do Windows desativadas."
+    LogExtraDiagTrackOk = "Servi" + $c_ccedil + "os DiagTrack e dmwappushservice parados e desativados."
+    LogExtraCopilotOk  = "Copilot, Recall e an" + $c_aacute + "lise de dados por IA bloqueados via diretiva."
+    LogExtraInputOk    = "Personaliza" + $c_ccedil + $c_atil + "o de digita" + $c_ccedil + $c_atil + "o e sincroniza" + $c_ccedil + $c_atil + "o de " + $c_aacute + "rea de transfer" + $c_ecirc + "ncia na nuvem desativadas."
+    LogExtraError      = "Erro ao aplicar op" + $c_ccedil + $c_atil + "o adicional de telemetria ({0}): {1}"
+    LogExtraDone       = "Op" + $c_ccedil + $c_otil + "es adicionais de bloqueio de telemetria finalizadas."
+    LogDriversStart    = "Bloqueando instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers via Windows Update..."
+    LogDriversOk       = "Instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers pelo Windows Update bloqueada."
+    LogDriversError    = "Erro ao bloquear drivers autom" + $c_aacute + "ticos: {0}"
+    LogPagefileRam     = "RAM detectada: {0} MB. Tamanho de pagefile calculado (RAM x 1.5): {1} MB."
+    LogPagefileOk      = "Pagefile configurado com sucesso: Inicial e M" + $c_aacute + "ximo = {0} MB (fixo, sem fragmenta" + $c_ccedil + $c_atil + "o)."
+    LogPagefileError   = "Erro ao configurar pagefile: {0}"
+    LogChocoSearching = "Verificando se o Chocolatey est" + $c_aacute + " instalado..."
+    LogChocoFound     = "Chocolatey encontrado em: {0}"
+    LogChocoNotFound  = "N" + $c_atil + "o foi poss" + $c_iacute + "vel instalar o Chocolatey automaticamente. Instale manualmente em https://chocolatey.org/install e tente novamente."
+    LogChocoInstalling      = "Chocolatey n" + $c_atil + "o encontrado. Instalando o Chocolatey automaticamente..."
+    LogChocoInstallOk = "Chocolatey instalado com sucesso."
+    LogChocoInstallFailed = "Falha ao instalar o Chocolatey: {0}"
+    LogInstallStart    = "Iniciando instala" + $c_ccedil + $c_atil + "o: {0} ({1})..."
+    LogTryingWinget       = "Tentando instalar {0} via winget..."
+    LogWingetFailedFallback = "O winget n" + $c_atil + "o conseguiu instalar {0} ({1}), usando o Chocolatey como alternativa..."
+    LogWingetNotAvailable  = "O winget n" + $c_atil + "o est" + $c_aacute + " dispon" + $c_iacute + "vel para {0}, usando o Chocolatey como alternativa..."
+    LogInstallOk       = "{0} instalado com sucesso."
+    LogInstallAlready  = "{0} j" + $c_aacute + " estava instalado (nenhuma a" + $c_ccedil + $c_atil + "o necess" + $c_aacute + "ria)."
+    LogInstallWarn     = "{0} retornou c" + $c_oacute + "digo de sa" + $c_iacute + "da {1}. Verifique o log em {2}"
+    LogInstallError    = "Erro ao instalar {0}: {1}"
+    LogLangChanged     = "Idioma alterado para {0}."
+    LogOptStart        = "======== Iniciando execu" + $c_ccedil + $c_atil + "o das otimiza" + $c_ccedil + $c_otil + "es selecionadas ========"
+    LogOptDone         = "======== Execu" + $c_ccedil + $c_atil + "o finalizada ========"
+    LogInstallBatchStart = "======== Iniciando instala" + $c_ccedil + $c_atil + "o de aplicativos selecionados ========"
+    LogInstallBatchDone  = "======== Instala" + $c_ccedil + $c_atil + "o de aplicativos finalizada ========"
+    LogNoAppsSelected  = "Nenhum aplicativo foi selecionado."
+    TxtChocoRequired   = "Os apps abaixo s" + $c_atil + "o instalados automaticamente via winget (nativo do Windows) sempre que poss" + $c_iacute + "vel. O Chocolatey " + $c_eacute + " usado como alternativa autom" + $c_aacute + "tica para apps que o winget n" + $c_atil + "o encontrar - instale-o abaixo por precau" + $c_ccedil + $c_atil + "o."
+    ChocoStatusFound   = "Chocolatey est" + $c_aacute + " instalado. Voc" + $c_ecirc + " j" + $c_aacute + " pode instalar os apps abaixo."
+    ChocoStatusNotFound = "O Chocolatey ainda n" + $c_atil + "o foi detectado neste sistema."
+    BtnInstallChoco    = "Instalar Chocolatey"
+    LogChocoRequiredFirst = "O Chocolatey n" + $c_atil + "o est" + $c_aacute + " instalado. Clique em 'Instalar Chocolatey' acima primeiro."
+    LogUnhandledError      = "Erro inesperado: {0}"
+}
+
+$Lang['es-ES'] = @{
+    AppTitle          = "WGO - Windows General Optimizations"
+    TabOptimizations  = "Optimizaciones y Privacidad"
+    TabInstaller      = "Instalador de Apps"
+    LblLanguage       = "Idioma:"
+    GrpRestore        = "Seguridad del Sistema"
+    BtnCreateRestore  = "Crear Punto de Restauraci" + [char]0x00F3 + "n"
+    GrpBloat          = "Eliminaci" + [char]0x00F3 + "n de Bloatware y Apps de IA"
+    ChkBloat          = "Eliminar bloatware / apps de IA (mantiene Store, Xbox, Edge/WebView2, runtimes)"
+    GrpSearch         = "B" + [char]0x00FA + "squeda del Men" + [char]0x00FA + " Inicio"
+    ChkSearch         = "Forzar b" + [char]0x00FA + "squeda 100% local (desactivar b" + [char]0x00FA + "squeda web Bing/Edge)"
+    GrpVisual         = "Efectos Visuales"
+    ChkVisual         = "Aplicar perfil de efectos visuales de rendimiento personalizado"
+    GrpPrivacy        = "Privacidad Profunda / Telemetr" + [char]0x00ED + "a"
+    ChkPrivacy        = "Bloquear telemetr" + [char]0x00ED + "a, WER, CEIP, Feed de Actividades, Ubicaci" + [char]0x00F3 + "n (Directiva de Grupo)"
+    GrpDrivers        = "Controladores v" + [char]0x00ED + "a Windows Update"
+    ChkDrivers        = "Bloquear instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores por Windows Update"
+    GrpPagefile       = "Memoria Virtual (Pagefile)"
+    ChkPagefile       = "Establecer tama" + $c_enye + "o est" + [char]0x00E1 + "tico del archivo de paginaci" + [char]0x00F3 + "n (RAM x 1.5)"
+    BtnRunSelected    = "Ejecutar Optimizaciones Seleccionadas"
+    GrpInstaller      = "Aplicaciones " + [char]0x00DA + "tiles"
+    BtnInstallApps    = "Instalar Seleccionados"
+    LogHeader         = "Registro de Ejecuci" + [char]0x00F3 + "n"
+    AppFirefoxDesc    = "Navegador muy recomendado por no utilizar el motor Chromium, ofreciendo privacidad real, m" + [char]0x00E1 + "s control del usuario y soporte completo para bloqueadores de anuncios eficientes (como uBlock Origin)."
+    AppNanaZipDesc    = "Compresor/descompresor de archivos ligero, moderno e integrado nativamente en el nuevo men" + [char]0x00FA + " contextual de Windows 11."
+    AppNppDesc        = "Editor de texto r" + [char]0x00E1 + "pido, ligero y esencial para reemplazar el Bloc de notas predeterminado."
+    AppFdmDesc        = "Potente gestor de descargas con aceleraci" + [char]0x00F3 + "n de archivos HTTP/HTTPS."
+    AppQbtDesc        = "Cliente BitTorrent de c" + [char]0x00F3 + "digo abierto, extremadamente ligero, sin anuncios ni bloatware."
+    AppSteamDesc      = "Tienda y launcher de juegos digitales de Valve."
+    AppEpicDesc       = "Tienda y launcher digital de Epic Games."
+    AppGogDesc        = "Tienda y launcher de juegos digitales libres de DRM."
+    MsgReady          = "Listo."
+    MsgDone           = "Completado."
+
+    GrpExtraPrivacy    = "Bloqueo Adicional de Telemetr" + [char]0x00ED + "a"
+    ChkAdvertisingId   = "Desactivar ID de publicidad (anuncios personalizados)"
+    ChkTailoredExp     = "Desactivar experiencias personalizadas / sugerencias de Windows"
+    ChkDiagTrackSvc    = "Desactivar servicio Connected User Experiences and Telemetry (DiagTrack) y dmwappushservice"
+    ChkCopilotBlock    = "Bloquear Copilot, Recall y an" + [char]0x00E1 + "lisis de datos por IA mediante directiva"
+    ChkInputTelemetry  = "Desactivar personalizaci" + [char]0x00F3 + "n de escritura y sincronizaci" + [char]0x00F3 + "n de portapapeles en la nube"
+
+    LogRestoreTry      = "Intentando crear un Punto de Restauraci" + [char]0x00F3 + "n del Sistema..."
+    LogRestoreOk       = "Punto de Restauraci" + [char]0x00F3 + "n creado correctamente."
+    LogRestoreFail     = "Error al crear el Punto de Restauraci" + [char]0x00F3 + "n: {0}"
+    LogRestoreHint     = "Verifique que la Protecci" + [char]0x00F3 + "n del Sistema est" + [char]0x00E9 + " activada (SystemPropertiesProtection.exe) y que el script se ejecute elevado."
+    LogBloatStart      = "Iniciando la eliminaci" + [char]0x00F3 + "n de bloatware / apps de IA..."
+    LogBloatUserRemoved = "Eliminado (usuario): {0}"
+    LogBloatProvRemoved = "Eliminado (aprovisionado): {0}"
+    LogBloatError      = "Error al eliminar {0} : {1}"
+    LogBloatDone       = "Eliminaci" + [char]0x00F3 + "n de bloatware finalizada. Los elementos de la lista blanca se conservaron."
+    LogSearchStart     = "Configurando la b" + [char]0x00FA + "squeda del Men" + [char]0x00FA + " Inicio como 100% local..."
+    LogSearchOk        = "B" + [char]0x00FA + "squeda local aplicada correctamente (DisableSearchBoxSuggestions, BingSearchEnabled, CortanaConsent)."
+    LogSearchError     = "Error al configurar la b" + [char]0x00FA + "squeda local: {0}"
+    LogVisualStart     = "Aplicando el perfil de Efectos Visuales personalizado..."
+    LogVisualOk        = "Efectos visuales aplicados: animaciones de ventana, arrastre de contenido, miniaturas, selecci" + [char]0x00F3 + "n translucida, fuentes suavizadas y sombras de iconos mantenidos activos; los dem" + [char]0x00E1 + "s efectos desactivados."
+    LogVisualError     = "Error al aplicar los efectos visuales: {0}"
+    LogPrivacyStart    = "Aplicando directivas de bloqueo de telemetr" + [char]0x00ED + "a y privacidad profunda..."
+    LogPrivacyOk       = "Directivas de telemetr" + [char]0x00ED + "a, WER, CEIP, App Compat, Ubicaci" + [char]0x00F3 + "n y Timeline aplicadas mediante HKLM (GPO)."
+    LogPrivacyError    = "Error al aplicar las directivas de privacidad (verifique la elevaci" + [char]0x00F3 + "n de administrador): {0}"
+    LogExtraStart      = "Aplicando opciones adicionales de bloqueo de telemetr" + [char]0x00ED + "a..."
+    LogExtraAdvOk      = "ID de publicidad desactivado."
+    LogExtraTailoredOk = "Experiencias personalizadas / sugerencias de Windows desactivadas."
+    LogExtraDiagTrackOk = "Servicios DiagTrack y dmwappushservice detenidos y desactivados."
+    LogExtraCopilotOk  = "Copilot, Recall y an" + [char]0x00E1 + "lisis de datos por IA bloqueados mediante directiva."
+    LogExtraInputOk    = "Personalizaci" + [char]0x00F3 + "n de escritura y sincronizaci" + [char]0x00F3 + "n de portapapeles en la nube desactivadas."
+    LogExtraError      = "Error al aplicar la opci" + [char]0x00F3 + "n adicional de telemetr" + [char]0x00ED + "a ({0}): {1}"
+    LogExtraDone       = "Opciones adicionales de bloqueo de telemetr" + [char]0x00ED + "a finalizadas."
+    LogDriversStart    = "Bloqueando la instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update..."
+    LogDriversOk       = "Instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update bloqueada."
+    LogDriversError    = "Error al bloquear los controladores autom" + [char]0x00E1 + "ticos: {0}"
+    LogPagefileRam     = "RAM detectada: {0} MB. Tama" + $c_enye + "o de pagefile calculado (RAM x 1.5): {1} MB."
+    LogPagefileOk      = "Pagefile configurado correctamente: Inicial y M" + [char]0x00E1 + "ximo = {0} MB (fijo, sin fragmentaci" + [char]0x00F3 + "n)."
+    LogPagefileError   = "Error al configurar el pagefile: {0}"
+    LogChocoSearching = "Comprobando si Chocolatey est" + [char]0x00E1 + " instalado..."
+    LogChocoFound     = "Chocolatey encontrado en: {0}"
+    LogChocoNotFound  = "No se pudo instalar Chocolatey autom" + [char]0x00E1 + "ticamente. Instalelo manualmente desde https://chocolatey.org/install e intente de nuevo."
+    LogChocoInstalling      = "Chocolatey no encontrado. Instalando Chocolatey autom" + [char]0x00E1 + "ticamente..."
+    LogChocoInstallOk = "Chocolatey instalado correctamente."
+    LogChocoInstallFailed = "Error al instalar Chocolatey: {0}"
+    LogInstallStart    = "Iniciando instalaci" + [char]0x00F3 + "n: {0} ({1})..."
+    LogTryingWinget       = "Probando instalar {0} con winget..."
+    LogWingetFailedFallback = "Winget no pudo instalar {0} ({1}), usando Chocolatey como alternativa..."
+    LogWingetNotAvailable  = "Winget no est" + [char]0x00E1 + " disponible para {0}, usando Chocolatey como alternativa..."
+    LogInstallOk       = "{0} instalado correctamente."
+    LogInstallAlready  = "{0} ya estaba instalado (ninguna acci" + [char]0x00F3 + "n necesaria)."
+    LogInstallWarn     = "{0} devolvi" + [char]0x00F3 + " el c" + [char]0x00F3 + "digo de salida {1}. Verifique el log en {2}"
+    LogInstallError    = "Error al instalar {0}: {1}"
+    LogLangChanged     = "Idioma cambiado a {0}."
+    LogOptStart        = "======== Iniciando ejecuci" + [char]0x00F3 + "n de las optimizaciones seleccionadas ========"
+    LogOptDone         = "======== Ejecuci" + [char]0x00F3 + "n finalizada ========"
+    LogInstallBatchStart = "======== Iniciando instalaci" + [char]0x00F3 + "n de aplicaciones seleccionadas ========"
+    LogInstallBatchDone  = "======== Instalaci" + [char]0x00F3 + "n de aplicaciones finalizada ========"
+    LogNoAppsSelected  = "No se seleccion" + [char]0x00F3 + " ninguna aplicaci" + [char]0x00F3 + "n."
+    TxtChocoRequired   = "Las aplicaciones de abajo se instalan autom" + [char]0x00E1 + "ticamente mediante winget (nativo de Windows) siempre que sea posible. Chocolatey se usa como alternativa autom" + [char]0x00E1 + "tica para apps que winget no encuentre - inst" + [char]0x00E1 + "lelo abajo por precauci" + [char]0x00F3 + "n."
+    ChocoStatusFound   = "Chocolatey est" + [char]0x00E1 + " instalado. Ya puede instalar las aplicaciones de abajo."
+    ChocoStatusNotFound = "Chocolatey a" + [char]0x00FA + "n no se ha detectado en este sistema."
+    BtnInstallChoco    = "Instalar Chocolatey"
+    LogChocoRequiredFirst = "Chocolatey no est" + [char]0x00E1 + " instalado. Haga clic en 'Instalar Chocolatey' arriba primero."
+    LogUnhandledError      = "Error inesperado: {0}"
+}
+
+# zh-CN (Simplified Chinese) - built strictly with [char]0xXXXX code points
+function ZH { param([int[]]$Codes) -join ($Codes | ForEach-Object { [char]$_ }) }
+
+$Lang['zh-CN'] = @{
+    AppTitle          = "WGO - Windows General Optimizations"
+    TabOptimizations  = (ZH 0x4F18,0x5316) + "&" + (ZH 0x9690,0x79C1)
+    TabInstaller      = (ZH 0x5E94,0x7528,0x5B89,0x88C5,0x5668)
+    LblLanguage       = (ZH 0x8BED,0x8A00) + ":"
+    GrpRestore        = (ZH 0x7CFB,0x7EDF,0x5B89,0x5168)
+    BtnCreateRestore  = (ZH 0x521B,0x5EFA) + (ZH 0x8FD8,0x539F,0x70B9)
+    GrpBloat          = (ZH 0x5220,0x9664) + (ZH 0x81C3,0x80BF,0x8F6F,0x4EF6) + "/AI" + (ZH 0x5E94,0x7528)
+    ChkBloat          = (ZH 0x5220,0x9664) + (ZH 0x81C3,0x80BF,0x8F6F,0x4EF6) + "/AI" + (ZH 0x5E94,0x7528) + " (" + (ZH 0x4FDD,0x7559) + " Store, Xbox, Edge/WebView2, Runtime)"
+    GrpSearch         = (ZH 0x5F00,0x59CB) + (ZH 0x83DC,0x5355) + (ZH 0x641C,0x7D22)
+    ChkSearch         = (ZH 0x5F3A,0x5236) + "100%" + (ZH 0x672C,0x5730) + (ZH 0x641C,0x7D22) + " (" + (ZH 0x7981,0x7528) + " Bing/Edge " + (ZH 0x7F51,0x7EDC) + (ZH 0x641C,0x7D22) + ")"
+    GrpVisual         = (ZH 0x89C6,0x89C9,0x6548,0x679C)
+    ChkVisual         = (ZH 0x5E94,0x7528) + (ZH 0x81EA,0x5B9A,0x4E49) + (ZH 0x6027,0x80FD) + (ZH 0x89C6,0x89C9,0x6548,0x679C) + (ZH 0x914D,0x7F6E)
+    GrpPrivacy        = (ZH 0x6DF1,0x5EA6) + (ZH 0x9690,0x79C1) + "/" + (ZH 0x9065,0x6D4B)
+    ChkPrivacy        = (ZH 0x963B,0x6B62) + (ZH 0x9065,0x6D4B) + ", WER, CEIP, " + (ZH 0x6D3B,0x52A8) + (ZH 0x63D0,0x9192) + ", " + (ZH 0x4F4D,0x7F6E) + " (" + (ZH 0x7EC4,0x7B56,0x7565) + ")"
+    GrpDrivers        = "Windows Update " + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F)
+    ChkDrivers        = (ZH 0x963B,0x6B62) + "Windows Update " + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F)
+    GrpPagefile       = (ZH 0x865A,0x62DF,0x5185,0x5B58) + " (Pagefile)"
+    ChkPagefile       = (ZH 0x8BBE,0x7F6E) + (ZH 0x9875,0x9762,0x6587,0x4EF6) + (ZH 0x56FA,0x5B9A) + (ZH 0x5927,0x5C0F) + " (RAM x 1.5)"
+    BtnRunSelected    = (ZH 0x8FD0,0x884C) + (ZH 0x5DF2,0x9009) + (ZH 0x4F18,0x5316) + (ZH 0x9879,0x76EE)
+    GrpInstaller      = (ZH 0x5B9E,0x7528) + (ZH 0x5E94,0x7528) + (ZH 0x7A0B,0x5E8F)
+    BtnInstallApps    = (ZH 0x5B89,0x88C5) + (ZH 0x5DF2,0x9009) + (ZH 0x9879,0x76EE)
+    LogHeader         = (ZH 0x8FD0,0x884C) + (ZH 0x65E5,0x5FD7)
+    AppFirefoxDesc    = (ZH 0x5F3A,0x70C8,0x63A8,0x8350) + (ZH 0x7684,0x6D4F,0x89C8,0x5668) + "," + (ZH 0x4E0D,0x4F7F,0x7528) + " Chromium " + (ZH 0x5F15,0x64CE) + "," + (ZH 0x63D0,0x4F9B) + (ZH 0x771F,0x6B63,0x7684) + (ZH 0x9690,0x79C1) + (ZH 0x4FDD,0x62A4)
+    AppNanaZipDesc    = (ZH 0x8F7B,0x91CF,0x7EA7) + (ZH 0x6587,0x4EF6) + (ZH 0x538B,0x7F29) + (ZH 0x5DE5,0x5177) + "," + (ZH 0x96C6,0x6210) + " Windows 11 " + (ZH 0x53F3,0x952E,0x83DC,0x5355)
+    AppNppDesc        = (ZH 0x5FEB,0x901F) + "," + (ZH 0x8F7B,0x91CF,0x7EA7) + (ZH 0x6587,0x672C) + (ZH 0x7F16,0x8F91,0x5668)
+    AppFdmDesc        = (ZH 0x5F3A,0x5927) + (ZH 0x7684,0x4E0B,0x8F7D) + (ZH 0x7BA1,0x7406,0x5668)
+    AppQbtDesc        = (ZH 0x5F00,0x6E90) + " BitTorrent " + (ZH 0x5BA2,0x6237,0x7AEF) + "," + (ZH 0x65E0) + (ZH 0x5E7F,0x544A) + (ZH 0x548C) + (ZH 0x81C3,0x80BF,0x8F6F,0x4EF6)
+    AppSteamDesc      = "Valve " + (ZH 0x6570,0x5B57) + (ZH 0x6E38,0x620F) + (ZH 0x5546,0x5E97)
+    AppEpicDesc       = "Epic Games " + (ZH 0x6570,0x5B57) + (ZH 0x5546,0x5E97)
+    AppGogDesc        = (ZH 0x65E0) + " DRM " + (ZH 0x6570,0x5B57) + (ZH 0x6E38,0x620F) + (ZH 0x5546,0x5E97)
+    MsgReady          = (ZH 0x5C31,0x7EEA)
+    MsgDone           = (ZH 0x5B8C,0x6210)
+
+    GrpExtraPrivacy    = (ZH 0x9644,0x52A0) + (ZH 0x9065,0x6D4B) + (ZH 0x963B,0x6B62)
+    ChkAdvertisingId   = (ZH 0x7981,0x7528) + (ZH 0x5E7F,0x544A) + "ID" + " (" + (ZH 0x4E2A,0x6027,0x5316) + (ZH 0x5E7F,0x544A) + ")"
+    ChkTailoredExp     = (ZH 0x7981,0x7528) + (ZH 0x4E2A,0x6027,0x5316) + (ZH 0x4F53,0x9A8C) + "/Windows" + (ZH 0x5EFA,0x8BAE)
+    ChkDiagTrackSvc    = (ZH 0x7981,0x7528) + " Connected User Experiences and Telemetry (DiagTrack) " + (ZH 0x548C) + " dmwappushservice " + (ZH 0x670D,0x52A1)
+    ChkCopilotBlock    = (ZH 0x901A,0x8FC7) + (ZH 0x7B56,0x7565) + (ZH 0x963B,0x6B62) + " Copilot" + "," + "Recall " + (ZH 0x548C) + "AI" + (ZH 0x6570,0x636E,0x5206,0x6790)
+    ChkInputTelemetry  = (ZH 0x7981,0x7528) + (ZH 0x8F93,0x5165) + (ZH 0x4E2A,0x6027,0x5316) + (ZH 0x548C) + (ZH 0x526A,0x8D34,0x677F) + (ZH 0x4E91) + (ZH 0x540C,0x6B65)
+
+    LogRestoreTry      = (ZH 0x6B63,0x5728) + (ZH 0x521B,0x5EFA) + (ZH 0x7CFB,0x7EDF) + (ZH 0x8FD8,0x539F,0x70B9)
+    LogRestoreOk       = (ZH 0x8FD8,0x539F,0x70B9) + (ZH 0x521B,0x5EFA) + (ZH 0x6210,0x529F)
+    LogRestoreFail     = (ZH 0x521B,0x5EFA) + (ZH 0x8FD8,0x539F,0x70B9) + (ZH 0x5931,0x8D25) + ": {0}"
+    LogRestoreHint     = (ZH 0x8BF7,0x68C0,0x67E5) + (ZH 0x7CFB,0x7EDF,0x4FDD,0x62A4) + (ZH 0x662F,0x5426) + (ZH 0x5DF2,0x542F,0x7528) + " (SystemPropertiesProtection.exe)"
+    LogBloatStart      = (ZH 0x5F00,0x59CB) + (ZH 0x5220,0x9664) + (ZH 0x81C3,0x80BF,0x8F6F,0x4EF6) + "/AI" + (ZH 0x5E94,0x7528)
+    LogBloatUserRemoved = (ZH 0x5DF2,0x5220,0x9664) + " (" + (ZH 0x7528,0x6237) + "): {0}"
+    LogBloatProvRemoved = (ZH 0x5DF2,0x5220,0x9664) + " (" + (ZH 0x9884,0x7F6E) + "): {0}"
+    LogBloatError      = (ZH 0x5220,0x9664) + " {0} " + (ZH 0x51FA,0x9519) + ": {1}"
+    LogBloatDone       = (ZH 0x81C3,0x80BF,0x8F6F,0x4EF6) + (ZH 0x5220,0x9664) + (ZH 0x5B8C,0x6210)
+    LogSearchStart     = (ZH 0x6B63,0x5728) + (ZH 0x914D,0x7F6E) + (ZH 0x672C,0x5730) + (ZH 0x641C,0x7D22)
+    LogSearchOk        = (ZH 0x672C,0x5730) + (ZH 0x641C,0x7D22) + (ZH 0x5DF2,0x5E94,0x7528)
+    LogSearchError     = (ZH 0x914D,0x7F6E) + (ZH 0x641C,0x7D22) + (ZH 0x51FA,0x9519) + ": {0}"
+    LogVisualStart     = (ZH 0x6B63,0x5728) + (ZH 0x5E94,0x7528) + (ZH 0x89C6,0x89C9,0x6548,0x679C)
+    LogVisualOk        = (ZH 0x89C6,0x89C9,0x6548,0x679C) + (ZH 0x5DF2,0x5E94,0x7528)
+    LogVisualError     = (ZH 0x5E94,0x7528) + (ZH 0x89C6,0x89C9,0x6548,0x679C) + (ZH 0x51FA,0x9519) + ": {0}"
+    LogPrivacyStart    = (ZH 0x6B63,0x5728) + (ZH 0x5E94,0x7528) + (ZH 0x9690,0x79C1) + (ZH 0x7B56,0x7565)
+    LogPrivacyOk       = (ZH 0x9690,0x79C1) + (ZH 0x7B56,0x7565) + (ZH 0x5DF2,0x5E94,0x7528)
+    LogPrivacyError    = (ZH 0x5E94,0x7528) + (ZH 0x9690,0x79C1) + (ZH 0x7B56,0x7565) + (ZH 0x51FA,0x9519) + ": {0}"
+    LogExtraStart      = (ZH 0x6B63,0x5728) + (ZH 0x5E94,0x7528) + (ZH 0x9644,0x52A0) + (ZH 0x9065,0x6D4B) + (ZH 0x963B,0x6B62) + (ZH 0x9009,0x9879)
+    LogExtraAdvOk      = (ZH 0x5E7F,0x544A) + "ID " + (ZH 0x5DF2,0x7981,0x7528)
+    LogExtraTailoredOk = (ZH 0x4E2A,0x6027,0x5316) + (ZH 0x4F53,0x9A8C) + (ZH 0x5DF2,0x7981,0x7528)
+    LogExtraDiagTrackOk = "DiagTrack " + (ZH 0x548C) + " dmwappushservice " + (ZH 0x5DF2,0x505C,0x6B62) + (ZH 0x5E76) + (ZH 0x7981,0x7528)
+    LogExtraCopilotOk  = "Copilot" + "/Recall " + (ZH 0x5DF2,0x963B,0x6B62)
+    LogExtraInputOk    = (ZH 0x8F93,0x5165) + (ZH 0x4E2A,0x6027,0x5316) + (ZH 0x5DF2,0x7981,0x7528)
+    LogExtraError      = (ZH 0x5E94,0x7528) + (ZH 0x9644,0x52A0) + (ZH 0x9009,0x9879) + " ({0}) " + (ZH 0x51FA,0x9519) + ": {1}"
+    LogExtraDone       = (ZH 0x9644,0x52A0) + (ZH 0x9065,0x6D4B) + (ZH 0x963B,0x6B62) + (ZH 0x5B8C,0x6210)
+    LogDriversStart    = (ZH 0x6B63,0x5728) + (ZH 0x963B,0x6B62) + (ZH 0x81EA,0x52A8) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x5B89,0x88C5)
+    LogDriversOk       = (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + (ZH 0x5DF2,0x963B,0x6B62)
+    LogDriversError    = (ZH 0x963B,0x6B62) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x51FA,0x9519) + ": {0}"
+    LogPagefileRam     = (ZH 0x68C0,0x6D4B) + " RAM: {0} MB" + "," + (ZH 0x8BA1,0x7B97) + " pagefile " + (ZH 0x5927,0x5C0F) + ": {1} MB"
+    LogPagefileOk      = "Pagefile " + (ZH 0x914D,0x7F6E) + (ZH 0x6210,0x529F) + ": {0} MB"
+    LogPagefileError   = (ZH 0x914D,0x7F6E) + " pagefile " + (ZH 0x51FA,0x9519) + ": {0}"
+    LogChocoSearching = (ZH 0x6B63,0x5728) + (ZH 0x68C0,0x67E5) + " Chocolatey " + (ZH 0x662F,0x5426) + (ZH 0x5DF2,0x5B89,0x88C5)
+    LogChocoFound     = "Chocolatey " + (ZH 0x4F4D,0x7F6E) + ": {0}"
+    LogChocoNotFound  = (ZH 0x65E0,0x6CD5) + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + " Chocolatey" + "," + (ZH 0x8BF7,0x8BBF,0x95EE) + " https://chocolatey.org/install " + (ZH 0x624B,0x52A8) + (ZH 0x5B89,0x88C5)
+    LogChocoInstalling      = (ZH 0x672A,0x627E,0x5230) + " Chocolatey" + "," + (ZH 0x6B63,0x5728) + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + "..."
+    LogChocoInstallOk = "Chocolatey " + (ZH 0x5B89,0x88C5) + (ZH 0x6210,0x529F)
+    LogChocoInstallFailed = "Chocolatey " + (ZH 0x5B89,0x88C5) + (ZH 0x5931,0x8D25) + ": {0}"
+    LogInstallStart    = (ZH 0x5F00,0x59CB) + (ZH 0x5B89,0x88C5) + ": {0} ({1})..."
+    LogTryingWinget       = (ZH 0x6B63,0x5728,0x5C1D,0x8BD5) + " winget " + (ZH 0x5B89,0x88C5) + " {0}..."
+    LogWingetFailedFallback = "winget " + (ZH 0x65E0,0x6CD5,0x5B89,0x88C5) + " {0} ({1})" + "," + (ZH 0x6539,0x7528) + " Chocolatey..."
+    LogWingetNotAvailable  = "winget " + (ZH 0x5BF9) + " {0} " + (ZH 0x4E0D,0x53EF,0x7528) + "," + (ZH 0x6539,0x7528) + " Chocolatey..."
+    LogInstallOk       = "{0} " + (ZH 0x5B89,0x88C5) + (ZH 0x6210,0x529F)
+    LogInstallAlready  = "{0} " + (ZH 0x5DF2) + (ZH 0x5B89,0x88C5)
+    LogInstallWarn     = "{0} " + (ZH 0x8FD4,0x56DE) + (ZH 0x9000,0x51FA) + (ZH 0x4EE3,0x7801) + " {1}" + "," + (ZH 0x8BF7,0x67E5,0x770B) + (ZH 0x65E5,0x5FD7) + " {2}"
+    LogInstallError    = (ZH 0x5B89,0x88C5) + " {0} " + (ZH 0x51FA,0x9519) + ": {1}"
+    LogLangChanged     = (ZH 0x8BED,0x8A00) + (ZH 0x5DF2,0x66F4,0x6539) + (ZH 0x4E3A) + " {0}"
+    LogOptStart        = "======== " + (ZH 0x5F00,0x59CB) + (ZH 0x6267,0x884C) + (ZH 0x4F18,0x5316) + " ========"
+    LogOptDone         = "======== " + (ZH 0x6267,0x884C) + (ZH 0x5B8C,0x6210) + " ========"
+    LogInstallBatchStart = "======== " + (ZH 0x5F00,0x59CB) + (ZH 0x5B89,0x88C5) + (ZH 0x5E94,0x7528) + " ========"
+    LogInstallBatchDone  = "======== " + (ZH 0x5B89,0x88C5) + (ZH 0x5B8C,0x6210) + " ========"
+    LogNoAppsSelected  = (ZH 0x672A,0x9009,0x62E9) + (ZH 0x4EFB,0x4F55) + (ZH 0x5E94,0x7528)
+    TxtChocoRequired   = (ZH 0x4E0B,0x9762,0x7684,0x5E94,0x7528,0x4F1A,0x5C3D,0x91CF) + " winget " + (ZH 0x81EA,0x52A8,0x5B89,0x88C5) + "," + (ZH 0x82E5,0x627E,0x4E0D,0x5230,0x5219,0x81EA,0x52A8,0x6539,0x7528) + " Chocolatey" + "," + (ZH 0x8BF7,0x5148,0x4E8E,0x4E0B,0x65B9,0x5907,0x7528,0x5B89,0x88C5)
+    ChocoStatusFound   = "Chocolatey " + (ZH 0x5DF2,0x5B89,0x88C5) + "," + (ZH 0x53EF,0x4EE5,0x5F00,0x59CB,0x5B89,0x88C5,0x4E0B,0x9762,0x7684,0x5E94,0x7528)
+    ChocoStatusNotFound = (ZH 0x5C1A,0x672A,0x68C0,0x6D4B,0x5230) + " Chocolatey"
+    BtnInstallChoco    = (ZH 0x5B89,0x88C5) + " Chocolatey"
+    LogChocoRequiredFirst = "Chocolatey " + (ZH 0x672A,0x5B89,0x88C5) + "," + (ZH 0x8BF7,0x5148,0x70B9,0x51FB,0x4E0A,0x65B9,0x7684) + " " + (ZH 0x5B89,0x88C5) + " Chocolatey"
+    LogUnhandledError      = (ZH 0x610F,0x5916,0x9519,0x8BEF) + ": {0}"
+}
+
+$Global:CurrentLangCode = "pt-BR"
+
+# ============================================================================
+# 3. XAML - INTERFACE GRAFICA (DARK MODE ESTILO WINDOWS 11)
+# ============================================================================
+
+[xml]$xaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WGO" Height="760" Width="920" WindowStartupLocation="CenterScreen"
+        Background="#FF202020" FontFamily="Segoe UI">
+    <Window.Resources>
+        <!-- ================= FLUENT WIN11 DARK/BLUE PALETTE ================= -->
+        <SolidColorBrush x:Key="BgDark" Color="#FF1A1B1E"/>
+        <SolidColorBrush x:Key="BgPanel" Color="#FF232428"/>
+        <SolidColorBrush x:Key="BgCard" Color="#FF2B2D31"/>
+        <SolidColorBrush x:Key="BgCardHover" Color="#FF32353A"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#FF4CC2FF"/>
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#FF75D2FF"/>
+        <SolidColorBrush x:Key="AccentPressedBrush" Color="#FF2AA0DE"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFF3F4F6"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#FF9CA3AF"/>
+        <SolidColorBrush x:Key="BorderBrush1" Color="#FF3A3C41"/>
+        <SolidColorBrush x:Key="BorderAccentBrush" Color="#552EA6E0"/>
+
+        <DropShadowEffect x:Key="CardShadow" Color="#FF000000" Direction="270" ShadowDepth="2" BlurRadius="14" Opacity="0.35"/>
+
+        <!-- ================= BASE TEXT ================= -->
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+        </Style>
+
+        <!-- ================= FLUENT TOGGLE-SWITCH CHECKBOX ================= -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,6,0,6"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="track" Grid.Column="0" Width="42" Height="22" CornerRadius="11"
+                                    Background="#FF44464C" BorderBrush="#FF616469" BorderThickness="1" VerticalAlignment="Center">
+                                <Ellipse x:Name="thumb" Width="15" Height="15" Fill="#FFE7E8EA" HorizontalAlignment="Left" Margin="3,0,0,0"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="track" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="track" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="thumb" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="thumb" Property="Margin" Value="0,0,3,0"/>
+                                <Setter TargetName="thumb" Property="Fill" Value="#FF0B0B0B"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="track" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================= GROUPBOX AS FLUENT SETTINGS CARD ================= -->
+        <Style TargetType="GroupBox">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Background" Value="{StaticResource BgPanel}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush1}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Padding" Value="18,14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Effect="{StaticResource CardShadow}">
+                            <StackPanel Margin="{TemplateBinding Padding}">
+                                <TextBlock Text="{TemplateBinding Header}" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{TemplateBinding Foreground}" Margin="0,0,0,10"/>
+                                <ContentPresenter/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================= FLUENT ACCENT-FILL BUTTON (PRIMARY) ================= -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="#FF0B0B0B"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="16,9"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Background" Value="#FF43454A"/>
+                                <Setter Property="Foreground" Value="#FF8A8D92"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================= SECONDARY (OUTLINE) BUTTON ================= -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="16,9"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1.4" CornerRadius="6">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#1F4CC2FF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#334CC2FF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#FF6C6F75"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#FF6C6F75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================= FLUENT SEGMENTED TABS ================= -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid>
+                            <Border x:Name="bd" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border x:Name="indicator" Height="3" VerticalAlignment="Bottom" Background="{StaticResource AccentBrush}"
+                                    CornerRadius="2" Opacity="0" Margin="18,0,18,0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="indicator" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                <Setter TargetName="bd" Property="Background" Value="#14FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================= FLUENT COMBOBOX ================= -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}" Margin="3,1">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="#FF0B0B0B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource BgCard}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush1}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="toggle" Background="Transparent" BorderThickness="0" Focusable="False" ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="Transparent"/>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Border x:Name="chrome" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" IsHitTestVisible="False">
+                                <Grid Margin="{TemplateBinding Padding}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Grid.Column="0" Content="{TemplateBinding SelectionBoxItem}" VerticalAlignment="Center"/>
+                                    <Path Grid.Column="1" Data="M0,0 L6,6 L12,0" Stroke="{StaticResource TextSecondary}"
+                                          StrokeThickness="1.6" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True" PopupAnimation="Fade">
+                                <Border Background="{StaticResource BgCard}" BorderBrush="{StaticResource BorderBrush1}" BorderThickness="1"
+                                        CornerRadius="8" Margin="0,4,0,0" Padding="2" Effect="{StaticResource CardShadow}"
+                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ItemsPresenter/>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="chrome" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================= FLUENT CARD (App Installer items) ================= -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource BgCard}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush1}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="Margin" Value="0,5"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource BgCardHover}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ================= SLIM FLUENT SCROLLBAR ================= -->
+        <Style x:Key="ScrollThumbStyle" TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border Background="#FF56585E" CornerRadius="4" Margin="2,0"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ScrollRepeatButtonStyle" TargetType="RepeatButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid>
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource ScrollRepeatButtonStyle}" Command="ScrollBar.PageUpCommand"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource ScrollThumbStyle}"/>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource ScrollRepeatButtonStyle}" Command="ScrollBar.PageDownCommand"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Background="{StaticResource BgDark}">
+        <!-- HEADER -->
+        <Border DockPanel.Dock="Top" Padding="18,14" BorderBrush="{StaticResource AccentBrush}" BorderThickness="0,0,0,2">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#FF23262B" Offset="0"/>
+                    <GradientStop Color="#FF1E2530" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="150"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="34" Height="34" CornerRadius="8" Margin="0,0,12,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FF4CC2FF" Offset="0"/>
+                                <GradientStop Color="#FF1A6FBF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="W" FontSize="17" FontWeight="Bold" Foreground="#FF0B0B0B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock x:Name="txtAppTitle" Text="WGO - Windows General Optimizations" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </StackPanel>
+                <TextBlock x:Name="txtLblLanguage" Grid.Column="1" Text="Language:" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}" Margin="0,0,8,0"/>
+                <ComboBox x:Name="cmbLanguage" Grid.Column="2" SelectedIndex="1">
+                    <ComboBoxItem Content="en-US"/>
+                    <ComboBoxItem Content="pt-BR"/>
+                    <ComboBoxItem Content="es-ES"/>
+                    <ComboBoxItem Content="zh-CN"/>
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <!-- LOG CONSOLE -->
+        <Border DockPanel.Dock="Bottom" Background="#FF141517" BorderBrush="{StaticResource BorderBrush1}" BorderThickness="1"
+                CornerRadius="10" Padding="14,10" Margin="14,0,14,14" Height="180" Effect="{StaticResource CardShadow}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                    <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="txtLogHeader" Text="Execution Log" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" FontSize="13"/>
+                </StackPanel>
+                <ScrollViewer x:Name="scrollLog" VerticalScrollBarVisibility="Auto">
+                    <TextBox x:Name="txtLog" Background="Transparent" Foreground="#FF7CE0C6" FontFamily="Cascadia Mono, Consolas" FontSize="12"
+                             BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- TABS -->
+        <TabControl x:Name="tabMain" Background="{StaticResource BgDark}" Margin="10" BorderThickness="0">
+            <TabItem x:Name="tabOptimizations" Header="Optimizations &amp; Privacy">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+
+                        <GroupBox x:Name="grpRestore" Header="System Safety">
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="btnCreateRestore" Content="Create Restore Point" Style="{StaticResource SecondaryButtonStyle}"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpBloat" Header="Bloatware Removal">
+                            <CheckBox x:Name="chkBloat" Content="Remove bloatware / AI apps" IsChecked="True"/>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpSearch" Header="Start Menu Search">
+                            <CheckBox x:Name="chkSearch" Content="Force 100% local search" IsChecked="True"/>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpVisual" Header="Visual Effects">
+                            <CheckBox x:Name="chkVisual" Content="Apply custom performance visual effects profile" IsChecked="True"/>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpPrivacy" Header="Deep Privacy / Telemetry">
+                            <CheckBox x:Name="chkPrivacy" Content="Block telemetry / WER / CEIP / Activity Feed / Location" IsChecked="True"/>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpDrivers" Header="Windows Update Drivers">
+                            <CheckBox x:Name="chkDrivers" Content="Block automatic driver installation" IsChecked="True"/>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpPagefile" Header="Virtual Memory (Pagefile)">
+                            <CheckBox x:Name="chkPagefile" Content="Set static pagefile size (RAM x 1.5)" IsChecked="True"/>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpExtraPrivacy" Header="Additional Telemetry Blocking">
+                            <StackPanel>
+                                <CheckBox x:Name="chkAdvertisingId" Content="Disable advertising ID" IsChecked="True"/>
+                                <CheckBox x:Name="chkTailoredExp" Content="Disable tailored experiences / suggestions" IsChecked="True"/>
+                                <CheckBox x:Name="chkDiagTrackSvc" Content="Disable DiagTrack / dmwappushservice" IsChecked="True"/>
+                                <CheckBox x:Name="chkCopilotBlock" Content="Block Copilot / Recall / AI data analysis" IsChecked="True"/>
+                                <CheckBox x:Name="chkInputTelemetry" Content="Disable input personalization / clipboard cloud sync" IsChecked="True"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <Button x:Name="btnRunSelected" Content="Run Selected Optimizations" HorizontalAlignment="Left" Padding="20,10" FontSize="14"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem x:Name="tabInstaller" Header="App Installer">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+
+                        <Border Style="{StaticResource CardStyle}">
+                            <StackPanel>
+                                <TextBlock x:Name="txtChocoRequired" Text="Installing the apps below requires Chocolatey." TextWrapping="Wrap" FontWeight="Bold"/>
+                                <TextBlock x:Name="txtChocoStatus" Text="" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,6" FontSize="12"/>
+                                <Button x:Name="btnInstallChoco" Content="Install Chocolatey" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
+                            </StackPanel>
+                        </Border>
+
+                        <GroupBox x:Name="grpInstaller" Header="Useful Applications">
+                            <StackPanel>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkFirefox" Content="Mozilla Firefox" FontWeight="Bold" Tag="firefox"/>
+                                        <TextBlock x:Name="txtFirefoxDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkNanaZip" Content="NanaZip" FontWeight="Bold" Tag="nanazip"/>
+                                        <TextBlock x:Name="txtNanaZipDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkNpp" Content="Notepad++" FontWeight="Bold" Tag="notepadplusplus.install"/>
+                                        <TextBlock x:Name="txtNppDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkFdm" Content="Free Download Manager" FontWeight="Bold" Tag="freedownloadmanager"/>
+                                        <TextBlock x:Name="txtFdmDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkQbt" Content="qBittorrent" FontWeight="Bold" Tag="qbittorrent"/>
+                                        <TextBlock x:Name="txtQbtDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkSteam" Content="Steam" FontWeight="Bold" Tag="steam"/>
+                                        <TextBlock x:Name="txtSteamDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkEpic" Content="Epic Games Launcher" FontWeight="Bold" Tag="epicgameslauncher"/>
+                                        <TextBlock x:Name="txtEpicDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkGog" Content="GOG Galaxy" FontWeight="Bold" Tag="goggalaxy"/>
+                                        <TextBlock x:Name="txtGogDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+                        </GroupBox>
+                        <Button x:Name="btnInstallApps" Content="Install Selected" HorizontalAlignment="Left" Padding="20,10" FontSize="14"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
+"@
+
+$reader = New-Object System.Xml.XmlNodeReader $xaml
+$window = [Windows.Markup.XamlReader]::Load($reader)
+
+# ----------------------------------------------------------------------------
+# WHY THE INSTALLER / OPTIMIZATIONS DID NOTHING (root cause)
+# ----------------------------------------------------------------------------
+# The previous implementation tried to reuse the UI's own Runspace from a
+# background [System.Threading.Tasks.Task]::Run thread by pointing
+# [Runspace]::DefaultRunspace at it. That runspace is NOT idle, though - it is
+# the exact runspace that is, at that very moment, blocked inside
+# "$window.ShowDialog()" at the bottom of this script. A single local Runspace
+# can only run one pipeline at a time; invoking anything on it concurrently
+# from a different OS thread throws immediately (pipeline already
+# running / invalid runspace state), BEFORE execution ever reaches any
+# try/catch inside the task. Since the Task was started with "| Out-Null" and
+# never awaited/observed, .NET's TPL silently swallowed that exception - which
+# is exactly why every background button (Create Restore Point, Run Selected,
+# Install Chocolatey, Install Selected) looked like it did nothing and wrote
+# nothing to the log, not even an error.
+#
+# THE FIX
+# ----------------------------------------------------------------------------
+# Every background task now gets its OWN dedicated Runspace (via
+# runspacefactory), completely independent from the UI runspace, so there is
+# never any contention. To keep it self-contained we copy the exact bodies of
+# the functions it needs (Write-Log, T, Install-WgoApp, etc.) into that
+# runspace, and share only plain data (hashtables/arrays/strings) with it -
+# never WPF objects. Background code therefore NEVER touches $window/$ctrl
+# directly (that would throw, since WPF controls are thread-affine); instead
+# it only enqueues log lines into a thread-safe ConcurrentQueue, which the UI
+# thread drains on a DispatcherTimer tick. Anything that truly must update the
+# UI (re-enabling a button, refreshing the Chocolatey status line) is done via
+# an -OnCompleted callback that Start-WgoBackgroundTask guarantees runs on the
+# UI thread AFTER the worker runspace has finished.
+$Global:WgoLogQueue = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
+
+# Last-resort error reporter: shows a MessageBox directly. Safe to call from
+# ANY thread (including a background worker runspace) because
+# System.Windows.Forms.MessageBox.Show does not require WPF's Dispatcher - it
+# only needs an STA thread, which every runspace here (UI and workers) has.
+function Show-WgoFatalError {
+    param([string]$Message)
+    [System.Windows.Forms.MessageBox]::Show(
+        $Message, "WGO - Error",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Error
+    ) | Out-Null
+}
+
+# Runs a scriptblock on a dedicated background Runspace. The scriptblock may
+# start with its own param() block; values passed via -ArgumentList are bound
+# to it positionally, exactly like calling a .ps1 with positional arguments
+# (this replaces GetNewClosure() closures, which do not survive being moved
+# into a different runspace). If -OnCompleted is supplied, it is invoked on
+# the UI thread once the background work has finished (success or failure),
+# so it can safely touch $window/$ctrl (re-enable buttons, refresh status).
+function Start-WgoBackgroundTask {
+    param(
+        [Parameter(Mandatory = $true)][scriptblock]$ScriptBlock,
+        [object[]]$ArgumentList = @(),
+        [scriptblock]$OnCompleted = $null
+    )
+
+    $rs = [runspacefactory]::CreateRunspace()
+    $rs.ApartmentState = [System.Threading.ApartmentState]::STA
+    $rs.ThreadOptions   = [System.Management.Automation.Runspaces.PSThreadOptions]::ReuseThread
+    $rs.Open()
+
+    # Share plain data only - never $window/$ctrl (WPF objects are thread-affine).
+    $rs.SessionStateProxy.SetVariable('WgoLogQueue', $Global:WgoLogQueue)
+    $rs.SessionStateProxy.SetVariable('Lang', $Lang)
+    $rs.SessionStateProxy.SetVariable('CurrentLangCode', $Global:CurrentLangCode)
+    $rs.SessionStateProxy.SetVariable('WgoAppCatalog', $Global:WgoAppCatalog)
+    $rs.SessionStateProxy.SetVariable('BloatwareWhitelist', $BloatwareWhitelist)
+    $rs.SessionStateProxy.SetVariable('BloatwareTargets', $BloatwareTargets)
+
+    $ps = [powershell]::Create()
+    $ps.Runspace = $rs
+
+    # Copy the current body of every function the background code is allowed
+    # to call into the worker runspace (read live via Get-Item, so there is no
+    # duplicated source of truth to keep in sync).
+    $funcDefs = ($Global:WgoSharedFunctionNames | ForEach-Object {
+        $fn = Get-Item "function:\$_" -ErrorAction SilentlyContinue
+        if ($fn) { "function $_ {`n$($fn.ScriptBlock)`n}" }
+    }) -join "`n`n"
+    [void]$ps.AddScript($funcDefs)
+
+    # The actual task, as its own independently-parsed script chunk so that a
+    # param() block at its start (if any) binds correctly to -ArgumentList.
+    [void]$ps.AddScript($ScriptBlock.ToString())
+    foreach ($arg in $ArgumentList) { [void]$ps.AddArgument($arg) }
+
+    $asyncResult = $ps.BeginInvoke()
+
+    $timer = New-Object System.Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(150)
+    $timer.Add_Tick({
+        if (-not $asyncResult.IsCompleted) { return }
+        $timer.Stop()
+        try {
+            $ps.EndInvoke($asyncResult) | Out-Null
+            foreach ($errRec in $ps.Streams.Error) {
+                Write-Log (T 'LogUnhandledError' $errRec.ToString()) "ERROR"
+            }
+        } catch {
+            Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+        } finally {
+            $ps.Dispose()
+            $rs.Close()
+            $rs.Dispose()
+            if ($OnCompleted) {
+                try { & $OnCompleted } catch {
+                    Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+                }
+            }
+        }
+    }.GetNewClosure())
+    $timer.Start()
+}
+
+# ============================================================================
+# 4. RECUPERAR CONTROLES NOMEADOS
+# ============================================================================
+
+$ctrl = @{}
+$names = @(
+    'txtAppTitle','txtLblLanguage','cmbLanguage','txtLogHeader','scrollLog','txtLog',
+    'tabOptimizations','tabInstaller',
+    'grpRestore','btnCreateRestore',
+    'grpBloat','chkBloat',
+    'grpSearch','chkSearch',
+    'grpVisual','chkVisual',
+    'grpPrivacy','chkPrivacy',
+    'grpDrivers','chkDrivers',
+    'grpPagefile','chkPagefile',
+    'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
+    'btnRunSelected',
+    'grpInstaller','btnInstallApps',
+    'txtChocoRequired','txtChocoStatus','btnInstallChoco',
+    'chkFirefox','txtFirefoxDesc',
+    'chkNanaZip','txtNanaZipDesc',
+    'chkNpp','txtNppDesc',
+    'chkFdm','txtFdmDesc',
+    'chkQbt','txtQbtDesc',
+    'chkSteam','txtSteamDesc',
+    'chkEpic','txtEpicDesc',
+    'chkGog','txtGogDesc'
+)
+foreach ($n in $names) { $ctrl[$n] = $window.FindName($n) }
+
+# ============================================================================
+# 5. LOG / UTILIDADES DE UI
+# ============================================================================
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    # Only touch the ConcurrentQueue here (thread-safe, no WPF objects
+    # involved), so this same function works correctly whether it is called
+    # from the UI thread or from a background worker runspace. The UI thread
+    # drains it via $Global:WgoLogTimer below.
+    $Global:WgoLogQueue.Enqueue("[$timestamp][$Level] $Message")
+}
+
+# Drains $Global:WgoLogQueue into the log TextBox. Runs only on the UI thread
+# (DispatcherTimer ticks are always dispatched there), so this is the single
+# place that actually touches the txtLog control - safe and simple.
+$Global:WgoLogTimer = New-Object System.Windows.Threading.DispatcherTimer
+$Global:WgoLogTimer.Interval = [TimeSpan]::FromMilliseconds(150)
+$Global:WgoLogTimer.Add_Tick({
+    $line = $null
+    $appended = $false
+    while ($Global:WgoLogQueue.TryDequeue([ref]$line)) {
+        $ctrl['txtLog'].AppendText("$line`r`n")
+        $appended = $true
+    }
+    if ($appended) { $ctrl['txtLog'].ScrollToEnd() }
+})
+$Global:WgoLogTimer.Start()
+
+# T = Translate: resolves a message key in the currently selected UI language and,
+# optionally, formats it with -f using the extra arguments passed in.
+# This is what makes the execution log fully multi-language (en-US / pt-BR / es-ES / zh-CN),
+# instead of being hardcoded in a single language regardless of the UI language selected.
+function T {
+    param(
+        [Parameter(Mandatory = $true)][string]$Key,
+        [Parameter(ValueFromRemainingArguments = $true)][object[]]$FormatArgs
+    )
+    $table = $Lang[$Global:CurrentLangCode]
+    if (-not $table -or -not $table.ContainsKey($Key)) { $table = $Lang['en-US'] }
+    $template = $table[$Key]
+    if (-not $template) { return $Key }
+    if ($FormatArgs -and $FormatArgs.Count -gt 0) {
+        try { return ($template -f $FormatArgs) } catch { return $template }
+    }
+    return $template
+}
+
+function Update-UILanguage {
+    param([string]$Code)
+    $t = $Lang[$Code]
+    $Global:CurrentLangCode = $Code
+
+    $window.Title                       = $t.AppTitle
+    $ctrl['txtAppTitle'].Text            = $t.AppTitle
+    $ctrl['txtLblLanguage'].Text         = $t.LblLanguage
+    $ctrl['txtLogHeader'].Text           = $t.LogHeader
+    $ctrl['tabOptimizations'].Header     = $t.TabOptimizations
+    $ctrl['tabInstaller'].Header         = $t.TabInstaller
+
+    $ctrl['grpRestore'].Header           = $t.GrpRestore
+    $ctrl['btnCreateRestore'].Content    = $t.BtnCreateRestore
+
+    $ctrl['grpBloat'].Header             = $t.GrpBloat
+    $ctrl['chkBloat'].Content            = $t.ChkBloat
+
+    $ctrl['grpSearch'].Header            = $t.GrpSearch
+    $ctrl['chkSearch'].Content           = $t.ChkSearch
+
+    $ctrl['grpVisual'].Header            = $t.GrpVisual
+    $ctrl['chkVisual'].Content           = $t.ChkVisual
+
+    $ctrl['grpPrivacy'].Header           = $t.GrpPrivacy
+    $ctrl['chkPrivacy'].Content          = $t.ChkPrivacy
+
+    $ctrl['grpDrivers'].Header           = $t.GrpDrivers
+    $ctrl['chkDrivers'].Content          = $t.ChkDrivers
+
+    $ctrl['grpPagefile'].Header          = $t.GrpPagefile
+    $ctrl['chkPagefile'].Content         = $t.ChkPagefile
+
+    $ctrl['grpExtraPrivacy'].Header      = $t.GrpExtraPrivacy
+    $ctrl['chkAdvertisingId'].Content    = $t.ChkAdvertisingId
+    $ctrl['chkTailoredExp'].Content      = $t.ChkTailoredExp
+    $ctrl['chkDiagTrackSvc'].Content     = $t.ChkDiagTrackSvc
+    $ctrl['chkCopilotBlock'].Content     = $t.ChkCopilotBlock
+    $ctrl['chkInputTelemetry'].Content   = $t.ChkInputTelemetry
+
+    $ctrl['btnRunSelected'].Content      = $t.BtnRunSelected
+
+    $ctrl['txtChocoRequired'].Text       = $t.TxtChocoRequired
+    $ctrl['btnInstallChoco'].Content     = $t.BtnInstallChoco
+    Update-WgoChocoStatus
+
+    $ctrl['grpInstaller'].Header         = $t.GrpInstaller
+    $ctrl['btnInstallApps'].Content      = $t.BtnInstallApps
+
+    $ctrl['chkFirefox'].Content          = "Mozilla Firefox"
+    $ctrl['txtFirefoxDesc'].Text         = $t.AppFirefoxDesc
+    $ctrl['chkNanaZip'].Content          = "NanaZip"
+    $ctrl['txtNanaZipDesc'].Text         = $t.AppNanaZipDesc
+    $ctrl['chkNpp'].Content              = "Notepad++"
+    $ctrl['txtNppDesc'].Text             = $t.AppNppDesc
+    $ctrl['chkFdm'].Content              = "Free Download Manager"
+    $ctrl['txtFdmDesc'].Text             = $t.AppFdmDesc
+    $ctrl['chkQbt'].Content              = "qBittorrent"
+    $ctrl['txtQbtDesc'].Text             = $t.AppQbtDesc
+    $ctrl['chkSteam'].Content            = "Steam"
+    $ctrl['txtSteamDesc'].Text           = $t.AppSteamDesc
+    $ctrl['chkEpic'].Content             = "Epic Games Launcher"
+    $ctrl['txtEpicDesc'].Text            = $t.AppEpicDesc
+    $ctrl['chkGog'].Content              = "GOG Galaxy"
+    $ctrl['txtGogDesc'].Text             = $t.AppGogDesc
+}
+
+# ============================================================================
+# 6. FUNCAO 1 - PONTO DE RESTAURACAO
+# ============================================================================
+
+function New-WgoRestorePoint {
+    Write-Log (T 'LogRestoreTry') "INFO"
+    try {
+        $svc = Get-Service -Name "srservice" -ErrorAction SilentlyContinue
+        Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction SilentlyContinue
+
+        Checkpoint-Computer -Description "WGO - Before optimizations" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
+        Write-Log (T 'LogRestoreOk') "OK"
+        return $true
+    } catch {
+        Write-Log (T 'LogRestoreFail' $_.Exception.Message) "ERROR"
+        Write-Log (T 'LogRestoreHint') "WARN"
+        return $false
+    }
+}
+
+# ============================================================================
+# 7. FUNCAO 2 - REMOCAO DE BLOATWARE (WHITELIST EXPANDIDA)
+# ============================================================================
+
+$BloatwareWhitelist = @(
+    "Microsoft.WindowsStore",
+    "Microsoft.XboxApp",
+    "Microsoft.GamingApp",
+    "Microsoft.XboxGameOverlay",
+    "Microsoft.XboxGamingOverlay",
+    "Microsoft.XboxSpeechToTextOverlay",
+    "Microsoft.XboxIdentityProvider",
+    "Microsoft.Xbox.TCUI",
+    "Microsoft.MicrosoftEdge",
+    "Microsoft.MicrosoftEdge.Stable",
+    "MicrosoftEdgeDevToolsProtocol",
+    "Microsoft.Edge",
+    "Microsoft.Edge.GameAssist",
+    "Microsoft.WebView2",
+    "Microsoft.WebMediaExtensions",
+    "Microsoft.VCLibs",
+    "Microsoft.VCLibs.140.00",
+    "Microsoft.NET.Native",
+    "Microsoft.NET.Native.Framework",
+    "Microsoft.NET.Native.Runtime",
+    "Microsoft.UI.Xaml",
+    "Microsoft.Services.Store.Engagement",
+    "Microsoft.StorePurchaseApp",
+    "Microsoft.DesktopAppInstaller",
+    "Microsoft.WindowsAppRuntime"
+)
+
+$BloatwareTargets = @(
+    "Microsoft.Copilot",
+    "Microsoft.Windows.Ai.Copilot.Provider",
+    "MicrosoftWindows.Client.CoPilot",
+    "Microsoft.WindowsRecall",
+    "Microsoft.Windows.Recall",
+    "Microsoft.549981C3F5F10",             # Cortana
+    "Microsoft.Paint3D",
+    "Microsoft.MSPaint",
+    "Microsoft.YourPhone",                 # Phone Link
+    "microsoft.windowscommunicationsapps", # Mail e Calendar
+    "Microsoft.BingNews",
+    "Microsoft.BingWeather",
+    "Microsoft.BingFinance",
+    "Microsoft.BingSports",
+    "Microsoft.MicrosoftOfficeHub",
+    "Microsoft.MicrosoftSolitaireCollection",
+    "Microsoft.MicrosoftStickyNotes",
+    "Microsoft.MixedReality.Portal",
+    "Microsoft.People",
+    "Microsoft.PowerAutomateDesktop",
+    "Microsoft.SkypeApp",
+    "Microsoft.Getstarted",
+    "Microsoft.WindowsFeedbackHub",
+    "Microsoft.WindowsMaps",
+    "Microsoft.WindowsSoundRecorder",
+    "Microsoft.ZuneMusic",
+    "Microsoft.ZuneVideo",
+    "Microsoft.GamingServices",
+    "Microsoft.Todos",
+    "Microsoft.Whiteboard",
+    "Microsoft.OutlookForWindows",
+    "Microsoft.Teams",
+    "MicrosoftTeams",
+    "Clipchamp.Clipchamp",
+    "Microsoft.549981C3F5F10",
+    "Microsoft.3DBuilder",
+    "Microsoft.Wallet",
+    "Microsoft.Advertising.Xaml"
+)
+
+function Remove-WgoBloatware {
+    Write-Log (T 'LogBloatStart') "INFO"
+    foreach ($appName in $BloatwareTargets) {
+        if ($BloatwareWhitelist -contains $appName) { continue }
+        try {
+            $pkgs = Get-AppxPackage -AllUsers -Name "*$appName*" -ErrorAction SilentlyContinue |
+                    Where-Object { $BloatwareWhitelist -notcontains $_.Name }
+            foreach ($p in $pkgs) {
+                Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction SilentlyContinue
+                Write-Log (T 'LogBloatUserRemoved' $p.Name) "OK"
+            }
+
+            $prov = Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue |
+                    Where-Object { $_.DisplayName -like "*$appName*" -and ($BloatwareWhitelist -notcontains $_.DisplayName) }
+            foreach ($pp in $prov) {
+                Remove-AppxProvisionedPackage -Online -PackageName $pp.PackageName -ErrorAction SilentlyContinue
+                Write-Log (T 'LogBloatProvRemoved' $pp.DisplayName) "OK"
+            }
+        } catch {
+            Write-Log (T 'LogBloatError' $appName $_.Exception.Message) "ERROR"
+        }
+    }
+    Write-Log (T 'LogBloatDone') "OK"
+}
+
+# ============================================================================
+# 8. FUNCAO 3 - PESQUISA 100% LOCAL (SEM BING / EDGE WEB SEARCH)
+# ============================================================================
+
+function Set-WgoLocalSearch {
+    Write-Log (T 'LogSearchStart') "INFO"
+    try {
+        $explorerPolicy = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+        $searchKey      = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
+
+        if (-not (Test-Path $explorerPolicy)) { New-Item -Path $explorerPolicy -Force | Out-Null }
+        if (-not (Test-Path $searchKey))      { New-Item -Path $searchKey -Force | Out-Null }
+
+        New-ItemProperty -Path $explorerPolicy -Name "DisableSearchBoxSuggestions" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $searchKey -Name "BingSearchEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $searchKey -Name "CortanaConsent" -Value 0 -PropertyType DWord -Force | Out-Null
+
+        Write-Log (T 'LogSearchOk') "OK"
+    } catch {
+        Write-Log (T 'LogSearchError' $_.Exception.Message) "ERROR"
+    }
+}
+
+# ============================================================================
+# 9. FUNCAO 4 - EFEITOS VISUAIS PERSONALIZADOS
+# ============================================================================
+
+function Set-WgoVisualEffects {
+    Write-Log (T 'LogVisualStart') "INFO"
+    try {
+        $desktopKey = "HKCU:\Control Panel\Desktop"
+        $vfxKey     = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
+        $advKey     = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+        $dwmKey     = "HKCU:\Software\Microsoft\Windows\DWM"
+
+        foreach ($k in @($vfxKey)) { if (-not (Test-Path $k)) { New-Item -Path $k -Force | Out-Null } }
+
+        # VisualFXSetting = 3 (custom)
+        New-ItemProperty -Path $vfxKey -Name "VisualFXSetting" -Value 3 -PropertyType DWord -Force | Out-Null
+
+        # HABILITADOS
+        New-ItemProperty -Path $desktopKey -Name "MinAnimate" -Value 1 -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "DragFullWindows" -Value 1 -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $advKey -Name "IconsOnly" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "ListviewAlphaSelect" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "FontSmoothing" -Value 2 -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "FontSmoothingType" -Value 2 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "ListviewShadow" -Value 1 -PropertyType DWord -Force | Out-Null
+
+        # DESATIVADOS
+        New-ItemProperty -Path $advKey -Name "TaskbarAnimations" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "ComboBoxAnimation" -Value 0 -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "MenuAnimation" -Value 0 -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "TooltipAnimation" -Value 0 -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -PropertyType Binary -Force | Out-Null
+        if (-not (Test-Path $dwmKey)) { New-Item -Path $dwmKey -Force | Out-Null }
+        New-ItemProperty -Path $dwmKey -Name "EnableAeroPeek" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "CursorShadow" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $advKey -Name "ListviewWatermark" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $desktopKey -Name "SmoothScroll" -Value 0 -PropertyType DWord -Force | Out-Null
+
+        Write-Log (T 'LogVisualOk') "OK"
+    } catch {
+        Write-Log (T 'LogVisualError' $_.Exception.Message) "ERROR"
+    }
+}
+
+# ============================================================================
+# 10. FUNCAO 5 - PRIVACIDADE PROFUNDA / TELEMETRIA (GPEDIT / REGISTRY)
+# ============================================================================
+
+function Set-WgoPrivacyPolicies {
+    Write-Log (T 'LogPrivacyStart') "INFO"
+    try {
+        $paths = @{
+            DataCollection = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+            AppCompat      = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
+            WER            = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting"
+            SQMClient      = "HKLM:\SOFTWARE\Policies\Microsoft\SQMClient\Windows"
+            Location       = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors"
+            ActivityFeed   = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        }
+        foreach ($p in $paths.Values) {
+            if (-not (Test-Path $p)) { New-Item -Path $p -Force | Out-Null }
+        }
+
+        # DataCollection / DiagnosticData
+        New-ItemProperty -Path $paths.DataCollection -Name "AllowTelemetry" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.DataCollection -Name "LimitDiagnosticDataConfigurationSet" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.DataCollection -Name "DisableOneSettingsDownloads" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.DataCollection -Name "DoNotShowFeedbackNotifications" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.DataCollection -Name "NumberOfSIUFInPeriod" -Value 0 -PropertyType DWord -Force | Out-Null
+
+        # Application Impact & Compatibility (AppCompat / Inventory)
+        New-ItemProperty -Path $paths.AppCompat -Name "AITEnable" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.AppCompat -Name "DisableInventory" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.AppCompat -Name "DisablePCA" -Value 1 -PropertyType DWord -Force | Out-Null
+
+        # Windows Error Reporting
+        New-ItemProperty -Path $paths.WER -Name "Disabled" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.WER -Name "DoReport" -Value 0 -PropertyType DWord -Force | Out-Null
+
+        # CEIP (SQMClient) + tarefas agendadas relacionadas
+        New-ItemProperty -Path $paths.SQMClient -Name "CEIPEnable" -Value 0 -PropertyType DWord -Force | Out-Null
+        $ceipTasks = @(
+            "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator",
+            "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip",
+            "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser",
+            "\Microsoft\Windows\Application Experience\ProgramDataUpdater",
+            "\Microsoft\Windows\Autochk\Proxy",
+            "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
+        )
+        foreach ($task in $ceipTasks) {
+            try { Disable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction SilentlyContinue | Out-Null } catch {}
+        }
+
+        # Location & Sensors
+        New-ItemProperty -Path $paths.Location -Name "DisableLocation" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.Location -Name "DisableLocationScripting" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.Location -Name "DisableSensors" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.Location -Name "DisableWindowsLocationProvider" -Value 1 -PropertyType DWord -Force | Out-Null
+
+        # Activity History & Timeline
+        New-ItemProperty -Path $paths.ActivityFeed -Name "EnableActivityFeed" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.ActivityFeed -Name "PublishUserActivities" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $paths.ActivityFeed -Name "UploadUserActivities" -Value 0 -PropertyType DWord -Force | Out-Null
+
+        Write-Log (T 'LogPrivacyOk') "OK"
+    } catch {
+        Write-Log (T 'LogPrivacyError' $_.Exception.Message) "ERROR"
+    }
+}
+
+# ============================================================================
+# 10-B. FUNCAO 5-B - OPCOES ADICIONAIS DE TELEMETRIA
+# ============================================================================
+
+function Set-WgoExtraPrivacy {
+    param(
+        [bool]$AdvertisingId   = $false,
+        [bool]$TailoredExp     = $false,
+        [bool]$DiagTrackSvc    = $false,
+        [bool]$CopilotBlock    = $false,
+        [bool]$InputTelemetry  = $false
+    )
+
+    if (-not ($AdvertisingId -or $TailoredExp -or $DiagTrackSvc -or $CopilotBlock -or $InputTelemetry)) { return }
+
+    Write-Log (T 'LogExtraStart') "INFO"
+
+    if ($AdvertisingId) {
+        try {
+            $advKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo"
+            $advKeyM = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo"
+            if (-not (Test-Path $advKey))  { New-Item -Path $advKey -Force | Out-Null }
+            if (-not (Test-Path $advKeyM)) { New-Item -Path $advKeyM -Force | Out-Null }
+            New-ItemProperty -Path $advKey -Name "Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $advKeyM -Name "DisabledByGroupPolicy" -Value 1 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogExtraAdvOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtraError' "AdvertisingId" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($TailoredExp) {
+        try {
+            $cdmKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
+            $cloudKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+            if (-not (Test-Path $cdmKey))   { New-Item -Path $cdmKey -Force | Out-Null }
+            if (-not (Test-Path $cloudKey)) { New-Item -Path $cloudKey -Force | Out-Null }
+            $cdmProps = @(
+                "SubscribedContent-338388Enabled", "SubscribedContent-338389Enabled",
+                "SubscribedContent-353698Enabled", "SystemPaneSuggestionsEnabled",
+                "SoftLandingEnabled", "ContentDeliveryAllowed", "OemPreInstalledAppsEnabled",
+                "PreInstalledAppsEnabled", "PreInstalledAppsEverEnabled", "SilentInstalledAppsEnabled"
+            )
+            foreach ($prop in $cdmProps) {
+                New-ItemProperty -Path $cdmKey -Name $prop -Value 0 -PropertyType DWord -Force | Out-Null
+            }
+            New-ItemProperty -Path $cloudKey -Name "DisableWindowsConsumerFeatures" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $cloudKey -Name "DisableTailoredExperiencesWithDiagnosticData" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $cloudKey -Name "DisableSoftLanding" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $cloudKey -Name "DisableWindowsSpotlightFeatures" -Value 1 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogExtraTailoredOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtraError' "TailoredExp" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($DiagTrackSvc) {
+        try {
+            foreach ($svcName in @("DiagTrack", "dmwappushservice")) {
+                $svc = Get-Service -Name $svcName -ErrorAction SilentlyContinue
+                if ($svc) {
+                    Stop-Service -Name $svcName -Force -ErrorAction SilentlyContinue
+                    Set-Service -Name $svcName -StartupType Disabled -ErrorAction SilentlyContinue
+                }
+            }
+            Write-Log (T 'LogExtraDiagTrackOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtraError' "DiagTrackSvc" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($CopilotBlock) {
+        try {
+            $winKey    = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot"
+            $dcKey     = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+            $expKey    = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+            if (-not (Test-Path $winKey)) { New-Item -Path $winKey -Force | Out-Null }
+            if (-not (Test-Path $expKey)) { New-Item -Path $expKey -Force | Out-Null }
+            New-ItemProperty -Path $winKey -Name "TurnOffWindowsCopilot" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $expKey -Name "DisableSearchBoxSuggestions" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $dcKey -Name "AllowRecallEnablement" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $dcKey -Name "DisableAIDataAnalysis" -Value 1 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogExtraCopilotOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtraError' "CopilotBlock" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($InputTelemetry) {
+        try {
+            $inputKey  = "HKCU:\SOFTWARE\Microsoft\InputPersonalization"
+            $trainKey  = "HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore"
+            $clipKey   = "HKCU:\SOFTWARE\Microsoft\Clipboard"
+            if (-not (Test-Path $inputKey)) { New-Item -Path $inputKey -Force | Out-Null }
+            if (-not (Test-Path $trainKey)) { New-Item -Path $trainKey -Force | Out-Null }
+            if (-not (Test-Path $clipKey))  { New-Item -Path $clipKey -Force | Out-Null }
+            New-ItemProperty -Path $inputKey -Name "RestrictImplicitInkCollection" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $inputKey -Name "RestrictImplicitTextCollection" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $trainKey -Name "HarvestContacts" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $clipKey -Name "EnableClipboardHistory" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $clipKey -Name "CloudClipboardAutomaticUpload" -Value 0 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogExtraInputOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtraError' "InputTelemetry" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    Write-Log (T 'LogExtraDone') "OK"
+}
+
+# ============================================================================
+# 11. FUNCAO 6 - BLOQUEIO DE DRIVERS AUTOMATICOS (WINDOWS UPDATE)
+# ============================================================================
+
+function Set-WgoBlockDriverUpdates {
+    Write-Log (T 'LogDriversStart') "INFO"
+    try {
+        $driverSearchKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching"
+        $wuPolicyKey     = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+
+        if (-not (Test-Path $driverSearchKey)) { New-Item -Path $driverSearchKey -Force | Out-Null }
+        if (-not (Test-Path $wuPolicyKey))     { New-Item -Path $wuPolicyKey -Force | Out-Null }
+
+        New-ItemProperty -Path $driverSearchKey -Name "SearchOrderConfig" -Value 0 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -Path $wuPolicyKey -Name "ExcludeWUDriversInQualityUpdate" -Value 1 -PropertyType DWord -Force | Out-Null
+
+        Write-Log (T 'LogDriversOk') "OK"
+    } catch {
+        Write-Log (T 'LogDriversError' $_.Exception.Message) "ERROR"
+    }
+}
+
+# ============================================================================
+# 12. FUNCAO 7 - AJUSTE DE MEMORIA VIRTUAL (PAGEFILE)
+# ============================================================================
+
+function Set-WgoPagefile {
+    try {
+        $cs = Get-CimInstance -ClassName Win32_ComputerSystem
+        $ramMB = [Math]::Round($cs.TotalPhysicalMemory / 1MB)
+        $pageMB = [Math]::Round($ramMB * 1.5)
+
+        Write-Log (T 'LogPagefileRam' $ramMB $pageMB) "INFO"
+
+        # Desabilitar gerenciamento automatico
+        $cs2 = Get-CimInstance -ClassName Win32_ComputerSystem
+        if ($cs2.AutomaticManagedPagefile) {
+            Set-CimInstance -InputObject $cs2 -Property @{ AutomaticManagedPagefile = $false } -ErrorAction Stop
+        }
+
+        $sysDrive = $env:SystemDrive
+        $pagefilePath = "$sysDrive\pagefile.sys"
+
+        $existing = Get-CimInstance -ClassName Win32_PageFileSetting -ErrorAction SilentlyContinue |
+                    Where-Object { $_.Name -eq $pagefilePath }
+
+        if ($existing) {
+            Set-CimInstance -InputObject $existing -Property @{ InitialSize = $pageMB; MaximumSize = $pageMB } -ErrorAction Stop
+        } else {
+            $newPF = New-CimInstance -ClassName Win32_PageFileSetting -Property @{
+                Name        = $pagefilePath
+                InitialSize = $pageMB
+                MaximumSize = $pageMB
+            } -ErrorAction Stop
+        }
+
+        Write-Log (T 'LogPagefileOk' $pageMB) "OK"
+    } catch {
+        Write-Log (T 'LogPagefileError' $_.Exception.Message) "ERROR"
+    }
+}
+
+# ============================================================================
+# 13. FUNCAO 8 - INSTALADOR DE APLICATIVOS (CHOCOLATEY)
+# ============================================================================
+#
+# App installation was migrated from winget to Chocolatey. The previous winget-based
+# approach silently failed to install anything (GOG Galaxy, Steam, etc.) because the
+# "winget" App Execution Alias frequently does not resolve correctly for an elevated
+# (Administrator) PowerShell session that was launched via Verb=runas, which is exactly
+# how WGO relaunches itself. Chocolatey does not have this limitation: it installs to
+# C:\ProgramData\chocolatey and its choco.exe is a normal executable, so it works
+# reliably in the elevated session WGO already runs in.
+#
+# Flow: on the first "Install Selected" click, WGO checks whether Chocolatey is already
+# present; if not, it downloads and installs it automatically using the official
+# bootstrap script, refreshes PATH/ChocolateyInstall for the current process (so choco
+# can be used immediately, without restarting the script), and only then proceeds to
+# install the selected applications with "choco install <id> -y".
+
+$Global:WgoChocoPath = $null
+
+# Resolves the actual path to choco.exe, checking PATH first and then the well-known
+# installation folders (works even if PATH has not been refreshed yet in this process).
+function Find-WgoChocolatey {
+    if ($Global:WgoChocoPath -and (Test-Path $Global:WgoChocoPath)) { return $Global:WgoChocoPath }
+
+    try {
+        $cmd = Get-Command choco.exe -ErrorAction SilentlyContinue
+        if ($cmd -and $cmd.Source -and (Test-Path $cmd.Source)) {
+            $Global:WgoChocoPath = $cmd.Source
+            return $Global:WgoChocoPath
+        }
+    } catch {}
+
+    $candidates = @()
+    if ($env:ChocolateyInstall) { $candidates += (Join-Path $env:ChocolateyInstall "bin\choco.exe") }
+    $candidates += "$env:ProgramData\chocolatey\bin\choco.exe"
+    $candidates += "$env:SystemDrive\ProgramData\chocolatey\bin\choco.exe"
+
+    foreach ($c in $candidates) {
+        if ($c -and (Test-Path $c)) {
+            $Global:WgoChocoPath = $c
+            return $Global:WgoChocoPath
+        }
+    }
+
+    return $null
+}
+
+# Refreshes Path / ChocolateyInstall in the CURRENT process from the machine + user
+# environment, so a just-installed choco.exe can be used right away without having to
+# close and reopen the elevated PowerShell session.
+function Update-WgoSessionEnvironment {
+    try {
+        $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+        $userPath    = [System.Environment]::GetEnvironmentVariable("Path", "User")
+        $env:Path = @($machinePath, $userPath) -join ";"
+
+        $machineChoco = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall", "Machine")
+        if ($machineChoco) { $env:ChocolateyInstall = $machineChoco }
+    } catch {}
+}
+
+# Installs Chocolatey using the official bootstrapper. This is only called from the
+# dedicated "Install Chocolatey" button, so clicking that button IS the user's
+# confirmation - no extra dialog needed here. Returns the resolved path to
+# choco.exe, or $null if the installation failed.
+function Install-WgoChocolatey {
+    Write-Log (T 'LogChocoSearching') "INFO"
+
+    $existing = Find-WgoChocolatey
+    if ($existing) {
+        Write-Log (T 'LogChocoFound' $existing) "INFO"
+        return $existing
+    }
+
+    Write-Log (T 'LogChocoInstalling') "INFO"
+    try {
+        Set-ExecutionPolicy Bypass -Scope Process -Force -ErrorAction SilentlyContinue
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+        Update-WgoSessionEnvironment
+        $Global:WgoChocoPath = $null
+        $resolved = Find-WgoChocolatey
+
+        if ($resolved) {
+            Write-Log (T 'LogChocoInstallOk') "OK"
+            return $resolved
+        } else {
+            Write-Log (T 'LogChocoInstallFailed' "choco.exe not found after installation") "ERROR"
+            Write-Log (T 'LogChocoNotFound') "ERROR"
+            return $null
+        }
+    } catch {
+        Write-Log (T 'LogChocoInstallFailed' $_.Exception.Message) "ERROR"
+        Write-Log (T 'LogChocoNotFound') "ERROR"
+        return $null
+    }
+}
+
+# Updates the small status line above the app list to reflect whether Chocolatey
+# is currently detected. Safe to call from the UI thread or a background thread.
+function Update-WgoChocoStatus {
+    $found = [bool](Find-WgoChocolatey)
+    $text = if ($found) { T 'ChocoStatusFound' } else { T 'ChocoStatusNotFound' }
+    if ($window.Dispatcher.CheckAccess()) {
+        $ctrl['txtChocoStatus'].Text = $text
+    } else {
+        $window.Dispatcher.Invoke([action]{ $ctrl['txtChocoStatus'].Text = $text })
+    }
+}
+
+# Pure check: does NOT install anything. The app-install flow assumes Chocolatey
+# is already installed via the dedicated "Install Chocolatey" button above. If it
+# is not found, this logs a clear message telling the user what to do and returns
+# $false, instead of silently doing nothing.
+function Test-WgoChocolatey {
+    $chocoExe = Find-WgoChocolatey
+    if ($chocoExe) { return $true }
+    Write-Log (T 'LogChocoRequiredFirst') "ERROR"
+    return $false
+}
+
+# ============================================================================
+# 13b. CATALOGO DE APPS (winget id + choco id por chave)
+# ============================================================================
+
+# Central catalog: the key matches each CheckBox's Tag in the XAML.
+# Winget is tried first (built into Windows 10 2004+ / Windows 11, no bootstrap
+# needed, no external script download), Chocolatey is used as an automatic
+# fallback only if winget is missing or does not have the package.
+$Global:WgoAppCatalog = @{
+    'firefox'                 = @{ Name = "Mozilla Firefox";        WingetId = "Mozilla.Firefox";                      ChocoId = "firefox" }
+    'nanazip'                 = @{ Name = "NanaZip";                 WingetId = "M2Team.NanaZip";                       ChocoId = "nanazip" }
+    'notepadplusplus.install' = @{ Name = "Notepad++";                WingetId = "Notepad++.Notepad++";                  ChocoId = "notepadplusplus.install" }
+    'freedownloadmanager'     = @{ Name = "Free Download Manager";    WingetId = "FreeDownloadManager.FreeDownloadManager"; ChocoId = "freedownloadmanager" }
+    'qbittorrent'             = @{ Name = "qBittorrent";               WingetId = "qBittorrent.qBittorrent";              ChocoId = "qbittorrent" }
+    'steam'                   = @{ Name = "Steam";                     WingetId = "Valve.Steam";                          ChocoId = "steam" }
+    'epicgameslauncher'       = @{ Name = "Epic Games Launcher";       WingetId = "EpicGames.EpicGamesLauncher";          ChocoId = "epicgameslauncher" }
+    'goggalaxy'               = @{ Name = "GOG Galaxy";                WingetId = "GOG.Galaxy";                           ChocoId = "goggalaxy" }
+}
+
+# Locates winget.exe (App Installer), caching the resolved path like Find-WgoChocolatey.
+$Global:WgoWingetPath = $null
+function Find-WgoWinget {
+    if ($Global:WgoWingetPath -and (Test-Path $Global:WgoWingetPath)) { return $Global:WgoWingetPath }
+    try {
+        $cmd = Get-Command winget.exe -ErrorAction SilentlyContinue
+        if ($cmd -and $cmd.Source -and (Test-Path $cmd.Source)) {
+            $Global:WgoWingetPath = $cmd.Source
+            return $Global:WgoWingetPath
+        }
+    } catch {}
+    return $null
+}
+
+# Tries to install a package via winget. Returns $true on success (including
+# "already installed"), $false if winget is unavailable, the package was not
+# found, or the install failed for any other reason (caller should then try
+# the Chocolatey fallback).
+function Install-ViaWinget {
+    param([string]$WingetId, [string]$DisplayName)
+
+    $wingetExe = Find-WgoWinget
+    if (-not $wingetExe) { return $false }
+
+    try {
+        # Check if it's already installed first, to skip a redundant install
+        # and to correctly report "already installed" in the log.
+        $checkArgs = @("list", "--id", $WingetId, "-e", "--accept-source-agreements", "--disable-interactivity")
+        $checkOutput = & $wingetExe @checkArgs 2>$null
+        if ($LASTEXITCODE -eq 0 -and ($checkOutput -join "`n") -match [regex]::Escape($WingetId)) {
+            Write-Log (T 'LogInstallAlready' $DisplayName) "OK"
+            return $true
+        }
+
+        Write-Log (T 'LogTryingWinget' $DisplayName) "INFO"
+
+        $logFile = "$env:TEMP\wgo_winget_$($WingetId -replace '[^\w\.-]','_').log"
+        $installArgs = @(
+            "install", "--id", $WingetId, "-e",
+            "--silent",
+            "--accept-package-agreements",
+            "--accept-source-agreements",
+            "--disable-interactivity"
+        )
+
+        # --disable-interactivity + --accept-*-agreements are critical: without
+        # them, winget can sit forever waiting for a source-agreement prompt
+        # that never appears in a non-interactive/background context, which
+        # looks exactly like a silent hang with no log output.
+        $proc = Start-Process -FilePath $wingetExe -ArgumentList $installArgs -NoNewWindow -Wait -PassThru `
+                    -RedirectStandardOutput $logFile -ErrorAction Stop
+
+        if ($proc.ExitCode -eq 0) {
+            Write-Log (T 'LogInstallOk' $DisplayName) "OK"
+            return $true
+        } else {
+            Write-Log (T 'LogWingetFailedFallback' $DisplayName $proc.ExitCode) "WARN"
+            return $false
+        }
+    } catch {
+        Write-Log (T 'LogWingetFailedFallback' $DisplayName $_.Exception.Message) "WARN"
+        return $false
+    }
+}
+
+# Installs a package via Chocolatey (requires it to already be installed via
+# the dedicated "Install Chocolatey" button). Used as the automatic fallback
+# when winget is unavailable or doesn't have the package.
+function Install-ViaChocolatey {
+    param([string]$ChocoId, [string]$DisplayName)
+
+    $chocoExe = Find-WgoChocolatey
+    if (-not $chocoExe) {
+        Write-Log (T 'LogChocoRequiredFirst') "ERROR"
+        return
+    }
+
+    try {
+        # Check whether the package is already installed via Chocolatey before
+        # attempting to (re)install it. "choco list --local-only" with -r (limit
+        # output) prints "id|version" lines for locally-installed packages, one per
+        # line, which is easy to match exactly against $ChocoId.
+        $listArgs = @("list", "--local-only", "--exact", $ChocoId, "-r")
+        $listOutput = & $chocoExe @listArgs 2>$null
+        $alreadyInstalled = $false
+        foreach ($line in $listOutput) {
+            if ($line -match "^\Q$ChocoId\E\|") { $alreadyInstalled = $true; break }
+        }
+
+        if ($alreadyInstalled) {
+            Write-Log (T 'LogInstallAlready' $DisplayName) "OK"
+            return
+        }
+
+        $logFile = "$env:TEMP\wgo_choco_$ChocoId.log"
+        $errFile = "$env:TEMP\wgo_choco_$ChocoId.err.log"
+
+        $installArgs = @(
+            "install", $ChocoId, "-y",
+            "--no-progress",
+            "--limit-output",
+            "--accept-license"
+        )
+
+        $proc = Start-Process -FilePath $chocoExe -ArgumentList $installArgs -NoNewWindow -Wait -PassThru `
+                    -RedirectStandardOutput $logFile -RedirectStandardError $errFile -ErrorAction Stop
+
+        # Chocolatey exit codes: 0 = success (including "already installed", which choco
+        # detects and reports on its own without failing); 1641 / 3010 = success but a
+        # reboot is needed/pending. Anything else is a real failure.
+        $successCodes = @(0, 1641, 3010)
+
+        if ($successCodes -contains $proc.ExitCode) {
+            Write-Log (T 'LogInstallOk' $DisplayName) "OK"
+        } else {
+            Write-Log (T 'LogInstallWarn' $DisplayName $proc.ExitCode $logFile) "WARN"
+            try {
+                $tail = Get-Content -Path $logFile -Tail 5 -ErrorAction SilentlyContinue
+                if ($tail) { Write-Log ("choco: " + ($tail -join " | ")) "WARN" }
+            } catch {}
+        }
+    } catch {
+        Write-Log (T 'LogInstallError' $DisplayName $_.Exception.Message) "ERROR"
+    }
+}
+
+# Orchestrator called for each selected app: tries winget first (fast, built
+# into Windows, no bootstrap needed), and automatically falls back to
+# Chocolatey if winget is unavailable or fails for this specific package.
+function Install-WgoApp {
+    param([string]$Key, [string]$DisplayName)
+
+    $entry = $Global:WgoAppCatalog[$Key]
+    if (-not $entry) {
+        Write-Log (T 'LogInstallError' $DisplayName "unknown app key: $Key") "ERROR"
+        return
+    }
+
+    Write-Log (T 'LogInstallStart' $DisplayName $entry.WingetId) "INFO"
+
+    if (Install-ViaWinget -WingetId $entry.WingetId -DisplayName $DisplayName) {
+        return
+    }
+
+    Write-Log (T 'LogWingetNotAvailable' $DisplayName) "WARN"
+    Install-ViaChocolatey -ChocoId $entry.ChocoId -DisplayName $DisplayName
+}
+
+# ============================================================================
+# 13c. FUNCOES PERMITIDAS DENTRO DE UM WORKER RUNSPACE (background tasks)
+# ============================================================================
+# Used by Start-WgoBackgroundTask to clone these functions into each
+# dedicated worker Runspace it creates. Keep this list in sync whenever a
+# new function needs to be callable from inside a Start-WgoBackgroundTask
+# scriptblock (i.e. from a background button action).
+$Global:WgoSharedFunctionNames = @(
+    'Write-Log', 'T', 'Show-WgoFatalError',
+    'New-WgoRestorePoint', 'Remove-WgoBloatware',
+    'Set-WgoLocalSearch', 'Set-WgoVisualEffects', 'Set-WgoPrivacyPolicies',
+    'Set-WgoExtraPrivacy', 'Set-WgoBlockDriverUpdates', 'Set-WgoPagefile',
+    'Find-WgoChocolatey', 'Update-WgoSessionEnvironment', 'Install-WgoChocolatey',
+    'Test-WgoChocolatey', 'Find-WgoWinget', 'Install-ViaWinget',
+    'Install-ViaChocolatey', 'Install-WgoApp'
+)
+
+# ============================================================================
+# 14. EVENTOS DE INTERFACE
+# ============================================================================
+
+$ctrl['cmbLanguage'].Add_SelectionChanged({
+    $item = $ctrl['cmbLanguage'].SelectedItem
+    if ($item -ne $null) {
+        $code = $item.Content.ToString()
+        Update-UILanguage -Code $code
+        Write-Log (T 'LogLangChanged' $code) "INFO"
+    }
+})
+
+$ctrl['btnCreateRestore'].Add_Click({
+    $ctrl['btnCreateRestore'].IsEnabled = $false
+    Start-WgoBackgroundTask -ScriptBlock {
+        try {
+            New-WgoRestorePoint | Out-Null
+        } catch {
+            # Any unexpected error must be visible in the log instead of being
+            # silently swallowed by the background task.
+            Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+        }
+    } -OnCompleted {
+        $ctrl['btnCreateRestore'].IsEnabled = $true
+    }
+})
+
+$ctrl['btnRunSelected'].Add_Click({
+    $ctrl['btnRunSelected'].IsEnabled = $false
+    $doBloat    = [bool]$ctrl['chkBloat'].IsChecked
+    $doSearch   = [bool]$ctrl['chkSearch'].IsChecked
+    $doVisual   = [bool]$ctrl['chkVisual'].IsChecked
+    $doPrivacy  = [bool]$ctrl['chkPrivacy'].IsChecked
+    $doDrivers  = [bool]$ctrl['chkDrivers'].IsChecked
+    $doPagefile = [bool]$ctrl['chkPagefile'].IsChecked
+
+    $doAdvertisingId  = [bool]$ctrl['chkAdvertisingId'].IsChecked
+    $doTailoredExp    = [bool]$ctrl['chkTailoredExp'].IsChecked
+    $doDiagTrackSvc   = [bool]$ctrl['chkDiagTrackSvc'].IsChecked
+    $doCopilotBlock   = [bool]$ctrl['chkCopilotBlock'].IsChecked
+    $doInputTelemetry = [bool]$ctrl['chkInputTelemetry'].IsChecked
+
+    Start-WgoBackgroundTask -ScriptBlock {
+        param($doBloat, $doSearch, $doVisual, $doPrivacy, $doDrivers, $doPagefile,
+              $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry)
+        try {
+            Write-Log (T 'LogOptStart') "INFO"
+            New-WgoRestorePoint | Out-Null
+
+            if ($doBloat)    { Remove-WgoBloatware }
+            if ($doSearch)   { Set-WgoLocalSearch }
+            if ($doVisual)   { Set-WgoVisualEffects }
+            if ($doPrivacy)  { Set-WgoPrivacyPolicies }
+            if ($doDrivers)  { Set-WgoBlockDriverUpdates }
+            if ($doPagefile) { Set-WgoPagefile }
+
+            Set-WgoExtraPrivacy -AdvertisingId $doAdvertisingId -TailoredExp $doTailoredExp `
+                -DiagTrackSvc $doDiagTrackSvc -CopilotBlock $doCopilotBlock -InputTelemetry $doInputTelemetry
+
+            Write-Log (T 'LogOptDone') "OK"
+        } catch {
+            # Any unexpected error must be visible in the log instead of being
+            # silently swallowed by the background task.
+            Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+        }
+    } -ArgumentList @($doBloat, $doSearch, $doVisual, $doPrivacy, $doDrivers, $doPagefile,
+                       $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry) `
+      -OnCompleted {
+        $ctrl['btnRunSelected'].IsEnabled = $true
+    }
+})
+
+$ctrl['btnInstallChoco'].Add_Click({
+    try {
+        $ctrl['btnInstallChoco'].IsEnabled = $false
+        Start-WgoBackgroundTask -ScriptBlock {
+            try {
+                Install-WgoChocolatey | Out-Null
+            } catch {
+                # Any unexpected error must be visible in the log instead of being
+                # silently swallowed by the background task.
+                Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+            }
+        } -OnCompleted {
+            # Runs on the UI thread: safe to touch $ctrl here.
+            Update-WgoChocoStatus
+            $ctrl['btnInstallChoco'].IsEnabled = $true
+        }
+    } catch {
+        Show-WgoFatalError "btnInstallChoco click handler failed: $($_.Exception.Message)"
+        $ctrl['btnInstallChoco'].IsEnabled = $true
+    }
+})
+
+$ctrl['btnInstallApps'].Add_Click({
+  try {
+    $ctrl['btnInstallApps'].IsEnabled = $false
+
+    $appChecks = @(
+        @{ Chk = $ctrl['chkFirefox']; Name = "Mozilla Firefox" },
+        @{ Chk = $ctrl['chkNanaZip']; Name = "NanaZip" },
+        @{ Chk = $ctrl['chkNpp'];     Name = "Notepad++" },
+        @{ Chk = $ctrl['chkFdm'];     Name = "Free Download Manager" },
+        @{ Chk = $ctrl['chkQbt'];     Name = "qBittorrent" },
+        @{ Chk = $ctrl['chkSteam'];   Name = "Steam" },
+        @{ Chk = $ctrl['chkEpic'];    Name = "Epic Games Launcher" },
+        @{ Chk = $ctrl['chkGog'];     Name = "GOG Galaxy" }
+    )
+
+    $selected = @()
+    foreach ($a in $appChecks) {
+        if ($a.Chk.IsChecked) {
+            $selected += @{ Id = $a.Chk.Tag; Name = $a.Name }
+        }
+    }
+
+    if ($selected.Count -eq 0) {
+        Write-Log (T 'LogNoAppsSelected') "WARN"
+        $ctrl['btnInstallApps'].IsEnabled = $true
+        return
+    }
+
+    # $selected is passed via -ArgumentList (plain data: an array of
+    # hashtables), not captured via closure - closures over UI-thread
+    # variables do not survive being moved into a different runspace.
+    Start-WgoBackgroundTask -ScriptBlock {
+        param($selected)
+        try {
+            Write-Log (T 'LogInstallBatchStart') "INFO"
+            foreach ($app in $selected) {
+                # Install-WgoApp tries winget first and only falls back to
+                # Chocolatey per-app if winget can't do it, so we don't gate
+                # the whole batch on Chocolatey being installed anymore.
+                Install-WgoApp -Key $app.Id -DisplayName $app.Name
+            }
+            Write-Log (T 'LogInstallBatchDone') "OK"
+        } catch {
+            # Any unexpected error must be visible in the log instead of being
+            # silently swallowed by the background task.
+            Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+        }
+    } -ArgumentList @(,$selected) -OnCompleted {
+        $ctrl['btnInstallApps'].IsEnabled = $true
+    }
+  } catch {
+    Show-WgoFatalError "btnInstallApps click handler failed: $($_.Exception.Message)"
+    $ctrl['btnInstallApps'].IsEnabled = $true
+  }
+})
+
+# ============================================================================
+# 15. INICIALIZACAO
+# ============================================================================
+
+Update-UILanguage -Code $Global:CurrentLangCode
+Write-Log $Lang[$Global:CurrentLangCode].MsgReady "INFO"
+
+$window.ShowDialog() | Out-Null
