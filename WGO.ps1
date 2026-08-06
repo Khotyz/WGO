@@ -144,6 +144,23 @@ $Lang['en-US'] = @{
     LogExtraInputOk    = "Typing personalization and clipboard cloud sync disabled."
     LogExtraError      = "Error applying additional telemetry option ({0}): {1}"
     LogExtraDone       = "Additional telemetry-blocking options finished."
+
+    GrpAdvancedTweaks   = "Advanced System Tweaks"
+    ChkDiagTrackFull    = "Disable Telemetry (DiagTrack service + registry policy)"
+    ChkEdgeWidgets      = "Disable Edge preload and Widgets"
+    ChkDeliveryOpt      = "Disable Delivery Optimization (P2P)"
+    ChkAppsBackground   = "Suspend UWP apps running in background"
+    ChkNetworkLatency   = "Network optimization / latency reduction (TCP/IP)"
+
+    LogAdvStart            = "Applying advanced system tweaks..."
+    LogAdvDiagTrackOk      = "Telemetry disabled (DiagTrack service stopped/disabled, AllowTelemetry set to 0)."
+    LogAdvEdgeWidgetsOk    = "Edge preload/background mode and taskbar Widgets disabled."
+    LogAdvDeliveryOptOk    = "Delivery Optimization set to HTTP-only (P2P disabled)."
+    LogAdvAppsBackgroundOk = "UWP apps blocked from running in the background."
+    LogAdvNetworkOk        = "Network throttling disabled; TCP ack/nodelay tuned on {0} active interface(s)."
+    LogAdvError            = "Error applying advanced tweak ({0}): {1}"
+    LogAdvDone             = "Advanced system tweaks finished."
+
     LogDriversStart    = "Blocking automatic driver installation via Windows Update..."
     LogDriversOk       = "Automatic driver installation via Windows Update blocked."
     LogDriversError    = "Error blocking automatic drivers: {0}"
@@ -249,6 +266,23 @@ $Lang['pt-BR'] = @{
     LogExtraInputOk    = "Personaliza" + $c_ccedil + $c_atil + "o de digita" + $c_ccedil + $c_atil + "o e sincroniza" + $c_ccedil + $c_atil + "o de " + $c_aacute + "rea de transfer" + $c_ecirc + "ncia na nuvem desativadas."
     LogExtraError      = "Erro ao aplicar op" + $c_ccedil + $c_atil + "o adicional de telemetria ({0}): {1}"
     LogExtraDone       = "Op" + $c_ccedil + $c_otil + "es adicionais de bloqueio de telemetria finalizadas."
+
+    GrpAdvancedTweaks   = "Ajustes Avan" + $c_ccedil + "ados do Sistema"
+    ChkDiagTrackFull    = "Desativar Telemetria (servi" + $c_ccedil + "o DiagTrack + pol" + $c_iacute + "tica de registro)"
+    ChkEdgeWidgets      = "Desativar pr" + $c_eacute + "-carregamento do Edge e Widgets"
+    ChkDeliveryOpt      = "Desativar Otimiza" + $c_ccedil + $c_atil + "o de Entrega (P2P)"
+    ChkAppsBackground   = "Suspender apps UWP em segundo plano"
+    ChkNetworkLatency   = "Otimiza" + $c_ccedil + $c_atil + "o de Rede / Redu" + $c_ccedil + $c_atil + "o de Lat" + $c_ecirc + "ncia (TCP/IP)"
+
+    LogAdvStart            = "Aplicando ajustes avan" + $c_ccedil + "ados do sistema..."
+    LogAdvDiagTrackOk      = "Telemetria desativada (servi" + $c_ccedil + "o DiagTrack parado/desativado, AllowTelemetry definido como 0)."
+    LogAdvEdgeWidgetsOk    = "Pr" + $c_eacute + "-carregamento/segundo plano do Edge e Widgets da barra de tarefas desativados."
+    LogAdvDeliveryOptOk    = "Otimiza" + $c_ccedil + $c_atil + "o de Entrega definida somente para HTTP (P2P desativado)."
+    LogAdvAppsBackgroundOk = "Apps UWP bloqueados de executar em segundo plano."
+    LogAdvNetworkOk        = "Throttling de rede desativado; TCP ack/nodelay ajustados em {0} interface(s) ativa(s)."
+    LogAdvError            = "Erro ao aplicar ajuste avan" + $c_ccedil + "ado ({0}): {1}"
+    LogAdvDone             = "Ajustes avan" + $c_ccedil + "ados do sistema conclu" + $c_iacute + "dos."
+
     LogDriversStart    = "Bloqueando instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers via Windows Update..."
     LogDriversOk       = "Instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers pelo Windows Update bloqueada."
     LogDriversError    = "Erro ao bloquear drivers autom" + $c_aacute + "ticos: {0}"
@@ -354,6 +388,23 @@ $Lang['es-ES'] = @{
     LogExtraInputOk    = "Personalizaci" + [char]0x00F3 + "n de escritura y sincronizaci" + [char]0x00F3 + "n de portapapeles en la nube desactivadas."
     LogExtraError      = "Error al aplicar la opci" + [char]0x00F3 + "n adicional de telemetr" + [char]0x00ED + "a ({0}): {1}"
     LogExtraDone       = "Opciones adicionales de bloqueo de telemetr" + [char]0x00ED + "a finalizadas."
+
+    GrpAdvancedTweaks   = "Ajustes Avanzados del Sistema"
+    ChkDiagTrackFull    = "Desactivar Telemetr" + [char]0x00ED + "a (servicio DiagTrack + directiva de registro)"
+    ChkEdgeWidgets      = "Desactivar precarga de Edge y Widgets"
+    ChkDeliveryOpt      = "Desactivar Optimizaci" + [char]0x00F3 + "n de Entrega (P2P)"
+    ChkAppsBackground   = "Suspender apps UWP en segundo plano"
+    ChkNetworkLatency   = "Optimizaci" + [char]0x00F3 + "n de red / reducci" + [char]0x00F3 + "n de latencia (TCP/IP)"
+
+    LogAdvStart            = "Aplicando ajustes avanzados del sistema..."
+    LogAdvDiagTrackOk      = "Telemetr" + [char]0x00ED + "a desactivada (servicio DiagTrack detenido/deshabilitado, AllowTelemetry en 0)."
+    LogAdvEdgeWidgetsOk    = "Precarga/segundo plano de Edge y Widgets de la barra de tareas desactivados."
+    LogAdvDeliveryOptOk    = "Optimizaci" + [char]0x00F3 + "n de Entrega establecida solo en HTTP (P2P desactivado)."
+    LogAdvAppsBackgroundOk = "Apps UWP bloqueadas para ejecutarse en segundo plano."
+    LogAdvNetworkOk        = "Throttling de red desactivado; TCP ack/nodelay ajustados en {0} interfaz(es) activa(s)."
+    LogAdvError            = "Error al aplicar ajuste avanzado ({0}): {1}"
+    LogAdvDone             = "Ajustes avanzados del sistema finalizados."
+
     LogDriversStart    = "Bloqueando la instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update..."
     LogDriversOk       = "Instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update bloqueada."
     LogDriversError    = "Error al bloquear los controladores autom" + [char]0x00E1 + "ticos: {0}"
@@ -462,6 +513,23 @@ $Lang['zh-CN'] = @{
     LogExtraInputOk    = (ZH 0x8F93,0x5165) + (ZH 0x4E2A,0x6027,0x5316) + (ZH 0x5DF2,0x7981,0x7528)
     LogExtraError      = (ZH 0x5E94,0x7528) + (ZH 0x9644,0x52A0) + (ZH 0x9009,0x9879) + " ({0}) " + (ZH 0x51FA,0x9519) + ": {1}"
     LogExtraDone       = (ZH 0x9644,0x52A0) + (ZH 0x9065,0x6D4B) + (ZH 0x963B,0x6B62) + (ZH 0x5B8C,0x6210)
+
+    GrpAdvancedTweaks   = (ZH 0x9AD8,0x7EA7) + (ZH 0x7CFB,0x7EDF) + (ZH 0x8C03,0x4F18)
+    ChkDiagTrackFull    = (ZH 0x7981,0x7528) + (ZH 0x9065,0x6D4B) + " (DiagTrack " + (ZH 0x670D,0x52A1) + "+" + (ZH 0x6CE8,0x518C,0x8868) + (ZH 0x7B56,0x7565) + ")"
+    ChkEdgeWidgets      = (ZH 0x7981,0x7528) + " Edge " + (ZH 0x9884,0x52A0,0x8F7D) + (ZH 0x548C) + " Widgets"
+    ChkDeliveryOpt      = (ZH 0x7981,0x7528) + (ZH 0x4F20,0x9001,0x4F18,0x5316) + " (P2P)"
+    ChkAppsBackground   = (ZH 0x6302,0x8D77) + " UWP " + (ZH 0x540E,0x53F0) + (ZH 0x8FD0,0x884C) + (ZH 0x7A0B,0x5E8F)
+    ChkNetworkLatency   = (ZH 0x7F51,0x7EDC) + (ZH 0x4F18,0x5316) + "/" + (ZH 0x964D,0x4F4E) + (ZH 0x5EF6,0x8FDF) + " (TCP/IP)"
+
+    LogAdvStart            = (ZH 0x6B63,0x5728) + (ZH 0x5E94,0x7528) + (ZH 0x9AD8,0x7EA7) + (ZH 0x7CFB,0x7EDF) + (ZH 0x8C03,0x4F18) + "..."
+    LogAdvDiagTrackOk      = (ZH 0x9065,0x6D4B) + (ZH 0x5DF2,0x7981,0x7528) + " (DiagTrack " + (ZH 0x670D,0x52A1) + (ZH 0x5DF2,0x505C,0x6B62,0x5E76,0x7981,0x7528) + ", AllowTelemetry=0)"
+    LogAdvEdgeWidgetsOk    = " Edge " + (ZH 0x9884,0x52A0,0x8F7D) + "/" + (ZH 0x540E,0x53F0) + (ZH 0x548C) + " Widgets " + (ZH 0x5DF2,0x7981,0x7528)
+    LogAdvDeliveryOptOk    = (ZH 0x4F20,0x9001,0x4F18,0x5316) + (ZH 0x5DF2,0x8BBE,0x7F6E) + (ZH 0x4EC5) + " HTTP (P2P " + (ZH 0x5DF2,0x7981,0x7528) + ")"
+    LogAdvAppsBackgroundOk = "UWP " + (ZH 0x5E94,0x7528) + (ZH 0x5DF2,0x7981,0x6B62) + (ZH 0x540E,0x53F0) + (ZH 0x8FD0,0x884C)
+    LogAdvNetworkOk        = (ZH 0x7F51,0x7EDC) + (ZH 0x9650,0x901F) + (ZH 0x5DF2,0x7981,0x7528) + "; " + (ZH 0x5728) + " {0} " + (ZH 0x4E2A,0x6D3B,0x52A8,0x63A5,0x53E3) + (ZH 0x8C03,0x6574) + " TCP ack/nodelay"
+    LogAdvError            = (ZH 0x5E94,0x7528) + (ZH 0x9AD8,0x7EA7) + (ZH 0x8C03,0x4F18) + (ZH 0x51FA,0x9519) + " ({0}): {1}"
+    LogAdvDone             = (ZH 0x9AD8,0x7EA7) + (ZH 0x7CFB,0x7EDF) + (ZH 0x8C03,0x4F18) + (ZH 0x5B8C,0x6210)
+
     LogDriversStart    = (ZH 0x6B63,0x5728) + (ZH 0x963B,0x6B62) + (ZH 0x81EA,0x52A8) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x5B89,0x88C5)
     LogDriversOk       = (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + (ZH 0x5DF2,0x963B,0x6B62)
     LogDriversError    = (ZH 0x963B,0x6B62) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x51FA,0x9519) + ": {0}"
@@ -923,6 +991,16 @@ $Global:CurrentLangCode = "pt-BR"
                             </StackPanel>
                         </GroupBox>
 
+                        <GroupBox x:Name="grpAdvancedTweaks" Header="Advanced System Tweaks">
+                            <StackPanel>
+                                <CheckBox x:Name="chkDiagTrackFull" Content="Disable Telemetry (DiagTrack)" IsChecked="True"/>
+                                <CheckBox x:Name="chkEdgeWidgets" Content="Disable Edge preload and Widgets" IsChecked="True"/>
+                                <CheckBox x:Name="chkDeliveryOpt" Content="Disable Delivery Optimization (P2P)" IsChecked="True"/>
+                                <CheckBox x:Name="chkAppsBackground" Content="Suspend UWP apps in background" IsChecked="True"/>
+                                <CheckBox x:Name="chkNetworkLatency" Content="Network optimization / latency reduction (TCP-IP)" IsChecked="False"/>
+                            </StackPanel>
+                        </GroupBox>
+
                         <Button x:Name="btnRunSelected" Content="Run Selected Optimizations" HorizontalAlignment="Left" Padding="20,10" FontSize="14"/>
                     </StackPanel>
                 </ScrollViewer>
@@ -1134,6 +1212,7 @@ $names = @(
     'grpDrivers','chkDrivers',
     'grpPagefile','chkPagefile',
     'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
+    'grpAdvancedTweaks','chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
     'btnRunSelected',
     'grpInstaller','btnInstallApps',
     'txtChocoRequired','txtChocoStatus','btnInstallChoco',
@@ -1240,6 +1319,13 @@ function Update-UILanguage {
     $ctrl['chkDiagTrackSvc'].Content     = $t.ChkDiagTrackSvc
     $ctrl['chkCopilotBlock'].Content     = $t.ChkCopilotBlock
     $ctrl['chkInputTelemetry'].Content   = $t.ChkInputTelemetry
+
+    $ctrl['grpAdvancedTweaks'].Header    = $t.GrpAdvancedTweaks
+    $ctrl['chkDiagTrackFull'].Content    = $t.ChkDiagTrackFull
+    $ctrl['chkEdgeWidgets'].Content      = $t.ChkEdgeWidgets
+    $ctrl['chkDeliveryOpt'].Content      = $t.ChkDeliveryOpt
+    $ctrl['chkAppsBackground'].Content   = $t.ChkAppsBackground
+    $ctrl['chkNetworkLatency'].Content   = $t.ChkNetworkLatency
 
     $ctrl['btnRunSelected'].Content      = $t.BtnRunSelected
 
@@ -1635,6 +1721,114 @@ function Set-WgoExtraPrivacy {
     }
 
     Write-Log (T 'LogExtraDone') "OK"
+}
+
+# ============================================================================
+# 10-C. FUNCTION 5-C - ADVANCED SYSTEM TWEAKS (DiagTrack / Edge / DO / UWP / TCP)
+# ============================================================================
+
+function Set-WgoAdvancedTweaks {
+    param(
+        [bool]$DiagTrackFull  = $false,
+        [bool]$EdgeWidgets    = $false,
+        [bool]$DeliveryOpt    = $false,
+        [bool]$AppsBackground = $false,
+        [bool]$NetworkLatency = $false
+    )
+
+    if (-not ($DiagTrackFull -or $EdgeWidgets -or $DeliveryOpt -or $AppsBackground -or $NetworkLatency)) { return }
+
+    Write-Log (T 'LogAdvStart') "INFO"
+
+    # 1. Disable Telemetry (DiagTrack service + policy)
+    if ($DiagTrackFull) {
+        try {
+            $dcKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+            if (-not (Test-Path $dcKey)) { New-Item -Path $dcKey -Force | Out-Null }
+            New-ItemProperty -Path $dcKey -Name "AllowTelemetry" -Value 0 -PropertyType DWord -Force | Out-Null
+
+            $svc = Get-Service -Name "DiagTrack" -ErrorAction SilentlyContinue
+            if ($svc) {
+                Stop-Service -Name "DiagTrack" -Force -ErrorAction SilentlyContinue
+                Set-Service -Name "DiagTrack" -StartupType Disabled -ErrorAction SilentlyContinue
+            }
+            Write-Log (T 'LogAdvDiagTrackOk') "OK"
+        } catch {
+            Write-Log (T 'LogAdvError' "DiagTrackFull" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    # 2. Disable Edge preload/background and taskbar Widgets
+    if ($EdgeWidgets) {
+        try {
+            $edgeKey = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
+            $advKey  = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+            if (-not (Test-Path $edgeKey)) { New-Item -Path $edgeKey -Force | Out-Null }
+            if (-not (Test-Path $advKey))  { New-Item -Path $advKey -Force | Out-Null }
+            New-ItemProperty -Path $edgeKey -Name "StartupBoostEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $edgeKey -Name "BackgroundModeEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $advKey -Name "TaskbarDa" -Value 0 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogAdvEdgeWidgetsOk') "OK"
+        } catch {
+            Write-Log (T 'LogAdvError' "EdgeWidgets" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    # 3. Delivery Optimization -> HTTP only (disable P2P)
+    if ($DeliveryOpt) {
+        try {
+            $doKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization"
+            if (-not (Test-Path $doKey)) { New-Item -Path $doKey -Force | Out-Null }
+            New-ItemProperty -Path $doKey -Name "DODownloadMode" -Value 0 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogAdvDeliveryOptOk') "OK"
+        } catch {
+            Write-Log (T 'LogAdvError' "DeliveryOpt" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    # 4. Block UWP apps from running in background
+    if ($AppsBackground) {
+        try {
+            $bgKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
+            if (-not (Test-Path $bgKey)) { New-Item -Path $bgKey -Force | Out-Null }
+            New-ItemProperty -Path $bgKey -Name "LetAppsRunInBackground" -Value 2 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogAdvAppsBackgroundOk') "OK"
+        } catch {
+            Write-Log (T 'LogAdvError' "AppsBackground" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    # 5. Network / TCP-IP latency tuning
+    if ($NetworkLatency) {
+        try {
+            $mmKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
+            if (-not (Test-Path $mmKey)) { New-Item -Path $mmKey -Force | Out-Null }
+            New-ItemProperty -Path $mmKey -Name "NetworkThrottlingIndex" -Value 0xffffffff -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $mmKey -Name "SystemResponsiveness" -Value 0 -PropertyType DWord -Force | Out-Null
+
+            $ifaceRoot = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
+            $activeCount = 0
+            if (Test-Path $ifaceRoot) {
+                Get-ChildItem -Path $ifaceRoot -ErrorAction SilentlyContinue | ForEach-Object {
+                    $ifPath = $_.PSPath
+                    $props  = Get-ItemProperty -Path $ifPath -ErrorAction SilentlyContinue
+                    # Only touch interfaces that actually have an assigned/leased IP (active NICs)
+                    $hasIp = ($props.PSObject.Properties.Name -contains 'DhcpIPAddress' -and $props.DhcpIPAddress) -or
+                             ($props.PSObject.Properties.Name -contains 'IPAddress' -and $props.IPAddress -and ($props.IPAddress -join '') -notin @('', '0.0.0.0'))
+                    if ($hasIp) {
+                        New-ItemProperty -Path $ifPath -Name "TCPNoDelay" -Value 1 -PropertyType DWord -Force | Out-Null
+                        New-ItemProperty -Path $ifPath -Name "TcpAckFrequency" -Value 1 -PropertyType DWord -Force | Out-Null
+                        $activeCount++
+                    }
+                }
+            }
+            Write-Log (T 'LogAdvNetworkOk' $activeCount) "OK"
+        } catch {
+            Write-Log (T 'LogAdvError' "NetworkLatency" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    Write-Log (T 'LogAdvDone') "OK"
 }
 
 # ============================================================================
@@ -2039,9 +2233,16 @@ $ctrl['btnRunSelected'].Add_Click({
     $doCopilotBlock   = [bool]$ctrl['chkCopilotBlock'].IsChecked
     $doInputTelemetry = [bool]$ctrl['chkInputTelemetry'].IsChecked
 
+    $doDiagTrackFull  = [bool]$ctrl['chkDiagTrackFull'].IsChecked
+    $doEdgeWidgets    = [bool]$ctrl['chkEdgeWidgets'].IsChecked
+    $doDeliveryOpt    = [bool]$ctrl['chkDeliveryOpt'].IsChecked
+    $doAppsBackground = [bool]$ctrl['chkAppsBackground'].IsChecked
+    $doNetworkLatency = [bool]$ctrl['chkNetworkLatency'].IsChecked
+
     Start-WgoBackgroundTask -ScriptBlock {
         param($doBloat, $doSearch, $doVisual, $doPrivacy, $doDrivers, $doPagefile,
-              $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry)
+              $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry,
+              $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency)
         try {
             Write-Log (T 'LogOptStart') "INFO"
             New-WgoRestorePoint | Out-Null
@@ -2056,6 +2257,9 @@ $ctrl['btnRunSelected'].Add_Click({
             Set-WgoExtraPrivacy -AdvertisingId $doAdvertisingId -TailoredExp $doTailoredExp `
                 -DiagTrackSvc $doDiagTrackSvc -CopilotBlock $doCopilotBlock -InputTelemetry $doInputTelemetry
 
+            Set-WgoAdvancedTweaks -DiagTrackFull $doDiagTrackFull -EdgeWidgets $doEdgeWidgets `
+                -DeliveryOpt $doDeliveryOpt -AppsBackground $doAppsBackground -NetworkLatency $doNetworkLatency
+
             Write-Log (T 'LogOptDone') "OK"
         } catch {
             # Any unexpected error must be visible in the log instead of being
@@ -2063,7 +2267,8 @@ $ctrl['btnRunSelected'].Add_Click({
             Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
         }
     } -ArgumentList @($doBloat, $doSearch, $doVisual, $doPrivacy, $doDrivers, $doPagefile,
-                       $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry) `
+                       $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry,
+                       $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency) `
       -OnCompleted {
         $ctrl['btnRunSelected'].IsEnabled = $true
     }
