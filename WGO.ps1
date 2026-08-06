@@ -80,6 +80,7 @@ $Lang['en-US'] = @{
     LblLanguage       = "Language:"
     GrpRestore        = "System Safety"
     BtnCreateRestore  = "Create Restore Point"
+    ChkSelectAll      = "Select All / Deselect All"
     GrpBloat          = "Bloatware & AI Apps Removal"
     ChkBloat          = "Remove bloatware / AI apps (keeps Store, Xbox, Edge/WebView2, runtimes)"
     GrpSearch         = "Start Menu Search"
@@ -202,6 +203,7 @@ $Lang['pt-BR'] = @{
     LblLanguage       = "Idioma:"
     GrpRestore        = "Seguran" + $c_ccedil + "a do Sistema"
     BtnCreateRestore  = "Criar Ponto de Restaura" + $c_ccedil + $c_atil + "o"
+    ChkSelectAll      = "Selecionar Tudo / Desmarcar Tudo"
     GrpBloat          = "Remo" + $c_ccedil + $c_atil + "o de Bloatwares e Apps de IA"
     ChkBloat          = "Remover bloatwares / apps de IA (mant" + $c_eacute + "m Store, Xbox, Edge/WebView2, runtimes)"
     GrpSearch         = "Pesquisa do Menu Iniciar"
@@ -324,6 +326,7 @@ $Lang['es-ES'] = @{
     LblLanguage       = "Idioma:"
     GrpRestore        = "Seguridad del Sistema"
     BtnCreateRestore  = "Crear Punto de Restauraci" + [char]0x00F3 + "n"
+    ChkSelectAll      = "Seleccionar Todo / Deseleccionar Todo"
     GrpBloat          = "Eliminaci" + [char]0x00F3 + "n de Bloatware y Apps de IA"
     ChkBloat          = "Eliminar bloatware / apps de IA (mantiene Store, Xbox, Edge/WebView2, runtimes)"
     GrpSearch         = "B" + [char]0x00FA + "squeda del Men" + [char]0x00FA + " Inicio"
@@ -449,6 +452,7 @@ $Lang['zh-CN'] = @{
     LblLanguage       = (ZH 0x8BED,0x8A00) + ":"
     GrpRestore        = (ZH 0x7CFB,0x7EDF,0x5B89,0x5168)
     BtnCreateRestore  = (ZH 0x521B,0x5EFA) + (ZH 0x8FD8,0x539F,0x70B9)
+    ChkSelectAll      = (ZH 0x5168,0x9009) + "/" + (ZH 0x53D6,0x6D88) + (ZH 0x5168,0x9009)
     GrpBloat          = (ZH 0x5220,0x9664) + (ZH 0x81C3,0x80BF,0x8F6F,0x4EF6) + "/AI" + (ZH 0x5E94,0x7528)
     ChkBloat          = (ZH 0x5220,0x9664) + (ZH 0x81C3,0x80BF,0x8F6F,0x4EF6) + "/AI" + (ZH 0x5E94,0x7528) + " (" + (ZH 0x4FDD,0x7559) + " Store, Xbox, Edge/WebView2, Runtime)"
     GrpSearch         = (ZH 0x5F00,0x59CB) + (ZH 0x83DC,0x5355) + (ZH 0x641C,0x7D22)
@@ -951,6 +955,8 @@ $Global:CurrentLangCode = "pt-BR"
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
 
+                        <CheckBox x:Name="chkSelectAll" Content="Select All / Deselect All" FontWeight="Bold" Margin="0,0,0,10" IsChecked="True"/>
+
                         <GroupBox x:Name="grpRestore" Header="System Safety">
                             <StackPanel Orientation="Horizontal">
                                 <Button x:Name="btnCreateRestore" Content="Create Restore Point" Style="{StaticResource SecondaryButtonStyle}"/>
@@ -1204,6 +1210,7 @@ $ctrl = @{}
 $names = @(
     'txtAppTitle','txtLblLanguage','cmbLanguage','txtLogHeader','scrollLog','txtLog',
     'tabOptimizations','tabInstaller',
+    'chkSelectAll',
     'grpRestore','btnCreateRestore',
     'grpBloat','chkBloat',
     'grpSearch','chkSearch',
@@ -1230,6 +1237,14 @@ $names = @(
     'chkSunshine','txtSunshineDesc'
 )
 foreach ($n in $names) { $ctrl[$n] = $window.FindName($n) }
+
+# Checkboxes controlled by the "Select All / Deselect All" master checkbox
+# (Optimizations & Privacy tab only - excludes the App Installer tab).
+$script:optimizationCheckboxNames = @(
+    'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
+    'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
+    'chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency'
+)
 
 # ============================================================================
 # 5. LOG / UI UTILITIES
@@ -1291,6 +1306,8 @@ function Update-UILanguage {
     $ctrl['txtLogHeader'].Text           = $t.LogHeader
     $ctrl['tabOptimizations'].Header     = $t.TabOptimizations
     $ctrl['tabInstaller'].Header         = $t.TabInstaller
+
+    $ctrl['chkSelectAll'].Content        = $t.ChkSelectAll
 
     $ctrl['grpRestore'].Header           = $t.GrpRestore
     $ctrl['btnCreateRestore'].Content    = $t.BtnCreateRestore
@@ -2200,6 +2217,13 @@ $ctrl['cmbLanguage'].Add_SelectionChanged({
         $code = $item.Content.ToString()
         Update-UILanguage -Code $code
         Write-Log (T 'LogLangChanged' $code) "INFO"
+    }
+})
+
+$ctrl['chkSelectAll'].Add_Click({
+    $isChecked = [bool]$ctrl['chkSelectAll'].IsChecked
+    foreach ($n in $script:optimizationCheckboxNames) {
+        if ($ctrl[$n]) { $ctrl[$n].IsChecked = $isChecked }
     }
 })
 
