@@ -96,6 +96,22 @@ $Lang['en-US'] = @{
     BtnRunSelected    = "Run Selected Optimizations"
     GrpInstaller      = "Useful Applications"
     BtnInstallApps    = "Install Selected"
+
+    TabExternalScripts = "External Scripts"
+    TxtExtScriptsWarning = "These are independent, third-party open-source scripts (not part of WGO). Each one opens in its own window and requests admin rights on its own. Only run tools from sources you trust."
+
+    TxtAmdOptimizerTitle = "AMD Stability Optimizer"
+    TxtAmdOptimizerDesc  = "A dedicated toolkit for AMD Radeon GPUs that targets the most common causes of driver crashes, black screens and stutter. It disables ULPS, Multi-Plane Overlay and HDCP, extends the TDR driver-timeout, turns off Fast Startup/Hibernation and the AMD Crash Defender service, fixes hardware-acceleration flicker in Chrome/Edge/Electron apps (Discord, Spotify), and unlocks Windows' hidden Ultimate Performance power plan. It creates a registry backup and, when possible, a System Restore Point before touching anything, and every change can be reverted from its own interface."
+    BtnRunAmdOptimizer   = "Run AMD Stability Optimizer"
+
+    TxtMassgraveTitle = "Windows & Office Activation (MAS)"
+    TxtMassgraveDesc  = "Launches the official Microsoft Activation Scripts (MASSGRAVE) project, a well-known open-source community tool for activating Windows and Microsoft Office via HWID, KMS38 or Online KMS. It opens an interactive text menu in a new console window; just follow the on-screen options to pick the activation method you want."
+    BtnRunMassgrave   = "Run Activation Script"
+
+    LogExtScriptStart    = "Launching external script: {0}..."
+    LogExtScriptLaunched = "{0} launched in a new window. Follow the instructions there."
+    LogExtScriptError    = "Error launching {0}: {1}"
+
     LogHeader         = "Execution Log"
     AppFirefoxDesc    = "Highly recommended browser that does not use the Chromium engine, offering real privacy, more user control and full support for effective ad blockers (like uBlock Origin)."
     AppNanaZipDesc    = "Lightweight, modern archiver natively integrated into the new Windows 11 context menu."
@@ -162,6 +178,51 @@ $Lang['en-US'] = @{
     LogAdvError            = "Error applying advanced tweak ({0}): {1}"
     LogAdvDone             = "Advanced system tweaks finished."
 
+    GrpMoreOptimizations = "System Cleanup & Performance"
+    ChkHibernation       = "Disable Hibernation (frees hiberfil.sys disk space)"
+    ChkPowerPlan         = "Set power plan to High Performance"
+    ChkTempCleanup       = "Clean temp files, old Prefetch, Windows.old and Windows Update cache"
+    ChkHotCorners        = "Disable Snap Assist / Aero Shake (Hot Corners)"
+    ChkRecallBlock       = "Disable Windows Recall"
+    ChkBootTimeout       = "Reduce boot menu timeout to 5 seconds"
+    ChkOfficeTelemetry   = "Block Office and OneDrive telemetry"
+    ChkExtraSchedTasks   = "Remove additional telemetry scheduled tasks"
+    ChkDiskOptimize      = "Auto-detect disks (SSD/HDD) and configure TRIM / scheduled defrag"
+    ChkDryRun            = "Dry Run (only log what would change, apply nothing)"
+    BtnRestoreDefaults   = "Restore Defaults"
+    BtnExportProfile     = "Export Profile"
+    BtnImportProfile     = "Import Profile"
+
+    LogMoreStart              = "Applying system cleanup & performance tweaks..."
+    LogHibernationOk          = "Hibernation disabled (hiberfil.sys removed)."
+    LogPowerPlanOk            = "Power plan set to High Performance."
+    LogTempCleanupOk          = "Temporary files, old Prefetch entries, Windows.old and Windows Update cache cleaned."
+    LogHotCornersOk           = "Snap Assist and Aero Shake disabled."
+    LogRecallBlockOk          = "Windows Recall disabled via policy."
+    LogBootTimeoutOk          = "Boot menu timeout set to 5 seconds."
+    LogOfficeTelemetryOk      = "Office and OneDrive telemetry blocked."
+    LogExtraSchedTasksOk      = "Additional telemetry scheduled tasks disabled."
+    LogDiskOptimizeOk         = "Disk optimization applied: {0}"
+    LogMoreError              = "Error applying tweak ({0}): {1}"
+    LogMoreDone               = "System cleanup & performance tweaks finished."
+
+    LogRestoreDefaultsStart = "Restoring registry and service defaults..."
+    LogRestoreDefaultsOk    = "Defaults restored successfully. A restart is recommended."
+    LogRestoreDefaultsError = "Error restoring defaults: {0}"
+
+    LogExportStart     = "Exporting current configuration profile..."
+    LogExportOk        = "Profile exported to: {0}"
+    LogExportError     = "Error exporting profile: {0}"
+    LogExportCancelled = "Profile export cancelled by user."
+
+    LogImportStart     = "Importing configuration profile..."
+    LogImportOk        = "Profile imported from: {0}"
+    LogImportError     = "Error importing profile: {0}"
+    LogImportCancelled = "Profile import cancelled by user."
+
+    LogDryRunPrefix = "[DRY RUN] Would apply: {0}"
+    LogDryRunNote   = "Dry Run mode enabled: no changes will be made, only logged."
+
     LogDriversStart    = "Blocking automatic driver installation via Windows Update..."
     LogDriversOk       = "Automatic driver installation via Windows Update blocked."
     LogDriversError    = "Error blocking automatic drivers: {0}"
@@ -219,6 +280,22 @@ $Lang['pt-BR'] = @{
     BtnRunSelected    = "Executar Otimiza" + $c_ccedil + $c_otil + "es Selecionadas"
     GrpInstaller      = "Aplicativos " + $c_uacute + "teis"
     BtnInstallApps    = "Instalar Selecionados"
+
+    TabExternalScripts = "Scripts Externos"
+    TxtExtScriptsWarning = "Estes s" + $c_atil + "o scripts independentes de terceiros, de c" + $c_oacute + "digo aberto (n" + $c_atil + "o fazem parte do WGO). Cada um abre sua pr" + $c_oacute + "pria janela e solicita permiss" + $c_atil + "o de administrador por conta pr" + $c_oacute + "pria. S" + $c_oacute + " execute ferramentas de fontes confi" + $c_aacute + "veis."
+
+    TxtAmdOptimizerTitle = "AMD Stability Optimizer"
+    TxtAmdOptimizerDesc  = "Um kit dedicado para placas de v" + $c_iacute + "deo AMD Radeon que ataca as causas mais comuns de travamentos de driver, telas pretas e engasgos. Ele desativa o ULPS, o Multi-Plane Overlay e o HDCP, aumenta o tempo limite (TDR) do driver, desliga o Fast Startup/Hiberna" + $c_ccedil + $c_atil + "o e o servi" + $c_ccedil + "o AMD Crash Defender, corrige o piscar de tela por acelera" + $c_ccedil + $c_atil + "o de hardware no Chrome/Edge/apps Electron (Discord, Spotify) e desbloqueia o plano de energia oculto de Ultra Desempenho do Windows. Ele cria um backup do registro e, quando poss" + $c_iacute + "vel, um Ponto de Restaura" + $c_ccedil + $c_atil + "o antes de qualquer altera" + $c_ccedil + $c_atil + "o, e tudo pode ser revertido pela pr" + $c_oacute + "pria interface dele."
+    BtnRunAmdOptimizer   = "Executar AMD Stability Optimizer"
+
+    TxtMassgraveTitle = "Ativa" + $c_ccedil + $c_atil + "o do Windows e Office (MAS)"
+    TxtMassgraveDesc  = "Executa o projeto oficial Microsoft Activation Scripts (MASSGRAVE), uma ferramenta de c" + $c_oacute + "digo aberto muito conhecida da comunidade para ativar Windows e Microsoft Office via HWID, KMS38 ou KMS Online. Ele abre um menu de texto interativo em uma nova janela de console; basta seguir as op" + $c_ccedil + $c_otil + "es na tela para escolher o m" + $c_eacute + "todo de ativa" + $c_ccedil + $c_atil + "o desejado."
+    BtnRunMassgrave   = "Executar Script de Ativa" + $c_ccedil + $c_atil + "o"
+
+    LogExtScriptStart    = "Iniciando script externo: {0}..."
+    LogExtScriptLaunched = "{0} iniciado em uma nova janela. Siga as instru" + $c_ccedil + $c_otil + "es exibidas l" + $c_aacute + "."
+    LogExtScriptError    = "Erro ao iniciar {0}: {1}"
+
     LogHeader         = "Log de Execu" + $c_ccedil + $c_atil + "o"
     AppFirefoxDesc    = "Navegador altamente recomendado por n" + $c_atil + "o utilizar o motor Chromium, oferecendo privacidade real, maior controle do usu" + $c_aacute + "rio e suporte completo a bloqueadores de an" + $c_uacute + "ncios eficientes (como uBlock Origin)."
     AppNanaZipDesc    = "Compactador/descompactador de arquivos leve, moderno e nativamente integrado ao novo menu de contexto do Windows 11."
@@ -285,6 +362,51 @@ $Lang['pt-BR'] = @{
     LogAdvError            = "Erro ao aplicar ajuste avan" + $c_ccedil + "ado ({0}): {1}"
     LogAdvDone             = "Ajustes avan" + $c_ccedil + "ados do sistema conclu" + $c_iacute + "dos."
 
+    GrpMoreOptimizations = "Limpeza e Desempenho do Sistema"
+    ChkHibernation       = "Desativar Hiberna" + $c_ccedil + $c_atil + "o (libera espa" + $c_ccedil + "o do hiberfil.sys)"
+    ChkPowerPlan         = "Definir plano de energia como Alto Desempenho"
+    ChkTempCleanup       = "Limpar arquivos tempor" + $c_aacute + "rios, Prefetch antigo, Windows.old e cache do Windows Update"
+    ChkHotCorners        = "Desativar Snap Assist / Aero Shake (Hot Corners)"
+    ChkRecallBlock       = "Desativar o Windows Recall"
+    ChkBootTimeout       = "Reduzir o tempo de espera do menu de boot para 5 segundos"
+    ChkOfficeTelemetry   = "Bloquear telemetria do Office e do OneDrive"
+    ChkExtraSchedTasks   = "Remover tarefas agendadas adicionais de telemetria"
+    ChkDiskOptimize      = "Detectar discos (SSD/HDD) automaticamente e configurar TRIM / desfragmenta" + $c_ccedil + $c_atil + "o agendada"
+    ChkDryRun            = "Modo Simula" + $c_ccedil + $c_atil + "o (apenas registra o que seria alterado, sem aplicar)"
+    BtnRestoreDefaults   = "Restaurar Padr" + $c_otil + "es"
+    BtnExportProfile     = "Exportar Perfil"
+    BtnImportProfile     = "Importar Perfil"
+
+    LogMoreStart              = "Aplicando ajustes de limpeza e desempenho do sistema..."
+    LogHibernationOk          = "Hiberna" + $c_ccedil + $c_atil + "o desativada (hiberfil.sys removido)."
+    LogPowerPlanOk            = "Plano de energia definido como Alto Desempenho."
+    LogTempCleanupOk          = "Arquivos tempor" + $c_aacute + "rios, Prefetch antigo, Windows.old e cache do Windows Update limpos."
+    LogHotCornersOk           = "Snap Assist e Aero Shake desativados."
+    LogRecallBlockOk          = "Windows Recall desativado via pol" + $c_iacute + "tica."
+    LogBootTimeoutOk          = "Tempo de espera do menu de boot definido para 5 segundos."
+    LogOfficeTelemetryOk      = "Telemetria do Office e do OneDrive bloqueada."
+    LogExtraSchedTasksOk      = "Tarefas agendadas adicionais de telemetria desativadas."
+    LogDiskOptimizeOk         = "Otimiza" + $c_ccedil + $c_atil + "o de disco aplicada: {0}"
+    LogMoreError              = "Erro ao aplicar ajuste ({0}): {1}"
+    LogMoreDone               = "Ajustes de limpeza e desempenho do sistema conclu" + $c_iacute + "dos."
+
+    LogRestoreDefaultsStart = "Restaurando valores padr" + $c_atil + "o de registro e servi" + $c_ccedil + "os..."
+    LogRestoreDefaultsOk    = "Padr" + $c_otil + "es restaurados com sucesso. Reinicie o computador quando poss" + $c_iacute + "vel."
+    LogRestoreDefaultsError = "Erro ao restaurar padr" + $c_otil + "es: {0}"
+
+    LogExportStart     = "Exportando o perfil de configura" + $c_ccedil + $c_atil + "o atual..."
+    LogExportOk        = "Perfil exportado para: {0}"
+    LogExportError     = "Erro ao exportar o perfil: {0}"
+    LogExportCancelled = "Exporta" + $c_ccedil + $c_atil + "o de perfil cancelada pelo usu" + $c_aacute + "rio."
+
+    LogImportStart     = "Importando perfil de configura" + $c_ccedil + $c_atil + "o..."
+    LogImportOk        = "Perfil importado de: {0}"
+    LogImportError     = "Erro ao importar o perfil: {0}"
+    LogImportCancelled = "Importa" + $c_ccedil + $c_atil + "o de perfil cancelada pelo usu" + $c_aacute + "rio."
+
+    LogDryRunPrefix = "[SIMULA" + $c_ccedil + $c_atil + "O] Seria aplicado: {0}"
+    LogDryRunNote   = "Modo Simula" + $c_ccedil + $c_atil + "o ativado: nenhuma altera" + $c_ccedil + $c_atil + "o ser" + $c_aacute + " feita, apenas registrada no log."
+
     LogDriversStart    = "Bloqueando instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers via Windows Update..."
     LogDriversOk       = "Instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers pelo Windows Update bloqueada."
     LogDriversError    = "Erro ao bloquear drivers autom" + $c_aacute + "ticos: {0}"
@@ -342,6 +464,22 @@ $Lang['es-ES'] = @{
     BtnRunSelected    = "Ejecutar Optimizaciones Seleccionadas"
     GrpInstaller      = "Aplicaciones " + [char]0x00DA + "tiles"
     BtnInstallApps    = "Instalar Seleccionados"
+
+    TabExternalScripts = "Scripts Externos"
+    TxtExtScriptsWarning = "Estos son scripts independientes de terceros, de c" + [char]0x00F3 + "digo abierto (no forman parte de WGO). Cada uno abre su propia ventana y solicita permisos de administrador por su cuenta. Ejecute " + [char]0x00FA + "nicamente herramientas de fuentes confiables."
+
+    TxtAmdOptimizerTitle = "AMD Stability Optimizer"
+    TxtAmdOptimizerDesc  = "Un kit dedicado para tarjetas gr" + [char]0x00E1 + "ficas AMD Radeon que ataca las causas m" + [char]0x00E1 + "s comunes de bloqueos del controlador, pantallas negras y tirones. Desactiva ULPS, Multi-Plane Overlay y HDCP, aumenta el tiempo de espera (TDR) del controlador, desactiva Fast Startup/Hibernaci" + [char]0x00F3 + "n y el servicio AMD Crash Defender, corrige el parpadeo por aceleraci" + [char]0x00F3 + "n por hardware en Chrome/Edge/apps Electron (Discord, Spotify) y desbloquea el plan de energ" + [char]0x00ED + "a oculto de Rendimiento M" + [char]0x00E1 + "ximo de Windows. Crea una copia de seguridad del registro y, cuando es posible, un Punto de Restauraci" + [char]0x00F3 + "n antes de cualquier cambio, y todo puede revertirse desde su propia interfaz."
+    BtnRunAmdOptimizer   = "Ejecutar AMD Stability Optimizer"
+
+    TxtMassgraveTitle = "Activaci" + [char]0x00F3 + "n de Windows y Office (MAS)"
+    TxtMassgraveDesc  = "Ejecuta el proyecto oficial Microsoft Activation Scripts (MASSGRAVE), una herramienta de c" + [char]0x00F3 + "digo abierto muy conocida de la comunidad para activar Windows y Microsoft Office mediante HWID, KMS38 o KMS en l" + [char]0x00ED + "nea. Abre un men" + [char]0x00FA + " de texto interactivo en una nueva ventana de consola; solo siga las opciones en pantalla para elegir el m" + [char]0x00E9 + "todo de activaci" + [char]0x00F3 + "n deseado."
+    BtnRunMassgrave   = "Ejecutar Script de Activaci" + [char]0x00F3 + "n"
+
+    LogExtScriptStart    = "Iniciando script externo: {0}..."
+    LogExtScriptLaunched = "{0} iniciado en una nueva ventana. Siga las instrucciones mostradas all" + [char]0x00ED + "."
+    LogExtScriptError    = "Error al iniciar {0}: {1}"
+
     LogHeader         = "Registro de Ejecuci" + [char]0x00F3 + "n"
     AppFirefoxDesc    = "Navegador muy recomendado por no utilizar el motor Chromium, ofreciendo privacidad real, m" + [char]0x00E1 + "s control del usuario y soporte completo para bloqueadores de anuncios eficientes (como uBlock Origin)."
     AppNanaZipDesc    = "Compresor/descompresor de archivos ligero, moderno e integrado nativamente en el nuevo men" + [char]0x00FA + " contextual de Windows 11."
@@ -408,6 +546,51 @@ $Lang['es-ES'] = @{
     LogAdvError            = "Error al aplicar ajuste avanzado ({0}): {1}"
     LogAdvDone             = "Ajustes avanzados del sistema finalizados."
 
+    GrpMoreOptimizations = "Limpieza y Rendimiento del Sistema"
+    ChkHibernation       = "Desactivar Hibernaci" + [char]0x00F3 + "n (libera espacio de hiberfil.sys)"
+    ChkPowerPlan         = "Establecer plan de energ" + [char]0x00ED + "a en Alto Rendimiento"
+    ChkTempCleanup       = "Limpiar archivos temporales, Prefetch antiguo, Windows.old y cach" + [char]0x00E9 + " de Windows Update"
+    ChkHotCorners        = "Desactivar Snap Assist / Aero Shake (Hot Corners)"
+    ChkRecallBlock       = "Desactivar Windows Recall"
+    ChkBootTimeout       = "Reducir el tiempo de espera del men" + [char]0x00FA + " de arranque a 5 segundos"
+    ChkOfficeTelemetry   = "Bloquear la telemetr" + [char]0x00ED + "a de Office y OneDrive"
+    ChkExtraSchedTasks   = "Eliminar tareas programadas adicionales de telemetr" + [char]0x00ED + "a"
+    ChkDiskOptimize      = "Detectar discos (SSD/HDD) autom" + [char]0x00E1 + "ticamente y configurar TRIM / desfragmentaci" + [char]0x00F3 + "n programada"
+    ChkDryRun            = "Modo Simulaci" + [char]0x00F3 + "n (solo registra los cambios sin aplicarlos)"
+    BtnRestoreDefaults   = "Restaurar Valores Predeterminados"
+    BtnExportProfile     = "Exportar Perfil"
+    BtnImportProfile     = "Importar Perfil"
+
+    LogMoreStart              = "Aplicando ajustes de limpieza y rendimiento del sistema..."
+    LogHibernationOk          = "Hibernaci" + [char]0x00F3 + "n desactivada (hiberfil.sys eliminado)."
+    LogPowerPlanOk            = "Plan de energ" + [char]0x00ED + "a establecido en Alto Rendimiento."
+    LogTempCleanupOk          = "Archivos temporales, Prefetch antiguo, Windows.old y cach" + [char]0x00E9 + " de Windows Update limpiados."
+    LogHotCornersOk           = "Snap Assist y Aero Shake desactivados."
+    LogRecallBlockOk          = "Windows Recall desactivado mediante directiva."
+    LogBootTimeoutOk          = "Tiempo de espera del men" + [char]0x00FA + " de arranque establecido en 5 segundos."
+    LogOfficeTelemetryOk      = "Telemetr" + [char]0x00ED + "a de Office y OneDrive bloqueada."
+    LogExtraSchedTasksOk      = "Tareas programadas adicionales de telemetr" + [char]0x00ED + "a desactivadas."
+    LogDiskOptimizeOk         = "Optimizaci" + [char]0x00F3 + "n de disco aplicada: {0}"
+    LogMoreError              = "Error al aplicar el ajuste ({0}): {1}"
+    LogMoreDone               = "Ajustes de limpieza y rendimiento del sistema finalizados."
+
+    LogRestoreDefaultsStart = "Restaurando valores predeterminados de registro y servicios..."
+    LogRestoreDefaultsOk    = "Valores predeterminados restaurados correctamente. Se recomienda reiniciar."
+    LogRestoreDefaultsError = "Error al restaurar los valores predeterminados: {0}"
+
+    LogExportStart     = "Exportando el perfil de configuraci" + [char]0x00F3 + "n actual..."
+    LogExportOk        = "Perfil exportado a: {0}"
+    LogExportError     = "Error al exportar el perfil: {0}"
+    LogExportCancelled = "Exportaci" + [char]0x00F3 + "n de perfil cancelada por el usuario."
+
+    LogImportStart     = "Importando perfil de configuraci" + [char]0x00F3 + "n..."
+    LogImportOk        = "Perfil importado desde: {0}"
+    LogImportError     = "Error al importar el perfil: {0}"
+    LogImportCancelled = "Importaci" + [char]0x00F3 + "n de perfil cancelada por el usuario."
+
+    LogDryRunPrefix = "[SIMULACI" + [char]0x00D3 + "N] Se aplicar" + [char]0x00ED + "a: {0}"
+    LogDryRunNote   = "Modo Simulaci" + [char]0x00F3 + "n activado: no se aplicar" + [char]0x00E1 + " ning" + [char]0x00FA + "n cambio, solo se registrar" + [char]0x00E1 + " en el log."
+
     LogDriversStart    = "Bloqueando la instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update..."
     LogDriversOk       = "Instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update bloqueada."
     LogDriversError    = "Error al bloquear los controladores autom" + [char]0x00E1 + "ticos: {0}"
@@ -468,6 +651,22 @@ $Lang['zh-CN'] = @{
     BtnRunSelected    = (ZH 0x8FD0,0x884C) + (ZH 0x5DF2,0x9009) + (ZH 0x4F18,0x5316) + (ZH 0x9879,0x76EE)
     GrpInstaller      = (ZH 0x5B9E,0x7528) + (ZH 0x5E94,0x7528) + (ZH 0x7A0B,0x5E8F)
     BtnInstallApps    = (ZH 0x5B89,0x88C5) + (ZH 0x5DF2,0x9009) + (ZH 0x9879,0x76EE)
+
+    TabExternalScripts = (ZH 0x5916,0x90E8,0x811A,0x672C)
+    TxtExtScriptsWarning = (ZH 0x8FD9,0x4E9B,0x662F,0x72EC,0x7ACB,0x7684,0x7B2C,0x4E09,0x65B9,0x5F00,0x6E90,0x811A,0x672C) + "(" + (ZH 0x4E0D,0x5C5E,0x4E8E) + " WGO)" + "," + (ZH 0x6BCF,0x4E2A,0x811A,0x672C,0x90FD,0x4F1A,0x6253,0x5F00,0x81EA,0x5DF1,0x7684,0x7A97,0x53E3) + (ZH 0x5E76,0x81EA,0x884C,0x8BF7,0x6C42,0x7BA1,0x7406,0x5458,0x6743,0x9650) + "," + (ZH 0x8BF7,0x4EC5,0x8FD0,0x884C,0x6765,0x81EA,0x53EF,0x4FE1,0x6765,0x6E90,0x7684,0x5DE5,0x5177)
+
+    TxtAmdOptimizerTitle = "AMD " + (ZH 0x7A33,0x5B9A,0x6027,0x4F18,0x5316,0x5DE5,0x5177)
+    TxtAmdOptimizerDesc  = (ZH 0x4E13,0x4E3A) + " AMD Radeon " + (ZH 0x663E,0x5361) + (ZH 0x8BBE,0x8BA1,0x7684,0x5DE5,0x5177,0x5305) + "," + (ZH 0x65E8,0x5728,0x89E3,0x51B3,0x9A71,0x52A8,0x5D29,0x6E83) + "," + (ZH 0x9ED1,0x5C4F) + (ZH 0x4EE5,0x53CA) + (ZH 0x5361,0x987F,0x7B49,0x6700,0x5E38,0x89C1,0x95EE,0x9898) + "." + (ZH 0x5B83,0x4F1A,0x7981,0x7528) + " ULPS" + "," + "Multi-Plane Overlay " + (ZH 0x548C) + " HDCP" + "," + (ZH 0x5E76,0x5EF6,0x957F,0x9A71,0x52A8,0x8D85,0x65F6,0x65F6,0x95F4) + "," + (ZH 0x5E76,0x5173,0x95ED) + " Fast Startup/" + (ZH 0x4F11,0x7720) + (ZH 0x548C) + " AMD Crash Defender " + (ZH 0x670D,0x52A1) + "," + (ZH 0x5E76,0x4FEE,0x590D) + " Chrome/Edge/Electron " + (ZH 0x5E94,0x7528) + "(Discord" + "," + "Spotify)" + (ZH 0x4E2D,0x56E0,0x663E,0x5361,0x786C,0x4EF6,0x52A0,0x901F,0x5BFC,0x81F4,0x7684,0x95EA,0x70C1,0x95EE,0x9898) + "," + (ZH 0x5E76,0x89E3,0x9501) + " Windows " + (ZH 0x9690,0x85CF,0x7684,0x6781,0x9650,0x6027,0x80FD,0x7535,0x6E90,0x8BA1,0x5212) + "." + (ZH 0x5728,0x8FDB,0x884C,0x4EFB,0x4F55,0x66F4,0x6539,0x524D) + "," + (ZH 0x5B83,0x4F1A,0x521B,0x5EFA,0x6CE8,0x518C,0x8868,0x5907,0x4EFD) + (ZH 0x5E76,0x5728,0x53EF,0x80FD,0x7684,0x60C5,0x51B5,0x4E0B,0x521B,0x5EFA,0x7CFB,0x7EDF,0x8FD8,0x539F,0x70B9) + "," + (ZH 0x6240,0x6709,0x66F4,0x6539,0x90FD,0x53EF,0x4EE5,0x5728,0x5176,0x81EA,0x8EAB,0x754C,0x9762,0x4E2D,0x64A4,0x9500) + "."
+    BtnRunAmdOptimizer   = (ZH 0x8FD0,0x884C) + " AMD Stability Optimizer"
+
+    TxtMassgraveTitle = "Windows " + (ZH 0x548C) + " Office " + (ZH 0x6FC0,0x6D3B) + " (MAS)"
+    TxtMassgraveDesc  = (ZH 0x8FD0,0x884C) + " Microsoft Activation Scripts (MASSGRAVE) " + (ZH 0x5B98,0x65B9,0x9879,0x76EE) + "," + (ZH 0x662F,0x793E,0x533A,0x77E5,0x540D,0x7684,0x5F00,0x6E90,0x5DE5,0x5177) + "," + (ZH 0x7528,0x4E8E,0x901A,0x8FC7) + " HWID" + "," + "KMS38 " + (ZH 0x6216) + (ZH 0x5728,0x7EBF) + " KMS " + (ZH 0x6FC0,0x6D3B) + " Windows " + (ZH 0x548C) + " Microsoft Office" + "." + (ZH 0x5B83,0x4F1A,0x5728,0x65B0,0x7684,0x63A7,0x5236,0x53F0,0x7A97,0x53E3,0x4E2D,0x6253,0x5F00,0x4E00,0x4E2A,0x4EA4,0x4E92,0x5F0F,0x6587,0x672C,0x83DC,0x5355) + "," + (ZH 0x53EA,0x9700,0x6309,0x7167,0x5C4F,0x5E55,0x4E0A,0x7684,0x9009,0x9879,0x9009,0x62E9,0x6240,0x9700,0x7684,0x6FC0,0x6D3B,0x65B9,0x5F0F,0x5373,0x53EF) + "."
+    BtnRunMassgrave   = (ZH 0x8FD0,0x884C) + (ZH 0x6FC0,0x6D3B) + (ZH 0x811A,0x672C)
+
+    LogExtScriptStart    = (ZH 0x6B63,0x5728,0x542F,0x52A8,0x5916,0x90E8,0x811A,0x672C) + ": {0}..."
+    LogExtScriptLaunched = "{0} " + (ZH 0x5DF2,0x5728,0x65B0,0x7A97,0x53E3,0x4E2D,0x542F,0x52A8) + "," + (ZH 0x8BF7,0x6309,0x7167,0x5176,0x4E2D,0x663E,0x793A,0x7684,0x8BF4,0x660E,0x64CD,0x4F5C) + "."
+    LogExtScriptError    = (ZH 0x542F,0x52A8) + " {0} " + (ZH 0x65F6,0x51FA,0x9519) + ": {1}"
+
     LogHeader         = (ZH 0x8FD0,0x884C) + (ZH 0x65E5,0x5FD7)
     AppFirefoxDesc    = (ZH 0x5F3A,0x70C8,0x63A8,0x8350) + (ZH 0x7684,0x6D4F,0x89C8,0x5668) + "," + (ZH 0x4E0D,0x4F7F,0x7528) + " Chromium " + (ZH 0x5F15,0x64CE) + "," + (ZH 0x63D0,0x4F9B) + (ZH 0x771F,0x6B63,0x7684) + (ZH 0x9690,0x79C1) + (ZH 0x4FDD,0x62A4)
     AppNanaZipDesc    = (ZH 0x8F7B,0x91CF,0x7EA7) + (ZH 0x6587,0x4EF6) + (ZH 0x538B,0x7F29) + (ZH 0x5DE5,0x5177) + "," + (ZH 0x96C6,0x6210) + " Windows 11 " + (ZH 0x53F3,0x952E,0x83DC,0x5355)
@@ -533,6 +732,51 @@ $Lang['zh-CN'] = @{
     LogAdvNetworkOk        = (ZH 0x7F51,0x7EDC) + (ZH 0x9650,0x901F) + (ZH 0x5DF2,0x7981,0x7528) + "; " + (ZH 0x5728) + " {0} " + (ZH 0x4E2A,0x6D3B,0x52A8,0x63A5,0x53E3) + (ZH 0x8C03,0x6574) + " TCP ack/nodelay"
     LogAdvError            = (ZH 0x5E94,0x7528) + (ZH 0x9AD8,0x7EA7) + (ZH 0x8C03,0x4F18) + (ZH 0x51FA,0x9519) + " ({0}): {1}"
     LogAdvDone             = (ZH 0x9AD8,0x7EA7) + (ZH 0x7CFB,0x7EDF) + (ZH 0x8C03,0x4F18) + (ZH 0x5B8C,0x6210)
+
+    GrpMoreOptimizations = (ZH 0x7CFB,0x7EDF,0x6E05,0x7406,0x4E0E,0x6027,0x80FD)
+    ChkHibernation       = (ZH 0x7981,0x7528,0x4F11,0x7720) + " (" + (ZH 0x91CA,0x653E) + " hiberfil.sys " + (ZH 0x78C1,0x76D8,0x7A7A,0x95F4) + ")"
+    ChkPowerPlan         = (ZH 0x5C06,0x7535,0x6E90,0x8BA1,0x5212,0x8BBE,0x7F6E,0x4E3A,0x9AD8,0x6027,0x80FD)
+    ChkTempCleanup       = (ZH 0x6E05,0x7406,0x4E34,0x65F6,0x6587,0x4EF6) + "," + (ZH 0x65E7,0x7684,0x9884,0x8BFB,0x53D6,0x6587,0x4EF6) + "," + "Windows.old " + (ZH 0x4EE5,0x53CA) + " Windows " + (ZH 0x66F4,0x65B0,0x7F13,0x5B58)
+    ChkHotCorners        = (ZH 0x7981,0x7528) + (ZH 0x8D34,0x9760,0x8F85,0x52A9) + "/" + (ZH 0x6447,0x52A8,0x6700,0x5C0F,0x5316)
+    ChkRecallBlock       = (ZH 0x7981,0x7528) + " Windows Recall"
+    ChkBootTimeout       = (ZH 0x5C06,0x542F,0x52A8,0x83DC,0x5355,0x8D85,0x65F6,0x65F6,0x95F4,0x7F29,0x77ED,0x4E3A) + " 5 " + (ZH 0x79D2)
+    ChkOfficeTelemetry   = (ZH 0x963B,0x6B62) + " Office " + (ZH 0x548C) + " OneDrive " + (ZH 0x9065,0x6D4B)
+    ChkExtraSchedTasks   = (ZH 0x5220,0x9664) + (ZH 0x5176,0x4ED6,0x9065,0x6D4B,0x8BA1,0x5212,0x4EFB,0x52A1)
+    ChkDiskOptimize      = (ZH 0x81EA,0x52A8,0x68C0,0x6D4B) + (ZH 0x78C1,0x76D8) + " (SSD/HDD) " + (ZH 0x5E76,0x914D,0x7F6E) + " TRIM " + (ZH 0x6216) + (ZH 0x8BA1,0x5212,0x788E,0x7247,0x6574,0x7406)
+    ChkDryRun            = (ZH 0x6A21,0x62DF,0x8FD0,0x884C,0x6A21,0x5F0F) + " (" + (ZH 0x4EC5,0x8BB0,0x5F55,0x5C06,0x8981,0x66F4,0x6539,0x7684,0x5185,0x5BB9,0x800C,0x4E0D,0x5B9E,0x9645,0x5E94,0x7528) + ")"
+    BtnRestoreDefaults   = (ZH 0x6062,0x590D,0x9ED8,0x8BA4,0x8BBE,0x7F6E)
+    BtnExportProfile     = (ZH 0x5BFC,0x51FA,0x914D,0x7F6E,0x6587,0x4EF6)
+    BtnImportProfile     = (ZH 0x5BFC,0x5165,0x914D,0x7F6E,0x6587,0x4EF6)
+
+    LogMoreStart              = (ZH 0x6B63,0x5728) + (ZH 0x5E94,0x7528) + (ZH 0x7CFB,0x7EDF,0x6E05,0x7406,0x4E0E,0x6027,0x80FD) + (ZH 0x8C03,0x6574) + "..."
+    LogHibernationOk          = (ZH 0x4F11,0x7720) + (ZH 0x5DF2,0x7981,0x7528) + " (" + (ZH 0x5DF2,0x5220,0x9664) + " hiberfil.sys)"
+    LogPowerPlanOk            = (ZH 0x7535,0x6E90,0x8BA1,0x5212) + (ZH 0x5DF2,0x8BBE,0x7F6E,0x4E3A,0x9AD8,0x6027,0x80FD)
+    LogTempCleanupOk          = (ZH 0x4E34,0x65F6,0x6587,0x4EF6) + "," + (ZH 0x65E7,0x7684,0x9884,0x8BFB,0x53D6,0x6761,0x76EE) + ", Windows.old " + (ZH 0x548C) + " Windows " + (ZH 0x66F4,0x65B0,0x7F13,0x5B58) + (ZH 0x5DF2,0x6E05,0x7406)
+    LogHotCornersOk           = (ZH 0x8D34,0x9760,0x8F85,0x52A9) + (ZH 0x548C) + (ZH 0x6447,0x52A8,0x6700,0x5C0F,0x5316) + (ZH 0x5DF2,0x7981,0x7528)
+    LogRecallBlockOk          = "Windows Recall " + (ZH 0x5DF2,0x901A,0x8FC7,0x7B56,0x7565,0x7981,0x7528)
+    LogBootTimeoutOk          = (ZH 0x542F,0x52A8,0x83DC,0x5355,0x8D85,0x65F6,0x65F6,0x95F4) + (ZH 0x5DF2,0x8BBE,0x7F6E,0x4E3A) + " 5 " + (ZH 0x79D2)
+    LogOfficeTelemetryOk      = "Office " + (ZH 0x548C) + " OneDrive " + (ZH 0x9065,0x6D4B) + (ZH 0x5DF2,0x963B,0x6B62)
+    LogExtraSchedTasksOk      = (ZH 0x5176,0x4ED6,0x9065,0x6D4B,0x8BA1,0x5212,0x4EFB,0x52A1) + (ZH 0x5DF2,0x7981,0x7528)
+    LogDiskOptimizeOk         = (ZH 0x78C1,0x76D8,0x4F18,0x5316) + (ZH 0x5DF2,0x5E94,0x7528) + ": {0}"
+    LogMoreError              = (ZH 0x5E94,0x7528) + (ZH 0x8C03,0x6574) + (ZH 0x65F6,0x51FA,0x9519) + " ({0}): {1}"
+    LogMoreDone               = (ZH 0x7CFB,0x7EDF,0x6E05,0x7406,0x4E0E,0x6027,0x80FD) + (ZH 0x8C03,0x6574) + (ZH 0x5B8C,0x6210)
+
+    LogRestoreDefaultsStart = (ZH 0x6B63,0x5728) + (ZH 0x6062,0x590D) + (ZH 0x6CE8,0x518C,0x8868) + (ZH 0x548C) + (ZH 0x670D,0x52A1) + (ZH 0x7684) + (ZH 0x9ED8,0x8BA4,0x8BBE,0x7F6E) + "..."
+    LogRestoreDefaultsOk    = (ZH 0x9ED8,0x8BA4,0x8BBE,0x7F6E) + (ZH 0x5DF2,0x6210,0x529F,0x6062,0x590D) + "," + (ZH 0x5EFA,0x8BAE,0x91CD,0x65B0,0x542F,0x52A8)
+    LogRestoreDefaultsError = (ZH 0x6062,0x590D) + (ZH 0x9ED8,0x8BA4,0x8BBE,0x7F6E) + (ZH 0x65F6,0x51FA,0x9519) + ": {0}"
+
+    LogExportStart     = (ZH 0x6B63,0x5728) + (ZH 0x5BFC,0x51FA) + (ZH 0x5F53,0x524D) + (ZH 0x914D,0x7F6E,0x6587,0x4EF6) + "..."
+    LogExportOk        = (ZH 0x914D,0x7F6E,0x6587,0x4EF6) + (ZH 0x5DF2,0x5BFC,0x51FA,0x5230) + ": {0}"
+    LogExportError     = (ZH 0x5BFC,0x51FA) + (ZH 0x914D,0x7F6E,0x6587,0x4EF6) + (ZH 0x65F6,0x51FA,0x9519) + ": {0}"
+    LogExportCancelled = (ZH 0x7528,0x6237) + (ZH 0x5DF2,0x53D6,0x6D88) + (ZH 0x5BFC,0x51FA,0x914D,0x7F6E,0x6587,0x4EF6)
+
+    LogImportStart     = (ZH 0x6B63,0x5728) + (ZH 0x5BFC,0x5165) + (ZH 0x914D,0x7F6E,0x6587,0x4EF6) + "..."
+    LogImportOk        = (ZH 0x914D,0x7F6E,0x6587,0x4EF6) + (ZH 0x5DF2,0x4ECE,0x4EE5,0x4E0B,0x4F4D,0x7F6E,0x5BFC,0x5165) + ": {0}"
+    LogImportError     = (ZH 0x5BFC,0x5165) + (ZH 0x914D,0x7F6E,0x6587,0x4EF6) + (ZH 0x65F6,0x51FA,0x9519) + ": {0}"
+    LogImportCancelled = (ZH 0x7528,0x6237) + (ZH 0x5DF2,0x53D6,0x6D88) + (ZH 0x5BFC,0x5165,0x914D,0x7F6E,0x6587,0x4EF6)
+
+    LogDryRunPrefix = "[" + (ZH 0x6A21,0x62DF,0x8FD0,0x884C) + "] " + (ZH 0x5C06,0x5E94,0x7528) + ": {0}"
+    LogDryRunNote   = (ZH 0x6A21,0x62DF,0x8FD0,0x884C,0x6A21,0x5F0F,0x5DF2,0x542F,0x7528) + "," + (ZH 0x4E0D,0x4F1A,0x8FDB,0x884C,0x4EFB,0x4F55,0x66F4,0x6539) + "," + (ZH 0x4EC5,0x8BB0,0x5F55,0x5230,0x65E5,0x5FD7,0x4E2D)
 
     LogDriversStart    = (ZH 0x6B63,0x5728) + (ZH 0x963B,0x6B62) + (ZH 0x81EA,0x52A8) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x5B89,0x88C5)
     LogDriversOk       = (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + (ZH 0x5DF2,0x963B,0x6B62)
@@ -955,7 +1199,8 @@ $Global:CurrentLangCode = "pt-BR"
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
 
-                        <CheckBox x:Name="chkSelectAll" Content="Select All / Deselect All" FontWeight="Bold" Margin="0,0,0,10" IsChecked="True"/>
+                        <CheckBox x:Name="chkSelectAll" Content="Select All / Deselect All" FontWeight="Bold" Margin="0,0,0,4" IsChecked="True"/>
+                        <CheckBox x:Name="chkDryRun" Content="Dry Run (only log what would change, apply nothing)" Margin="0,0,0,10" IsChecked="False"/>
 
                         <GroupBox x:Name="grpRestore" Header="System Safety">
                             <StackPanel Orientation="Horizontal">
@@ -1007,7 +1252,26 @@ $Global:CurrentLangCode = "pt-BR"
                             </StackPanel>
                         </GroupBox>
 
-                        <Button x:Name="btnRunSelected" Content="Run Selected Optimizations" HorizontalAlignment="Left" Padding="20,10" FontSize="14"/>
+                        <GroupBox x:Name="grpMoreOptimizations" Header="System Cleanup &amp; Performance">
+                            <StackPanel>
+                                <CheckBox x:Name="chkHibernation" Content="Disable Hibernation" IsChecked="True"/>
+                                <CheckBox x:Name="chkPowerPlan" Content="Set power plan to High Performance" IsChecked="True"/>
+                                <CheckBox x:Name="chkTempCleanup" Content="Clean temp files / Prefetch / Windows.old / WU cache" IsChecked="True"/>
+                                <CheckBox x:Name="chkHotCorners" Content="Disable Snap Assist / Aero Shake" IsChecked="False"/>
+                                <CheckBox x:Name="chkRecallBlock" Content="Disable Windows Recall" IsChecked="True"/>
+                                <CheckBox x:Name="chkBootTimeout" Content="Reduce boot menu timeout to 5s" IsChecked="False"/>
+                                <CheckBox x:Name="chkOfficeTelemetry" Content="Block Office / OneDrive telemetry" IsChecked="True"/>
+                                <CheckBox x:Name="chkExtraSchedTasks" Content="Remove additional telemetry scheduled tasks" IsChecked="True"/>
+                                <CheckBox x:Name="chkDiskOptimize" Content="Auto-configure TRIM / scheduled defrag (SSD/HDD)" IsChecked="True"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <Button x:Name="btnRunSelected" Content="Run Selected Optimizations" Padding="20,10" FontSize="14" Margin="0,0,10,0"/>
+                            <Button x:Name="btnRestoreDefaults" Content="Restore Defaults" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                            <Button x:Name="btnExportProfile" Content="Export Profile" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                            <Button x:Name="btnImportProfile" Content="Import Profile" Style="{StaticResource SecondaryButtonStyle}"/>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -1117,6 +1381,32 @@ $Global:CurrentLangCode = "pt-BR"
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+
+            <TabItem x:Name="tabExternalScripts" Header="External Scripts">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+
+                        <TextBlock x:Name="txtExtScriptsWarning" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" FontStyle="Italic" Margin="0,0,0,10" FontSize="12"/>
+
+                        <Border Style="{StaticResource CardStyle}">
+                            <StackPanel>
+                                <TextBlock x:Name="txtAmdOptimizerTitle" Text="AMD Stability Optimizer" FontWeight="Bold" FontSize="14"/>
+                                <TextBlock x:Name="txtAmdOptimizerDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,10" FontSize="12"/>
+                                <Button x:Name="btnRunAmdOptimizer" Content="Run AMD Stability Optimizer" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource CardStyle}">
+                            <StackPanel>
+                                <TextBlock x:Name="txtMassgraveTitle" Text="Windows &amp; Office Activation (MAS)" FontWeight="Bold" FontSize="14"/>
+                                <TextBlock x:Name="txtMassgraveDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="0,4,0,10" FontSize="12"/>
+                                <Button x:Name="btnRunMassgrave" Content="Run Activation Script" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
     </DockPanel>
 </Window>
@@ -1209,8 +1499,8 @@ function Start-WgoBackgroundTask {
 $ctrl = @{}
 $names = @(
     'txtAppTitle','txtLblLanguage','cmbLanguage','txtLogHeader','scrollLog','txtLog',
-    'tabOptimizations','tabInstaller',
-    'chkSelectAll',
+    'tabOptimizations','tabInstaller','tabExternalScripts',
+    'chkSelectAll','chkDryRun',
     'grpRestore','btnCreateRestore',
     'grpBloat','chkBloat',
     'grpSearch','chkSearch',
@@ -1220,7 +1510,9 @@ $names = @(
     'grpPagefile','chkPagefile',
     'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
     'grpAdvancedTweaks','chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
-    'btnRunSelected',
+    'grpMoreOptimizations','chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
+    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
+    'btnRunSelected','btnRestoreDefaults','btnExportProfile','btnImportProfile',
     'grpInstaller','btnInstallApps',
     'txtChocoRequired','txtChocoStatus','btnInstallChoco',
     'chkFirefox','txtFirefoxDesc',
@@ -1234,7 +1526,10 @@ $names = @(
     'chkSevenZip','txtSevenZipDesc',
     'chkWiztree','txtWiztreeDesc',
     'chkMoonlight','txtMoonlightDesc',
-    'chkSunshine','txtSunshineDesc'
+    'chkSunshine','txtSunshineDesc',
+    'txtExtScriptsWarning',
+    'txtAmdOptimizerTitle','txtAmdOptimizerDesc','btnRunAmdOptimizer',
+    'txtMassgraveTitle','txtMassgraveDesc','btnRunMassgrave'
 )
 foreach ($n in $names) { $ctrl[$n] = $window.FindName($n) }
 
@@ -1243,7 +1538,9 @@ foreach ($n in $names) { $ctrl[$n] = $window.FindName($n) }
 $script:optimizationCheckboxNames = @(
     'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
     'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
-    'chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency'
+    'chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
+    'chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
+    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize'
 )
 
 # ============================================================================
@@ -1344,7 +1641,23 @@ function Update-UILanguage {
     $ctrl['chkAppsBackground'].Content   = $t.ChkAppsBackground
     $ctrl['chkNetworkLatency'].Content   = $t.ChkNetworkLatency
 
+    $ctrl['grpMoreOptimizations'].Header = $t.GrpMoreOptimizations
+    $ctrl['chkHibernation'].Content      = $t.ChkHibernation
+    $ctrl['chkPowerPlan'].Content        = $t.ChkPowerPlan
+    $ctrl['chkTempCleanup'].Content      = $t.ChkTempCleanup
+    $ctrl['chkHotCorners'].Content       = $t.ChkHotCorners
+    $ctrl['chkRecallBlock'].Content      = $t.ChkRecallBlock
+    $ctrl['chkBootTimeout'].Content      = $t.ChkBootTimeout
+    $ctrl['chkOfficeTelemetry'].Content  = $t.ChkOfficeTelemetry
+    $ctrl['chkExtraSchedTasks'].Content  = $t.ChkExtraSchedTasks
+    $ctrl['chkDiskOptimize'].Content     = $t.ChkDiskOptimize
+
+    $ctrl['chkDryRun'].Content           = $t.ChkDryRun
+
     $ctrl['btnRunSelected'].Content      = $t.BtnRunSelected
+    $ctrl['btnRestoreDefaults'].Content  = $t.BtnRestoreDefaults
+    $ctrl['btnExportProfile'].Content    = $t.BtnExportProfile
+    $ctrl['btnImportProfile'].Content    = $t.BtnImportProfile
 
     $ctrl['txtChocoRequired'].Text       = $t.TxtChocoRequired
     $ctrl['btnInstallChoco'].Content     = $t.BtnInstallChoco
@@ -1377,6 +1690,15 @@ function Update-UILanguage {
     $ctrl['txtMoonlightDesc'].Text       = $t.AppMoonlightDesc
     $ctrl['chkSunshine'].Content          = "Sunshine"
     $ctrl['txtSunshineDesc'].Text        = $t.AppSunshineDesc
+
+    $ctrl['tabExternalScripts'].Header    = $t.TabExternalScripts
+    $ctrl['txtExtScriptsWarning'].Text    = $t.TxtExtScriptsWarning
+    $ctrl['txtAmdOptimizerTitle'].Text    = $t.TxtAmdOptimizerTitle
+    $ctrl['txtAmdOptimizerDesc'].Text     = $t.TxtAmdOptimizerDesc
+    $ctrl['btnRunAmdOptimizer'].Content   = $t.BtnRunAmdOptimizer
+    $ctrl['txtMassgraveTitle'].Text       = $t.TxtMassgraveTitle
+    $ctrl['txtMassgraveDesc'].Text        = $t.TxtMassgraveDesc
+    $ctrl['btnRunMassgrave'].Content      = $t.BtnRunMassgrave
 }
 
 # ============================================================================
@@ -1849,6 +2171,221 @@ function Set-WgoAdvancedTweaks {
 }
 
 # ============================================================================
+# 10-D. FUNCTION 5-D - SYSTEM CLEANUP & PERFORMANCE (batch 2)
+# ============================================================================
+
+function Set-WgoMoreOptimizations {
+    param(
+        [bool]$Hibernation     = $false,
+        [bool]$PowerPlan       = $false,
+        [bool]$TempCleanup     = $false,
+        [bool]$HotCorners      = $false,
+        [bool]$RecallBlock     = $false,
+        [bool]$BootTimeout     = $false,
+        [bool]$OfficeTelemetry = $false,
+        [bool]$ExtraSchedTasks = $false,
+        [bool]$DiskOptimize    = $false,
+        [bool]$DryRun          = $false
+    )
+
+    if (-not ($Hibernation -or $PowerPlan -or $TempCleanup -or $HotCorners -or $RecallBlock -or
+               $BootTimeout -or $OfficeTelemetry -or $ExtraSchedTasks -or $DiskOptimize)) { return }
+
+    Write-Log (T 'LogMoreStart') "INFO"
+    if ($DryRun) { Write-Log (T 'LogDryRunNote') "WARN" }
+
+    # 1. Disable Hibernation
+    if ($Hibernation) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkHibernation')) "INFO"
+        } else {
+            try {
+                & powercfg.exe /hibernate off 2>$null | Out-Null
+                Write-Log (T 'LogHibernationOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "Hibernation" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 2. High Performance power plan
+    if ($PowerPlan) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkPowerPlan')) "INFO"
+        } else {
+            try {
+                # SCHEME_MIN is the built-in alias for the "High performance" plan.
+                & powercfg.exe /setactive SCHEME_MIN 2>$null | Out-Null
+                Write-Log (T 'LogPowerPlanOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "PowerPlan" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 3. Temp files / old Prefetch / Windows.old / Windows Update cache cleanup
+    if ($TempCleanup) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkTempCleanup')) "INFO"
+        } else {
+            try {
+                Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "$env:WINDIR\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+                $cutoff = (Get-Date).AddDays(-30)
+                Get-ChildItem -Path "$env:WINDIR\Prefetch\*.pf" -ErrorAction SilentlyContinue |
+                    Where-Object { $_.LastWriteTime -lt $cutoff } |
+                    Remove-Item -Force -ErrorAction SilentlyContinue
+
+                if (Test-Path "$env:SystemDrive\Windows.old") {
+                    Remove-Item -Path "$env:SystemDrive\Windows.old" -Recurse -Force -ErrorAction SilentlyContinue
+                }
+
+                Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "$env:WINDIR\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+                Start-Service -Name wuauserv -ErrorAction SilentlyContinue
+
+                Write-Log (T 'LogTempCleanupOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "TempCleanup" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 4. Disable Snap Assist / Aero Shake
+    if ($HotCorners) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkHotCorners')) "INFO"
+        } else {
+            try {
+                $advKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+                if (-not (Test-Path $advKey)) { New-Item -Path $advKey -Force | Out-Null }
+                New-ItemProperty -Path $advKey -Name "EnableSnapAssistFlyout" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $advKey -Name "SnapFill" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $advKey -Name "SnapAssist" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $advKey -Name "DisallowShaking" -Value 1 -PropertyType DWord -Force | Out-Null
+                Write-Log (T 'LogHotCornersOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "HotCorners" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 5. Disable Windows Recall
+    if ($RecallBlock) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkRecallBlock')) "INFO"
+        } else {
+            try {
+                $aiKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"
+                if (-not (Test-Path $aiKey)) { New-Item -Path $aiKey -Force | Out-Null }
+                New-ItemProperty -Path $aiKey -Name "DisableAIDataAnalysis" -Value 1 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $aiKey -Name "AllowRecallEnablement" -Value 0 -PropertyType DWord -Force | Out-Null
+                Write-Log (T 'LogRecallBlockOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "RecallBlock" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 6. Reduce boot menu timeout to 5 seconds
+    if ($BootTimeout) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkBootTimeout')) "INFO"
+        } else {
+            try {
+                & bcdedit.exe /timeout 5 2>$null | Out-Null
+                Write-Log (T 'LogBootTimeoutOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "BootTimeout" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 7. Block Office / OneDrive telemetry
+    if ($OfficeTelemetry) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkOfficeTelemetry')) "INFO"
+        } else {
+            try {
+                $officeCommonKey = "HKCU:\Software\Policies\Microsoft\office\16.0\common"
+                $officeOsmKey    = "HKCU:\Software\Policies\Microsoft\office\16.0\osm"
+                $oneDriveKey     = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+                foreach ($p in @($officeCommonKey, $officeOsmKey, $oneDriveKey)) {
+                    if (-not (Test-Path $p)) { New-Item -Path $p -Force | Out-Null }
+                }
+                New-ItemProperty -Path $officeCommonKey -Name "qmenable" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $officeCommonKey -Name "sendcustomerdata" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $officeOsmKey -Name "enablelogging" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $oneDriveKey -Name "DisableTelemetry" -Value 1 -PropertyType DWord -Force | Out-Null
+                Write-Log (T 'LogOfficeTelemetryOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "OfficeTelemetry" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 8. Remove additional telemetry scheduled tasks
+    if ($ExtraSchedTasks) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkExtraSchedTasks')) "INFO"
+        } else {
+            try {
+                $extraTasks = @(
+                    "\Microsoft\Windows\Feedback\Siuf\DmClient",
+                    "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload",
+                    "\Microsoft\Windows\Windows Error Reporting\QueueReporting",
+                    "\Microsoft\Office\OfficeTelemetryAgentFallBack2016",
+                    "\Microsoft\Office\OfficeTelemetryAgentLogOn2016"
+                )
+                foreach ($task in $extraTasks) {
+                    try { Disable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction SilentlyContinue | Out-Null } catch {}
+                }
+                Write-Log (T 'LogExtraSchedTasksOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "ExtraSchedTasks" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 9. Auto-detect disks (SSD/HDD) and configure TRIM / scheduled defrag
+    if ($DiskOptimize) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkDiskOptimize')) "INFO"
+        } else {
+            try {
+                $disks = Get-PhysicalDisk -ErrorAction SilentlyContinue
+                $hasSSD = $false
+                $hasHDD = $false
+                foreach ($d in $disks) {
+                    if ($d.MediaType -eq 'SSD') { $hasSSD = $true }
+                    elseif ($d.MediaType -eq 'HDD') { $hasHDD = $true }
+                }
+
+                $summary = @()
+                if ($hasSSD) {
+                    # Ensure TRIM (delete notify) is enabled for SSDs.
+                    & fsutil.exe behavior set DisableDeleteNotify 0 2>$null | Out-Null
+                    $summary += "SSD: TRIM ON"
+                }
+                if ($hasHDD) {
+                    # Keep/enable the built-in weekly scheduled defrag for HDDs.
+                    try { Enable-ScheduledTask -TaskName "ScheduledDefrag" -TaskPath "\Microsoft\Windows\Defrag\" -ErrorAction SilentlyContinue | Out-Null } catch {}
+                    $summary += "HDD: Scheduled Defrag ON"
+                }
+                if (-not $hasSSD -and -not $hasHDD) { $summary += "N/A" }
+
+                Write-Log (T 'LogDiskOptimizeOk' ($summary -join ", ")) "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "DiskOptimize" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    Write-Log (T 'LogMoreDone') "OK"
+}
+
+# ============================================================================
 # 11. FUNCTION 6 - BLOCK AUTOMATIC DRIVERS (WINDOWS UPDATE)
 # ============================================================================
 
@@ -1907,6 +2444,109 @@ function Set-WgoPagefile {
         Write-Log (T 'LogPagefileOk' $pageMB) "OK"
     } catch {
         Write-Log (T 'LogPagefileError' $_.Exception.Message) "ERROR"
+    }
+}
+
+# ============================================================================
+# 12-B. FUNCTION 9 - RESTORE DEFAULTS
+# ============================================================================
+# Reverts the policy/registry keys and services touched by this script back
+# to a state equivalent to a clean Windows install (removes the keys/values
+# we created, re-enables the services and scheduled tasks we disabled).
+# It intentionally does NOT touch bloatware removal, visual effects, pagefile
+# size or app installations, since those are not easily "undoable" 1:1.
+
+function Restore-WgoDefaults {
+    Write-Log (T 'LogRestoreDefaultsStart') "INFO"
+    try {
+        # --- Registry keys created/modified by this script (HKLM policies) ---
+        $keysToRemove = @(
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting",
+            "HKLM:\SOFTWARE\Policies\Microsoft\SQMClient",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Edge",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization",
+            "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive",
+            "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching"
+        )
+        foreach ($k in $keysToRemove) {
+            if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction SilentlyContinue }
+        }
+
+        # --- HKCU keys/values created/modified by this script ---
+        $hkcuAdvKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+        foreach ($name in @("DisableSearchBoxSuggestions","TaskbarDa","EnableSnapAssistFlyout","SnapFill","SnapAssist","DisallowShaking")) {
+            Remove-ItemProperty -Path $hkcuAdvKey -Name $name -Force -ErrorAction SilentlyContinue
+        }
+        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Microsoft\InputPersonalization" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Microsoft\Clipboard" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\common" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\osm" -Recurse -Force -ErrorAction SilentlyContinue
+
+        # --- Local search (restore Bing/web search + Cortana consent defaults) ---
+        Remove-ItemProperty -Path $hkcuAdvKey -Name "DisableSearchBoxSuggestions" -Force -ErrorAction SilentlyContinue
+        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Force -ErrorAction SilentlyContinue
+        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Force -ErrorAction SilentlyContinue
+
+        # --- Network / multimedia throttling back to Windows defaults ---
+        $mmKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
+        if (Test-Path $mmKey) {
+            New-ItemProperty -Path $mmKey -Name "NetworkThrottlingIndex" -Value 10 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $mmKey -Name "SystemResponsiveness" -Value 20 -PropertyType DWord -Force | Out-Null
+        }
+        $ifaceRoot = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
+        if (Test-Path $ifaceRoot) {
+            Get-ChildItem -Path $ifaceRoot -ErrorAction SilentlyContinue | ForEach-Object {
+                Remove-ItemProperty -Path $_.PSPath -Name "TCPNoDelay" -Force -ErrorAction SilentlyContinue
+                Remove-ItemProperty -Path $_.PSPath -Name "TcpAckFrequency" -Force -ErrorAction SilentlyContinue
+            }
+        }
+
+        # --- Boot menu timeout back to the Windows default (30s) ---
+        & bcdedit.exe /timeout 30 2>$null | Out-Null
+
+        # --- Re-enable services disabled by this script ---
+        foreach ($svcName in @("DiagTrack", "dmwappushservice")) {
+            $svc = Get-Service -Name $svcName -ErrorAction SilentlyContinue
+            if ($svc) {
+                Set-Service -Name $svcName -StartupType Automatic -ErrorAction SilentlyContinue
+                Start-Service -Name $svcName -ErrorAction SilentlyContinue
+            }
+        }
+
+        # --- Re-enable scheduled tasks disabled by this script ---
+        $tasksToReenable = @(
+            "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator",
+            "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip",
+            "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser",
+            "\Microsoft\Windows\Application Experience\ProgramDataUpdater",
+            "\Microsoft\Windows\Autochk\Proxy",
+            "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector",
+            "\Microsoft\Windows\Feedback\Siuf\DmClient",
+            "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload",
+            "\Microsoft\Windows\Windows Error Reporting\QueueReporting",
+            "\Microsoft\Office\OfficeTelemetryAgentFallBack2016",
+            "\Microsoft\Office\OfficeTelemetryAgentLogOn2016"
+        )
+        foreach ($task in $tasksToReenable) {
+            try { Enable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction SilentlyContinue | Out-Null } catch {}
+        }
+
+        Write-Log (T 'LogRestoreDefaultsOk') "OK"
+    } catch {
+        Write-Log (T 'LogRestoreDefaultsError' $_.Exception.Message) "ERROR"
     }
 }
 
@@ -2201,11 +2841,46 @@ $Global:WgoSharedFunctionNames = @(
     'Write-Log', 'T', 'Show-WgoFatalError',
     'New-WgoRestorePoint', 'Remove-WgoBloatware',
     'Set-WgoLocalSearch', 'Set-WgoVisualEffects', 'Set-WgoPrivacyPolicies',
-    'Set-WgoExtraPrivacy', 'Set-WgoBlockDriverUpdates', 'Set-WgoPagefile',
+    'Set-WgoExtraPrivacy', 'Set-WgoAdvancedTweaks', 'Set-WgoBlockDriverUpdates', 'Set-WgoPagefile',
+    'Set-WgoMoreOptimizations', 'Restore-WgoDefaults',
     'Find-WgoChocolatey', 'Update-WgoSessionEnvironment', 'Install-WgoChocolatey',
     'Test-WgoChocolatey', 'Find-WgoWinget', 'Install-ViaWinget',
     'Install-ViaChocolatey', 'Install-WgoApp'
 )
+
+# ============================================================================
+# 13-B. FUNCTION 10 - EXTERNAL SCRIPTS LAUNCHER
+# ============================================================================
+# These are independent, third-party projects (not authored by WGO). Each one
+# manages its own UI/console and its own UAC elevation, so WGO only needs to
+# spawn a new (non-blocking) PowerShell process pointed at the same command
+# the user would type manually - it never runs inside WGO's own process or
+# background runspace. Everything is logged to WGO's own log screen.
+
+function Start-WgoExternalScript {
+    param(
+        [Parameter(Mandatory = $true)][string]$Url,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [ValidateSet('iwr', 'irm')][string]$Downloader = 'irm'
+    )
+    try {
+        Write-Log (T 'LogExtScriptStart' $Name) "INFO"
+
+        $cmd = if ($Downloader -eq 'iwr') { "iwr -useb '$Url' | iex" } else { "irm '$Url' | iex" }
+
+        # -NoExit keeps the new console window open after the script finishes
+        # so the user can read its final output (e.g. the MAS activation
+        # result); the AMD Optimizer is a WPF window and simply leaves an
+        # idle console behind it, which the user can close manually.
+        Start-Process -FilePath "powershell.exe" `
+            -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-NoExit", "-Command", $cmd `
+            -ErrorAction Stop | Out-Null
+
+        Write-Log (T 'LogExtScriptLaunched' $Name) "OK"
+    } catch {
+        Write-Log (T 'LogExtScriptError' $Name $_.Exception.Message) "ERROR"
+    }
+}
 
 # ============================================================================
 # 14. UI EVENTS
@@ -2263,26 +2938,80 @@ $ctrl['btnRunSelected'].Add_Click({
     $doAppsBackground = [bool]$ctrl['chkAppsBackground'].IsChecked
     $doNetworkLatency = [bool]$ctrl['chkNetworkLatency'].IsChecked
 
+    $doHibernation     = [bool]$ctrl['chkHibernation'].IsChecked
+    $doPowerPlan       = [bool]$ctrl['chkPowerPlan'].IsChecked
+    $doTempCleanup     = [bool]$ctrl['chkTempCleanup'].IsChecked
+    $doHotCorners      = [bool]$ctrl['chkHotCorners'].IsChecked
+    $doRecallBlock     = [bool]$ctrl['chkRecallBlock'].IsChecked
+    $doBootTimeout     = [bool]$ctrl['chkBootTimeout'].IsChecked
+    $doOfficeTelemetry = [bool]$ctrl['chkOfficeTelemetry'].IsChecked
+    $doExtraSchedTasks = [bool]$ctrl['chkExtraSchedTasks'].IsChecked
+    $doDiskOptimize    = [bool]$ctrl['chkDiskOptimize'].IsChecked
+
+    $doDryRun = [bool]$ctrl['chkDryRun'].IsChecked
+
     Start-WgoBackgroundTask -ScriptBlock {
         param($doBloat, $doSearch, $doVisual, $doPrivacy, $doDrivers, $doPagefile,
               $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry,
-              $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency)
+              $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency,
+              $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
+              $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doDryRun)
         try {
             Write-Log (T 'LogOptStart') "INFO"
-            New-WgoRestorePoint | Out-Null
 
-            if ($doBloat)    { Remove-WgoBloatware }
-            if ($doSearch)   { Set-WgoLocalSearch }
-            if ($doVisual)   { Set-WgoVisualEffects }
-            if ($doPrivacy)  { Set-WgoPrivacyPolicies }
-            if ($doDrivers)  { Set-WgoBlockDriverUpdates }
-            if ($doPagefile) { Set-WgoPagefile }
+            if ($doDryRun) {
+                # Dry Run: nothing is written to the system. Log every selected
+                # item using its own checkbox label, so the user can review the
+                # exact list of changes that WOULD be made.
+                Write-Log (T 'LogDryRunNote') "WARN"
+                $dryItems = @(
+                    @{ Flag = $doBloat;           Key = 'ChkBloat' },
+                    @{ Flag = $doSearch;          Key = 'ChkSearch' },
+                    @{ Flag = $doVisual;          Key = 'ChkVisual' },
+                    @{ Flag = $doPrivacy;         Key = 'ChkPrivacy' },
+                    @{ Flag = $doDrivers;         Key = 'ChkDrivers' },
+                    @{ Flag = $doPagefile;        Key = 'ChkPagefile' },
+                    @{ Flag = $doAdvertisingId;   Key = 'ChkAdvertisingId' },
+                    @{ Flag = $doTailoredExp;     Key = 'ChkTailoredExp' },
+                    @{ Flag = $doDiagTrackSvc;    Key = 'ChkDiagTrackSvc' },
+                    @{ Flag = $doCopilotBlock;    Key = 'ChkCopilotBlock' },
+                    @{ Flag = $doInputTelemetry;  Key = 'ChkInputTelemetry' },
+                    @{ Flag = $doDiagTrackFull;   Key = 'ChkDiagTrackFull' },
+                    @{ Flag = $doEdgeWidgets;     Key = 'ChkEdgeWidgets' },
+                    @{ Flag = $doDeliveryOpt;     Key = 'ChkDeliveryOpt' },
+                    @{ Flag = $doAppsBackground;  Key = 'ChkAppsBackground' },
+                    @{ Flag = $doNetworkLatency;  Key = 'ChkNetworkLatency' }
+                )
+                foreach ($item in $dryItems) {
+                    if ($item.Flag) { Write-Log (T 'LogDryRunPrefix' (T $item.Key)) "INFO" }
+                }
+                # The "System Cleanup & Performance" group logs its own
+                # per-feature dry-run lines internally.
+                Set-WgoMoreOptimizations -Hibernation $doHibernation -PowerPlan $doPowerPlan `
+                    -TempCleanup $doTempCleanup -HotCorners $doHotCorners -RecallBlock $doRecallBlock `
+                    -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
+                    -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize -DryRun $true
+            } else {
+                New-WgoRestorePoint | Out-Null
 
-            Set-WgoExtraPrivacy -AdvertisingId $doAdvertisingId -TailoredExp $doTailoredExp `
-                -DiagTrackSvc $doDiagTrackSvc -CopilotBlock $doCopilotBlock -InputTelemetry $doInputTelemetry
+                if ($doBloat)    { Remove-WgoBloatware }
+                if ($doSearch)   { Set-WgoLocalSearch }
+                if ($doVisual)   { Set-WgoVisualEffects }
+                if ($doPrivacy)  { Set-WgoPrivacyPolicies }
+                if ($doDrivers)  { Set-WgoBlockDriverUpdates }
+                if ($doPagefile) { Set-WgoPagefile }
 
-            Set-WgoAdvancedTweaks -DiagTrackFull $doDiagTrackFull -EdgeWidgets $doEdgeWidgets `
-                -DeliveryOpt $doDeliveryOpt -AppsBackground $doAppsBackground -NetworkLatency $doNetworkLatency
+                Set-WgoExtraPrivacy -AdvertisingId $doAdvertisingId -TailoredExp $doTailoredExp `
+                    -DiagTrackSvc $doDiagTrackSvc -CopilotBlock $doCopilotBlock -InputTelemetry $doInputTelemetry
+
+                Set-WgoAdvancedTweaks -DiagTrackFull $doDiagTrackFull -EdgeWidgets $doEdgeWidgets `
+                    -DeliveryOpt $doDeliveryOpt -AppsBackground $doAppsBackground -NetworkLatency $doNetworkLatency
+
+                Set-WgoMoreOptimizations -Hibernation $doHibernation -PowerPlan $doPowerPlan `
+                    -TempCleanup $doTempCleanup -HotCorners $doHotCorners -RecallBlock $doRecallBlock `
+                    -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
+                    -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize -DryRun $false
+            }
 
             Write-Log (T 'LogOptDone') "OK"
         } catch {
@@ -2292,9 +3021,73 @@ $ctrl['btnRunSelected'].Add_Click({
         }
     } -ArgumentList @($doBloat, $doSearch, $doVisual, $doPrivacy, $doDrivers, $doPagefile,
                        $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry,
-                       $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency) `
+                       $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency,
+                       $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
+                       $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doDryRun) `
       -OnCompleted {
         $ctrl['btnRunSelected'].IsEnabled = $true
+    }
+})
+
+$ctrl['btnRestoreDefaults'].Add_Click({
+    $confirm = [System.Windows.Forms.MessageBox]::Show(
+        (T 'LogRestoreDefaultsStart'),
+        "WGO",
+        [System.Windows.Forms.MessageBoxButtons]::YesNo,
+        [System.Windows.Forms.MessageBoxIcon]::Warning
+    )
+    if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+
+    $ctrl['btnRestoreDefaults'].IsEnabled = $false
+    Start-WgoBackgroundTask -ScriptBlock {
+        try {
+            Restore-WgoDefaults
+        } catch {
+            Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+        }
+    } -OnCompleted {
+        $ctrl['btnRestoreDefaults'].IsEnabled = $true
+    }
+})
+
+$ctrl['btnExportProfile'].Add_Click({
+    try {
+        Write-Log (T 'LogExportStart') "INFO"
+        $dlg = New-Object System.Windows.Forms.SaveFileDialog
+        $dlg.Filter   = "JSON (*.json)|*.json"
+        $dlg.FileName = "WGO-Profile.json"
+        if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+            $profile = @{}
+            foreach ($n in $script:optimizationCheckboxNames) {
+                if ($ctrl[$n]) { $profile[$n] = [bool]$ctrl[$n].IsChecked }
+            }
+            $profile['chkDryRun'] = [bool]$ctrl['chkDryRun'].IsChecked
+            ($profile | ConvertTo-Json) | Set-Content -Path $dlg.FileName -Encoding UTF8
+            Write-Log (T 'LogExportOk' $dlg.FileName) "OK"
+        } else {
+            Write-Log (T 'LogExportCancelled') "WARN"
+        }
+    } catch {
+        Write-Log (T 'LogExportError' $_.Exception.Message) "ERROR"
+    }
+})
+
+$ctrl['btnImportProfile'].Add_Click({
+    try {
+        Write-Log (T 'LogImportStart') "INFO"
+        $dlg = New-Object System.Windows.Forms.OpenFileDialog
+        $dlg.Filter = "JSON (*.json)|*.json"
+        if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+            $profile = Get-Content -Path $dlg.FileName -Raw | ConvertFrom-Json
+            foreach ($prop in $profile.PSObject.Properties) {
+                if ($ctrl[$prop.Name]) { $ctrl[$prop.Name].IsChecked = [bool]$prop.Value }
+            }
+            Write-Log (T 'LogImportOk' $dlg.FileName) "OK"
+        } else {
+            Write-Log (T 'LogImportCancelled') "WARN"
+        }
+    } catch {
+        Write-Log (T 'LogImportError' $_.Exception.Message) "ERROR"
     }
 })
 
@@ -2378,6 +3171,16 @@ $ctrl['btnInstallApps'].Add_Click({
     Show-WgoFatalError "btnInstallApps click handler failed: $($_.Exception.Message)"
     $ctrl['btnInstallApps'].IsEnabled = $true
   }
+})
+
+$ctrl['btnRunAmdOptimizer'].Add_Click({
+    Start-WgoExternalScript -Url "https://raw.githubusercontent.com/Khotyz/AMDSTABILITYOPTIMIZER/main/AMD-Stability-Optimizer.ps1" `
+        -Name "AMD Stability Optimizer" -Downloader 'iwr'
+})
+
+$ctrl['btnRunMassgrave'].Add_Click({
+    Start-WgoExternalScript -Url "https://get.activated.win" `
+        -Name "Microsoft Activation Scripts (MASSGRAVE)" -Downloader 'irm'
 })
 
 # ============================================================================
