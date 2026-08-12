@@ -123,6 +123,8 @@ $Lang['en-US'] = @{
     AppGogDesc        = "DRM-free digital game store and launcher."
     AppSevenZipDesc   = "Free, open-source file archiver with a very high compression ratio."
     AppWiztreeDesc    = "Extremely fast disk space analyzer, an alternative to WinDirStat."
+    AppMemreductDesc  = "Lightweight real-time RAM monitoring and cleaning utility."
+    AppBleachbitDesc  = "Free, open-source tool to clean disk clutter and protect privacy."
     AppMoonlightDesc  = "Open-source game streaming client, used to connect to a Sunshine or NVIDIA GameStream host."
     AppSunshineDesc   = "Self-hosted, open-source game stream host for Moonlight, with low-latency GPU-accelerated encoding."
     MsgReady          = "Ready."
@@ -307,6 +309,8 @@ $Lang['pt-BR'] = @{
     AppGogDesc        = "Loja e launcher de jogos digitais livres de DRM."
     AppSevenZipDesc   = "Compactador de arquivos gratuito e de c" + $c_oacute + "digo aberto, com alt" + $c_iacute + "ssima taxa de compress" + $c_atil + "o."
     AppWiztreeDesc    = "Analisador de espa" + $c_ccedil + "o em disco extremamente r" + $c_aacute + "pido, alternativa ao WinDirStat."
+    AppMemreductDesc  = "Utilit" + $c_aacute + "rio leve de monitoramento e limpeza de RAM em tempo real."
+    AppBleachbitDesc  = "Ferramenta gratuita e de c" + $c_oacute + "digo aberto para limpar arquivos desnecess" + $c_aacute + "rios do disco e proteger a privacidade."
     AppMoonlightDesc  = "Cliente de streaming de jogos de c" + $c_oacute + "digo aberto, usado para conectar a um host Sunshine ou NVIDIA GameStream."
     AppSunshineDesc   = "Host de streaming de jogos auto-hospedado e de c" + $c_oacute + "digo aberto para o Moonlight, com codifica" + $c_ccedil + $c_atil + "o acelerada por GPU e baixa lat" + $c_ecirc + "ncia."
     MsgReady          = "Pronto."
@@ -491,6 +495,8 @@ $Lang['es-ES'] = @{
     AppGogDesc        = "Tienda y launcher de juegos digitales libres de DRM."
     AppSevenZipDesc   = "Compresor de archivos gratuito y de c" + [char]0x00F3 + "digo abierto, con una tasa de compresi" + [char]0x00F3 + "n muy alta."
     AppWiztreeDesc    = "Analizador de espacio en disco extremadamente r" + [char]0x00E1 + "pido, alternativa a WinDirStat."
+    AppMemreductDesc  = "Utilidad ligera de monitoreo y limpieza de RAM en tiempo real."
+    AppBleachbitDesc  = "Herramienta gratuita y de c" + [char]0x00F3 + "digo abierto para limpiar archivos innecesarios del disco y proteger la privacidad."
     AppMoonlightDesc  = "Cliente de transmisi" + [char]0x00F3 + "n de juegos de c" + [char]0x00F3 + "digo abierto, usado para conectarse a un host Sunshine o NVIDIA GameStream."
     AppSunshineDesc   = "Host de transmisi" + [char]0x00F3 + "n de juegos autoalojado y de c" + [char]0x00F3 + "digo abierto para Moonlight, con codificaci" + [char]0x00F3 + "n acelerada por GPU y baja latencia."
     MsgReady          = "Listo."
@@ -678,6 +684,8 @@ $Lang['zh-CN'] = @{
     AppGogDesc        = (ZH 0x65E0) + " DRM " + (ZH 0x6570,0x5B57) + (ZH 0x6E38,0x620F) + (ZH 0x5546,0x5E97)
     AppSevenZipDesc   = (ZH 0x514D,0x8D39) + (ZH 0x5F00,0x6E90) + (ZH 0x7684) + (ZH 0x6587,0x4EF6,0x538B,0x7F29,0x5DE5,0x5177) + "," + (ZH 0x538B,0x7F29,0x7387) + (ZH 0x6781,0x9AD8)
     AppWiztreeDesc    = (ZH 0x901F,0x5EA6,0x6781,0x5FEB) + (ZH 0x7684) + (ZH 0x78C1,0x76D8,0x7A7A,0x95F4,0x5206,0x6790,0x5DE5,0x5177) + "," + (ZH 0x662F) + " WinDirStat " + (ZH 0x7684,0x66FF,0x4EE3,0x54C1)
+    AppMemreductDesc  = (ZH 0x8F7B,0x91CF,0x7EA7) + (ZH 0x5B9E,0x65F6) + (ZH 0x5185,0x5B58,0x76D1,0x63A7,0x4E0E,0x6E05,0x7406,0x5DE5,0x5177)
+    AppBleachbitDesc  = (ZH 0x514D,0x8D39) + (ZH 0x5F00,0x6E90) + (ZH 0x5DE5,0x5177) + "," + (ZH 0x7528,0x4E8E,0x6E05,0x7406,0x78C1,0x76D8,0x5783,0x573E,0x5E76,0x4FDD,0x62A4,0x9690,0x79C1)
     AppMoonlightDesc  = (ZH 0x5F00,0x6E90,0x6E38,0x620F,0x4E32,0x6D41,0x5BA2,0x6237,0x7AEF) + "," + (ZH 0x7528,0x4E8E,0x8FDE,0x63A5) + " Sunshine " + (ZH 0x6216) + " NVIDIA GameStream " + (ZH 0x4E3B,0x673A)
     AppSunshineDesc   = (ZH 0x81EA,0x6258,0x7BA1,0x7684,0x5F00,0x6E90,0x6E38,0x620F,0x4E32,0x6D41,0x4E3B,0x673A) + "," + (ZH 0x914D,0x5408) + " Moonlight " + (ZH 0x4F7F,0x7528) + "," + (ZH 0x652F,0x6301) + " GPU " + (ZH 0x786C,0x4EF6,0x52A0,0x901F,0x7F16,0x7801) + "," + (ZH 0x5EF6,0x8FDF,0x6781,0x4F4E)
     MsgReady          = (ZH 0x5C31,0x7EEA)
@@ -1363,6 +1371,20 @@ $Global:CurrentLangCode = "pt-BR"
 
                                 <Border Style="{StaticResource CardStyle}">
                                     <StackPanel>
+                                        <CheckBox x:Name="chkMemreduct" Content="Mem Reduct" FontWeight="Bold" Tag="memreduct"/>
+                                        <TextBlock x:Name="txtMemreductDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkBleachbit" Content="BleachBit" FontWeight="Bold" Tag="bleachbit"/>
+                                        <TextBlock x:Name="txtBleachbitDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
                                         <CheckBox x:Name="chkMoonlight" Content="Moonlight" FontWeight="Bold" Tag="moonlight"/>
                                         <TextBlock x:Name="txtMoonlightDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
                                     </StackPanel>
@@ -1446,6 +1468,7 @@ function Start-WgoBackgroundTask {
     $rs.SessionStateProxy.SetVariable('WgoAppCatalog', $Global:WgoAppCatalog)
     $rs.SessionStateProxy.SetVariable('BloatwareWhitelist', $BloatwareWhitelist)
     $rs.SessionStateProxy.SetVariable('BloatwareTargets', $BloatwareTargets)
+    $rs.SessionStateProxy.SetVariable('BloatwareCriticalProtect', $BloatwareCriticalProtect)
 
     $ps = [powershell]::Create()
     $ps.Runspace = $rs
@@ -1525,6 +1548,8 @@ $names = @(
     'chkGog','txtGogDesc',
     'chkSevenZip','txtSevenZipDesc',
     'chkWiztree','txtWiztreeDesc',
+    'chkMemreduct','txtMemreductDesc',
+    'chkBleachbit','txtBleachbitDesc',
     'chkMoonlight','txtMoonlightDesc',
     'chkSunshine','txtSunshineDesc',
     'txtExtScriptsWarning',
@@ -1686,6 +1711,10 @@ function Update-UILanguage {
     $ctrl['txtSevenZipDesc'].Text        = $t.AppSevenZipDesc
     $ctrl['chkWiztree'].Content           = "WizTree"
     $ctrl['txtWiztreeDesc'].Text         = $t.AppWiztreeDesc
+    $ctrl['chkMemreduct'].Content         = "Mem Reduct"
+    $ctrl['txtMemreductDesc'].Text       = $t.AppMemreductDesc
+    $ctrl['chkBleachbit'].Content         = "BleachBit"
+    $ctrl['txtBleachbitDesc'].Text       = $t.AppBleachbitDesc
     $ctrl['chkMoonlight'].Content         = "Moonlight"
     $ctrl['txtMoonlightDesc'].Text       = $t.AppMoonlightDesc
     $ctrl['chkSunshine'].Content          = "Sunshine"
@@ -1743,15 +1772,41 @@ $BloatwareWhitelist = @(
     "Microsoft.WebMediaExtensions",
     "Microsoft.VCLibs",
     "Microsoft.VCLibs.140.00",
+    "Microsoft.VCLibs.140.00.UWPDesktop",
     "Microsoft.NET.Native",
     "Microsoft.NET.Native.Framework",
     "Microsoft.NET.Native.Runtime",
     "Microsoft.UI.Xaml",
+    "Microsoft.UI.Xaml.2.8",
+    "Microsoft.UI.Xaml.CBS",
     "Microsoft.Services.Store.Engagement",
     "Microsoft.StorePurchaseApp",
     "Microsoft.DesktopAppInstaller",
-    "Microsoft.WindowsAppRuntime"
+    "Microsoft.WindowsAppRuntime",
+    "Microsoft.Winget.Source",
+    "Microsoft.WindowsTerminal"
 )
+
+# Packages that must never be touched by the debloat routine no matter what
+# ends up in $BloatwareTargets, since removing them silently breaks winget /
+# App Installer. Matched as a name prefix, not an exact string, because
+# installed packages carry version-specific suffixes (e.g. Microsoft.UI.Xaml.2.8).
+$BloatwareCriticalProtect = @(
+    "Microsoft.DesktopAppInstaller",
+    "Microsoft.VCLibs",
+    "Microsoft.UI.Xaml",
+    "Microsoft.WindowsStore",
+    "Microsoft.NET.Native"
+)
+
+function Test-WgoProtectedPackage {
+    param([string]$Name)
+    if ([string]::IsNullOrEmpty($Name)) { return $false }
+    foreach ($p in $BloatwareCriticalProtect) {
+        if ($Name -like "$p*") { return $true }
+    }
+    return ($BloatwareWhitelist -contains $Name)
+}
 
 $BloatwareTargets = @(
     "Microsoft.Copilot",
@@ -1797,17 +1852,17 @@ $BloatwareTargets = @(
 function Remove-WgoBloatware {
     Write-Log (T 'LogBloatStart') "INFO"
     foreach ($appName in $BloatwareTargets) {
-        if ($BloatwareWhitelist -contains $appName) { continue }
+        if (Test-WgoProtectedPackage -Name $appName) { continue }
         try {
             $pkgs = Get-AppxPackage -AllUsers -Name "*$appName*" -ErrorAction SilentlyContinue |
-                    Where-Object { $BloatwareWhitelist -notcontains $_.Name }
+                    Where-Object { -not (Test-WgoProtectedPackage -Name $_.Name) }
             foreach ($p in $pkgs) {
                 Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction SilentlyContinue
                 Write-Log (T 'LogBloatUserRemoved' $p.Name) "OK"
             }
 
             $prov = Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue |
-                    Where-Object { $_.DisplayName -like "*$appName*" -and ($BloatwareWhitelist -notcontains $_.DisplayName) }
+                    Where-Object { $_.DisplayName -like "*$appName*" -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) }
             foreach ($pp in $prov) {
                 Remove-AppxProvisionedPackage -Online -PackageName $pp.PackageName -ErrorAction SilentlyContinue
                 Write-Log (T 'LogBloatProvRemoved' $pp.DisplayName) "OK"
@@ -2678,6 +2733,8 @@ $Global:WgoAppCatalog = @{
     'goggalaxy'               = @{ Name = "GOG Galaxy";                WingetId = "GOG.Galaxy";                           ChocoId = "goggalaxy" }
     '7zip'                    = @{ Name = "7-Zip";                     WingetId = "7zip.7zip";                            ChocoId = "7zip.install" }
     'wiztree'                 = @{ Name = "WizTree";                   WingetId = "AntibodySoftware.WizTree";             ChocoId = "wiztree" }
+    'memreduct'               = @{ Name = "Mem Reduct";                WingetId = "Henry++.MemReduct";                    ChocoId = "memreduct" }
+    'bleachbit'                = @{ Name = "BleachBit";                 WingetId = "BleachBit.BleachBit";                  ChocoId = "bleachbit" }
     'moonlight'               = @{ Name = "Moonlight";                 WingetId = "MoonlightGameStreamingProject.Moonlight"; ChocoId = "moonlight-qt" }
     'sunshine'                = @{ Name = "Sunshine";                  WingetId = "LizardByte.Sunshine";                  ChocoId = "sunshine" }
 }
@@ -2839,7 +2896,7 @@ function Install-WgoApp {
 # scriptblock (i.e. from a background button action).
 $Global:WgoSharedFunctionNames = @(
     'Write-Log', 'T', 'Show-WgoFatalError',
-    'New-WgoRestorePoint', 'Remove-WgoBloatware',
+    'New-WgoRestorePoint', 'Remove-WgoBloatware', 'Test-WgoProtectedPackage',
     'Set-WgoLocalSearch', 'Set-WgoVisualEffects', 'Set-WgoPrivacyPolicies',
     'Set-WgoExtraPrivacy', 'Set-WgoAdvancedTweaks', 'Set-WgoBlockDriverUpdates', 'Set-WgoPagefile',
     'Set-WgoMoreOptimizations', 'Restore-WgoDefaults',
@@ -3128,6 +3185,8 @@ $ctrl['btnInstallApps'].Add_Click({
         @{ Chk = $ctrl['chkGog'];     Name = "GOG Galaxy" },
         @{ Chk = $ctrl['chkSevenZip']; Name = "7-Zip" },
         @{ Chk = $ctrl['chkWiztree'];  Name = "WizTree" },
+        @{ Chk = $ctrl['chkMemreduct']; Name = "Mem Reduct" },
+        @{ Chk = $ctrl['chkBleachbit']; Name = "BleachBit" },
         @{ Chk = $ctrl['chkMoonlight']; Name = "Moonlight" },
         @{ Chk = $ctrl['chkSunshine'];  Name = "Sunshine" }
     )
