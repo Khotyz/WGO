@@ -17,6 +17,13 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, Sys
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 $isAdmin = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
+# Non-terminating cmdlet errors (e.g. Access Denied) must actually reach the
+# nearest try/catch instead of silently being written to the error stream
+# while execution carries on to the next line and logs a false "OK". Any
+# call that intentionally wants to fail silently already sets its own
+# -ErrorAction Ignore/SilentlyContinue, which still overrides this.
+$ErrorActionPreference = 'Stop'
+
 if (-not $isAdmin) {
     try {
         $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -190,6 +197,8 @@ $Lang['en-US'] = @{
     ChkOfficeTelemetry   = "Block Office and OneDrive telemetry"
     ChkExtraSchedTasks   = "Remove additional telemetry scheduled tasks"
     ChkDiskOptimize      = "Auto-detect disks (SSD/HDD) and configure TRIM / scheduled defrag"
+    ChkHagsGameMode      = "Enable Game Mode and Hardware-Accelerated GPU Scheduling (HAGS)"
+    ChkUltimatePerf      = "Enable Ultimate Performance power plan with CPU minimum state at 100%"
     ChkDryRun            = "Dry Run (only log what would change, apply nothing)"
     BtnRestoreDefaults   = "Restore Defaults"
     BtnExportProfile     = "Export Profile"
@@ -205,6 +214,8 @@ $Lang['en-US'] = @{
     LogOfficeTelemetryOk      = "Office and OneDrive telemetry blocked."
     LogExtraSchedTasksOk      = "Additional telemetry scheduled tasks disabled."
     LogDiskOptimizeOk         = "Disk optimization applied: {0}"
+    LogHagsGameModeOk         = "Game Mode and Hardware-Accelerated GPU Scheduling (HAGS) enabled. A restart is recommended for HAGS to take effect."
+    LogUltimatePerfOk         = "Ultimate Performance power plan enabled and set active, with CPU minimum state at 100% (AC and DC)."
     LogMoreError              = "Error applying tweak ({0}): {1}"
     LogMoreDone               = "System cleanup & performance tweaks finished."
 
@@ -376,6 +387,8 @@ $Lang['pt-BR'] = @{
     ChkOfficeTelemetry   = "Bloquear telemetria do Office e do OneDrive"
     ChkExtraSchedTasks   = "Remover tarefas agendadas adicionais de telemetria"
     ChkDiskOptimize      = "Detectar discos (SSD/HDD) automaticamente e configurar TRIM / desfragmenta" + $c_ccedil + $c_atil + "o agendada"
+    ChkHagsGameMode      = "Ativar Modo de Jogo e agendamento de GPU acelerado por hardware (HAGS)"
+    ChkUltimatePerf      = "Ativar plano de energia Desempenho M" + $c_aacute + "ximo (Ultimate Performance) com CPU m" + $c_iacute + "nima em 100%"
     ChkDryRun            = "Modo Simula" + $c_ccedil + $c_atil + "o (apenas registra o que seria alterado, sem aplicar)"
     BtnRestoreDefaults   = "Restaurar Padr" + $c_otil + "es"
     BtnExportProfile     = "Exportar Perfil"
@@ -391,6 +404,8 @@ $Lang['pt-BR'] = @{
     LogOfficeTelemetryOk      = "Telemetria do Office e do OneDrive bloqueada."
     LogExtraSchedTasksOk      = "Tarefas agendadas adicionais de telemetria desativadas."
     LogDiskOptimizeOk         = "Otimiza" + $c_ccedil + $c_atil + "o de disco aplicada: {0}"
+    LogHagsGameModeOk         = "Modo de Jogo e HAGS (agendamento de GPU acelerado por hardware) ativados. Reinicie o PC para o HAGS ter efeito."
+    LogUltimatePerfOk         = "Plano Desempenho M" + $c_aacute + "ximo ativado e definido como padr" + $c_atil + "o, com CPU m" + $c_iacute + "nima em 100% (energia e bateria)."
     LogMoreError              = "Erro ao aplicar ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpeza e desempenho do sistema conclu" + $c_iacute + "dos."
 
@@ -562,6 +577,8 @@ $Lang['es-ES'] = @{
     ChkOfficeTelemetry   = "Bloquear la telemetr" + [char]0x00ED + "a de Office y OneDrive"
     ChkExtraSchedTasks   = "Eliminar tareas programadas adicionales de telemetr" + [char]0x00ED + "a"
     ChkDiskOptimize      = "Detectar discos (SSD/HDD) autom" + [char]0x00E1 + "ticamente y configurar TRIM / desfragmentaci" + [char]0x00F3 + "n programada"
+    ChkHagsGameMode      = "Activar Modo de Juego y la planificaci" + [char]0x00F3 + "n de GPU acelerada por hardware (HAGS)"
+    ChkUltimatePerf      = "Activar el plan de energ" + [char]0x00ED + "a Rendimiento M" + [char]0x00E1 + "ximo (Ultimate Performance) con la CPU al m" + [char]0x00ED + "nimo en 100%"
     ChkDryRun            = "Modo Simulaci" + [char]0x00F3 + "n (solo registra los cambios sin aplicarlos)"
     BtnRestoreDefaults   = "Restaurar Valores Predeterminados"
     BtnExportProfile     = "Exportar Perfil"
@@ -577,6 +594,8 @@ $Lang['es-ES'] = @{
     LogOfficeTelemetryOk      = "Telemetr" + [char]0x00ED + "a de Office y OneDrive bloqueada."
     LogExtraSchedTasksOk      = "Tareas programadas adicionales de telemetr" + [char]0x00ED + "a desactivadas."
     LogDiskOptimizeOk         = "Optimizaci" + [char]0x00F3 + "n de disco aplicada: {0}"
+    LogHagsGameModeOk         = "Modo de Juego y HAGS (planificaci" + [char]0x00F3 + "n de GPU acelerada por hardware) activados. Se recomienda reiniciar para que HAGS surta efecto."
+    LogUltimatePerfOk         = "Plan Rendimiento M" + [char]0x00E1 + "ximo activado y establecido como predeterminado, con la CPU al m" + [char]0x00ED + "nimo en 100% (CA y bater" + [char]0x00ED + "a)."
     LogMoreError              = "Error al aplicar el ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpieza y rendimiento del sistema finalizados."
 
@@ -751,6 +770,8 @@ $Lang['zh-CN'] = @{
     ChkOfficeTelemetry   = (ZH 0x963B,0x6B62) + " Office " + (ZH 0x548C) + " OneDrive " + (ZH 0x9065,0x6D4B)
     ChkExtraSchedTasks   = (ZH 0x5220,0x9664) + (ZH 0x5176,0x4ED6,0x9065,0x6D4B,0x8BA1,0x5212,0x4EFB,0x52A1)
     ChkDiskOptimize      = (ZH 0x81EA,0x52A8,0x68C0,0x6D4B) + (ZH 0x78C1,0x76D8) + " (SSD/HDD) " + (ZH 0x5E76,0x914D,0x7F6E) + " TRIM " + (ZH 0x6216) + (ZH 0x8BA1,0x5212,0x788E,0x7247,0x6574,0x7406)
+    ChkHagsGameMode      = (ZH 0x542F,0x7528) + (ZH 0x6E38,0x620F,0x6A21,0x5F0F) + (ZH 0x548C) + (ZH 0x786C,0x4EF6,0x52A0,0x901F) + "GPU" + (ZH 0x8C03,0x5EA6) + " (HAGS)"
+    ChkUltimatePerf      = (ZH 0x542F,0x7528) + (ZH 0x6781,0x9650,0x6027,0x80FD) + (ZH 0x7535,0x6E90,0x8BA1,0x5212) + "," + "CPU " + (ZH 0x6700,0x4F4E,0x72B6,0x6001) + (ZH 0x8BBE,0x4E3A) + " 100%"
     ChkDryRun            = (ZH 0x6A21,0x62DF,0x8FD0,0x884C,0x6A21,0x5F0F) + " (" + (ZH 0x4EC5,0x8BB0,0x5F55,0x5C06,0x8981,0x66F4,0x6539,0x7684,0x5185,0x5BB9,0x800C,0x4E0D,0x5B9E,0x9645,0x5E94,0x7528) + ")"
     BtnRestoreDefaults   = (ZH 0x6062,0x590D,0x9ED8,0x8BA4,0x8BBE,0x7F6E)
     BtnExportProfile     = (ZH 0x5BFC,0x51FA,0x914D,0x7F6E,0x6587,0x4EF6)
@@ -766,6 +787,8 @@ $Lang['zh-CN'] = @{
     LogOfficeTelemetryOk      = "Office " + (ZH 0x548C) + " OneDrive " + (ZH 0x9065,0x6D4B) + (ZH 0x5DF2,0x963B,0x6B62)
     LogExtraSchedTasksOk      = (ZH 0x5176,0x4ED6,0x9065,0x6D4B,0x8BA1,0x5212,0x4EFB,0x52A1) + (ZH 0x5DF2,0x7981,0x7528)
     LogDiskOptimizeOk         = (ZH 0x78C1,0x76D8,0x4F18,0x5316) + (ZH 0x5DF2,0x5E94,0x7528) + ": {0}"
+    LogHagsGameModeOk         = (ZH 0x6E38,0x620F,0x6A21,0x5F0F) + (ZH 0x548C) + (ZH 0x786C,0x4EF6,0x52A0,0x901F) + "GPU" + (ZH 0x8C03,0x5EA6) + " (HAGS) " + (ZH 0x5DF2,0x542F,0x7528) + "." + (ZH 0x5EFA,0x8BAE) + (ZH 0x91CD,0x542F) + (ZH 0x4EE5,0x4F7F) + " HAGS " + (ZH 0x751F,0x6548) + "."
+    LogUltimatePerfOk         = (ZH 0x6781,0x9650,0x6027,0x80FD) + (ZH 0x7535,0x6E90,0x8BA1,0x5212) + (ZH 0x5DF2,0x542F,0x7528) + (ZH 0x5E76) + (ZH 0x8BBE,0x4E3A) + (ZH 0x9ED8,0x8BA4) + "," + "CPU " + (ZH 0x6700,0x4F4E,0x72B6,0x6001) + (ZH 0x8BBE,0x4E3A) + " 100% (" + (ZH 0x4EA4,0x6D41) + (ZH 0x548C) + (ZH 0x7535,0x6C60) + ")."
     LogMoreError              = (ZH 0x5E94,0x7528) + (ZH 0x8C03,0x6574) + (ZH 0x65F6,0x51FA,0x9519) + " ({0}): {1}"
     LogMoreDone               = (ZH 0x7CFB,0x7EDF,0x6E05,0x7406,0x4E0E,0x6027,0x80FD) + (ZH 0x8C03,0x6574) + (ZH 0x5B8C,0x6210)
 
@@ -1271,6 +1294,8 @@ $Global:CurrentLangCode = "pt-BR"
                                 <CheckBox x:Name="chkOfficeTelemetry" Content="Block Office / OneDrive telemetry" IsChecked="True"/>
                                 <CheckBox x:Name="chkExtraSchedTasks" Content="Remove additional telemetry scheduled tasks" IsChecked="True"/>
                                 <CheckBox x:Name="chkDiskOptimize" Content="Auto-configure TRIM / scheduled defrag (SSD/HDD)" IsChecked="True"/>
+                                <CheckBox x:Name="chkHagsGameMode" Content="Enable Game Mode and HAGS" IsChecked="False"/>
+                                <CheckBox x:Name="chkUltimatePerf" Content="Enable Ultimate Performance with CPU min state at 100%" IsChecked="False"/>
                             </StackPanel>
                         </GroupBox>
 
@@ -1457,7 +1482,12 @@ function Start-WgoBackgroundTask {
     )
 
     $rs = [runspacefactory]::CreateRunspace()
-    $rs.ApartmentState = [System.Threading.ApartmentState]::STA
+    # MTA, not STA: this runspace never touches WPF/COM-STA objects (only
+    # plain data + cmdlets), and several Storage/CIM cmdlets used here
+    # (Get-PhysicalDisk) misbehave under STA, occasionally surfacing a stray
+    # access-denied error during pipeline teardown even though the actual
+    # work already completed successfully.
+    $rs.ApartmentState = [System.Threading.ApartmentState]::MTA
     $rs.ThreadOptions   = [System.Management.Automation.Runspaces.PSThreadOptions]::ReuseThread
     $rs.Open()
 
@@ -1469,6 +1499,7 @@ function Start-WgoBackgroundTask {
     $rs.SessionStateProxy.SetVariable('BloatwareWhitelist', $BloatwareWhitelist)
     $rs.SessionStateProxy.SetVariable('BloatwareTargets', $BloatwareTargets)
     $rs.SessionStateProxy.SetVariable('BloatwareCriticalProtect', $BloatwareCriticalProtect)
+    $rs.SessionStateProxy.SetVariable('ErrorActionPreference', 'Stop')
 
     $ps = [powershell]::Create()
     $ps.Runspace = $rs
@@ -1497,14 +1528,16 @@ function Start-WgoBackgroundTask {
         try {
             $ps.EndInvoke($asyncResult) | Out-Null
             foreach ($errRec in $ps.Streams.Error) {
-                Write-Log (T 'LogUnhandledError' $errRec.ToString()) "ERROR"
+                $detail = "$($errRec.ToString()) | Category=$($errRec.CategoryInfo.Category) | Reason=$($errRec.CategoryInfo.Reason) | Target=$($errRec.CategoryInfo.TargetName) | At=$($errRec.InvocationInfo.PositionMessage -replace '[\r\n]+',' ')"
+                Write-Log (T 'LogUnhandledError' $detail) "ERROR"
             }
         } catch {
-            Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+            $detail = "$($_.Exception.GetType().FullName): $($_.Exception.Message) | At=$($_.ScriptStackTrace -replace '[\r\n]+',' ')"
+            Write-Log (T 'LogUnhandledError' $detail) "ERROR"
         } finally {
-            $ps.Dispose()
-            $rs.Close()
-            $rs.Dispose()
+            try { $ps.Dispose() } catch {}
+            try { $rs.Close() } catch {}
+            try { $rs.Dispose() } catch {}
             if ($OnCompleted) {
                 try { & $OnCompleted } catch {
                     Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
@@ -1534,7 +1567,7 @@ $names = @(
     'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
     'grpAdvancedTweaks','chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
     'grpMoreOptimizations','chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
-    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
+    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
     'btnRunSelected','btnRestoreDefaults','btnExportProfile','btnImportProfile',
     'grpInstaller','btnInstallApps',
     'txtChocoRequired','txtChocoStatus','btnInstallChoco',
