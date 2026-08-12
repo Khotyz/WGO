@@ -1477,7 +1477,7 @@ function Start-WgoBackgroundTask {
     # to call into the worker runspace (read live via Get-Item, so there is no
     # duplicated source of truth to keep in sync).
     $funcDefs = ($Global:WgoSharedFunctionNames | ForEach-Object {
-        $fn = Get-Item "function:\$_" -ErrorAction SilentlyContinue
+        $fn = Get-Item "function:\$_" -ErrorAction Ignore
         if ($fn) { "function $_ {`n$($fn.ScriptBlock)`n}" }
     }) -join "`n`n"
     [void]$ps.AddScript($funcDefs)
@@ -1737,8 +1737,8 @@ function Update-UILanguage {
 function New-WgoRestorePoint {
     Write-Log (T 'LogRestoreTry') "INFO"
     try {
-        $svc = Get-Service -Name "srservice" -ErrorAction SilentlyContinue
-        Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction SilentlyContinue
+        $svc = Get-Service -Name "srservice" -ErrorAction Ignore
+        Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction Ignore
 
         Checkpoint-Computer -Description "WGO - Before optimizations" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
         Write-Log (T 'LogRestoreOk') "OK"
@@ -1854,17 +1854,17 @@ function Remove-WgoBloatware {
     foreach ($appName in $BloatwareTargets) {
         if (Test-WgoProtectedPackage -Name $appName) { continue }
         try {
-            $pkgs = Get-AppxPackage -AllUsers -Name "*$appName*" -ErrorAction SilentlyContinue |
+            $pkgs = Get-AppxPackage -AllUsers -Name "*$appName*" -ErrorAction Ignore |
                     Where-Object { -not (Test-WgoProtectedPackage -Name $_.Name) }
             foreach ($p in $pkgs) {
-                Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction SilentlyContinue
+                Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction Ignore
                 Write-Log (T 'LogBloatUserRemoved' $p.Name) "OK"
             }
 
-            $prov = Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue |
+            $prov = Get-AppxProvisionedPackage -Online -ErrorAction Ignore |
                     Where-Object { $_.DisplayName -like "*$appName*" -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) }
             foreach ($pp in $prov) {
-                Remove-AppxProvisionedPackage -Online -PackageName $pp.PackageName -ErrorAction SilentlyContinue
+                Remove-AppxProvisionedPackage -Online -PackageName $pp.PackageName -ErrorAction Ignore
                 Write-Log (T 'LogBloatProvRemoved' $pp.DisplayName) "OK"
             }
         } catch {
@@ -1987,7 +1987,7 @@ function Set-WgoPrivacyPolicies {
             "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
         )
         foreach ($task in $ceipTasks) {
-            try { Disable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction SilentlyContinue | Out-Null } catch {}
+            try { Disable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
         }
 
         # Location & Sensors
@@ -2066,10 +2066,10 @@ function Set-WgoExtraPrivacy {
     if ($DiagTrackSvc) {
         try {
             foreach ($svcName in @("DiagTrack", "dmwappushservice")) {
-                $svc = Get-Service -Name $svcName -ErrorAction SilentlyContinue
+                $svc = Get-Service -Name $svcName -ErrorAction Ignore
                 if ($svc) {
-                    Stop-Service -Name $svcName -Force -ErrorAction SilentlyContinue
-                    Set-Service -Name $svcName -StartupType Disabled -ErrorAction SilentlyContinue
+                    Stop-Service -Name $svcName -Force -ErrorAction Ignore
+                    Set-Service -Name $svcName -StartupType Disabled -ErrorAction Ignore
                 }
             }
             Write-Log (T 'LogExtraDiagTrackOk') "OK"
@@ -2141,10 +2141,10 @@ function Set-WgoAdvancedTweaks {
             if (-not (Test-Path $dcKey)) { New-Item -Path $dcKey -Force | Out-Null }
             New-ItemProperty -Path $dcKey -Name "AllowTelemetry" -Value 0 -PropertyType DWord -Force | Out-Null
 
-            $svc = Get-Service -Name "DiagTrack" -ErrorAction SilentlyContinue
+            $svc = Get-Service -Name "DiagTrack" -ErrorAction Ignore
             if ($svc) {
-                Stop-Service -Name "DiagTrack" -Force -ErrorAction SilentlyContinue
-                Set-Service -Name "DiagTrack" -StartupType Disabled -ErrorAction SilentlyContinue
+                Stop-Service -Name "DiagTrack" -Force -ErrorAction Ignore
+                Set-Service -Name "DiagTrack" -StartupType Disabled -ErrorAction Ignore
             }
             Write-Log (T 'LogAdvDiagTrackOk') "OK"
         } catch {
@@ -2203,9 +2203,9 @@ function Set-WgoAdvancedTweaks {
             $ifaceRoot = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
             $activeCount = 0
             if (Test-Path $ifaceRoot) {
-                Get-ChildItem -Path $ifaceRoot -ErrorAction SilentlyContinue | ForEach-Object {
+                Get-ChildItem -Path $ifaceRoot -ErrorAction Ignore | ForEach-Object {
                     $ifPath = $_.PSPath
-                    $props  = Get-ItemProperty -Path $ifPath -ErrorAction SilentlyContinue
+                    $props  = Get-ItemProperty -Path $ifPath -ErrorAction Ignore
                     # Only touch interfaces that actually have an assigned/leased IP (active NICs)
                     $hasIp = ($props.PSObject.Properties.Name -contains 'DhcpIPAddress' -and $props.DhcpIPAddress) -or
                              ($props.PSObject.Properties.Name -contains 'IPAddress' -and $props.IPAddress -and ($props.IPAddress -join '') -notin @('', '0.0.0.0'))
@@ -2284,21 +2284,21 @@ function Set-WgoMoreOptimizations {
             Write-Log (T 'LogDryRunPrefix' (T 'ChkTempCleanup')) "INFO"
         } else {
             try {
-                Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path "$env:WINDIR\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction Ignore
+                Remove-Item -Path "$env:WINDIR\Temp\*" -Recurse -Force -ErrorAction Ignore
 
                 $cutoff = (Get-Date).AddDays(-30)
-                Get-ChildItem -Path "$env:WINDIR\Prefetch\*.pf" -ErrorAction SilentlyContinue |
+                Get-ChildItem -Path "$env:WINDIR\Prefetch\*.pf" -ErrorAction Ignore |
                     Where-Object { $_.LastWriteTime -lt $cutoff } |
-                    Remove-Item -Force -ErrorAction SilentlyContinue
+                    Remove-Item -Force -ErrorAction Ignore
 
                 if (Test-Path "$env:SystemDrive\Windows.old") {
-                    Remove-Item -Path "$env:SystemDrive\Windows.old" -Recurse -Force -ErrorAction SilentlyContinue
+                    Remove-Item -Path "$env:SystemDrive\Windows.old" -Recurse -Force -ErrorAction Ignore
                 }
 
-                Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path "$env:WINDIR\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
-                Start-Service -Name wuauserv -ErrorAction SilentlyContinue
+                Stop-Service -Name wuauserv -Force -ErrorAction Ignore
+                Remove-Item -Path "$env:WINDIR\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction Ignore
+                Start-Service -Name wuauserv -ErrorAction Ignore
 
                 Write-Log (T 'LogTempCleanupOk') "OK"
             } catch {
@@ -2394,7 +2394,7 @@ function Set-WgoMoreOptimizations {
                     "\Microsoft\Office\OfficeTelemetryAgentLogOn2016"
                 )
                 foreach ($task in $extraTasks) {
-                    try { Disable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction SilentlyContinue | Out-Null } catch {}
+                    try { Disable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
                 }
                 Write-Log (T 'LogExtraSchedTasksOk') "OK"
             } catch {
@@ -2409,7 +2409,7 @@ function Set-WgoMoreOptimizations {
             Write-Log (T 'LogDryRunPrefix' (T 'ChkDiskOptimize')) "INFO"
         } else {
             try {
-                $disks = Get-PhysicalDisk -ErrorAction SilentlyContinue
+                $disks = Get-PhysicalDisk -ErrorAction Ignore
                 $hasSSD = $false
                 $hasHDD = $false
                 foreach ($d in $disks) {
@@ -2425,7 +2425,7 @@ function Set-WgoMoreOptimizations {
                 }
                 if ($hasHDD) {
                     # Keep/enable the built-in weekly scheduled defrag for HDDs.
-                    try { Enable-ScheduledTask -TaskName "ScheduledDefrag" -TaskPath "\Microsoft\Windows\Defrag\" -ErrorAction SilentlyContinue | Out-Null } catch {}
+                    try { Enable-ScheduledTask -TaskName "ScheduledDefrag" -TaskPath "\Microsoft\Windows\Defrag\" -ErrorAction Ignore | Out-Null } catch {}
                     $summary += "HDD: Scheduled Defrag ON"
                 }
                 if (-not $hasSSD -and -not $hasHDD) { $summary += "N/A" }
@@ -2483,7 +2483,7 @@ function Set-WgoPagefile {
         $sysDrive = $env:SystemDrive
         $pagefilePath = "$sysDrive\pagefile.sys"
 
-        $existing = Get-CimInstance -ClassName Win32_PageFileSetting -ErrorAction SilentlyContinue |
+        $existing = Get-CimInstance -ClassName Win32_PageFileSetting -ErrorAction Ignore |
                     Where-Object { $_.Name -eq $pagefilePath }
 
         if ($existing) {
@@ -2533,27 +2533,27 @@ function Restore-WgoDefaults {
             "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching"
         )
         foreach ($k in $keysToRemove) {
-            if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction SilentlyContinue }
+            if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore }
         }
 
         # --- HKCU keys/values created/modified by this script ---
         $hkcuAdvKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
         foreach ($name in @("DisableSearchBoxSuggestions","TaskbarDa","EnableSnapAssistFlyout","SnapFill","SnapAssist","DisallowShaking")) {
-            Remove-ItemProperty -Path $hkcuAdvKey -Name $name -Force -ErrorAction SilentlyContinue
+            Remove-ItemProperty -Path $hkcuAdvKey -Name $name -Force -ErrorAction Ignore
         }
-        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCU:\Software\Microsoft\InputPersonalization" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCU:\Software\Microsoft\Clipboard" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\common" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\osm" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "HKCU:\Software\Microsoft\InputPersonalization" -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "HKCU:\Software\Microsoft\Clipboard" -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\common" -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\osm" -Recurse -Force -ErrorAction Ignore
 
         # --- Local search (restore Bing/web search + Cortana consent defaults) ---
-        Remove-ItemProperty -Path $hkcuAdvKey -Name "DisableSearchBoxSuggestions" -Force -ErrorAction SilentlyContinue
-        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Force -ErrorAction SilentlyContinue
-        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Force -ErrorAction SilentlyContinue
+        Remove-ItemProperty -Path $hkcuAdvKey -Name "DisableSearchBoxSuggestions" -Force -ErrorAction Ignore
+        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Force -ErrorAction Ignore
+        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Force -ErrorAction Ignore
 
         # --- Network / multimedia throttling back to Windows defaults ---
         $mmKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
@@ -2563,9 +2563,9 @@ function Restore-WgoDefaults {
         }
         $ifaceRoot = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
         if (Test-Path $ifaceRoot) {
-            Get-ChildItem -Path $ifaceRoot -ErrorAction SilentlyContinue | ForEach-Object {
-                Remove-ItemProperty -Path $_.PSPath -Name "TCPNoDelay" -Force -ErrorAction SilentlyContinue
-                Remove-ItemProperty -Path $_.PSPath -Name "TcpAckFrequency" -Force -ErrorAction SilentlyContinue
+            Get-ChildItem -Path $ifaceRoot -ErrorAction Ignore | ForEach-Object {
+                Remove-ItemProperty -Path $_.PSPath -Name "TCPNoDelay" -Force -ErrorAction Ignore
+                Remove-ItemProperty -Path $_.PSPath -Name "TcpAckFrequency" -Force -ErrorAction Ignore
             }
         }
 
@@ -2574,10 +2574,10 @@ function Restore-WgoDefaults {
 
         # --- Re-enable services disabled by this script ---
         foreach ($svcName in @("DiagTrack", "dmwappushservice")) {
-            $svc = Get-Service -Name $svcName -ErrorAction SilentlyContinue
+            $svc = Get-Service -Name $svcName -ErrorAction Ignore
             if ($svc) {
-                Set-Service -Name $svcName -StartupType Automatic -ErrorAction SilentlyContinue
-                Start-Service -Name $svcName -ErrorAction SilentlyContinue
+                Set-Service -Name $svcName -StartupType Automatic -ErrorAction Ignore
+                Start-Service -Name $svcName -ErrorAction Ignore
             }
         }
 
@@ -2596,7 +2596,7 @@ function Restore-WgoDefaults {
             "\Microsoft\Office\OfficeTelemetryAgentLogOn2016"
         )
         foreach ($task in $tasksToReenable) {
-            try { Enable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction SilentlyContinue | Out-Null } catch {}
+            try { Enable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
         }
 
         Write-Log (T 'LogRestoreDefaultsOk') "OK"
@@ -2617,7 +2617,7 @@ function Find-WgoChocolatey {
     if ($Global:WgoChocoPath -and (Test-Path $Global:WgoChocoPath)) { return $Global:WgoChocoPath }
 
     try {
-        $cmd = Get-Command choco.exe -ErrorAction SilentlyContinue
+        $cmd = Get-Command choco.exe -ErrorAction Ignore
         if ($cmd -and $cmd.Source -and (Test-Path $cmd.Source)) {
             $Global:WgoChocoPath = $cmd.Source
             return $Global:WgoChocoPath
@@ -2668,7 +2668,7 @@ function Install-WgoChocolatey {
 
     Write-Log (T 'LogChocoInstalling') "INFO"
     try {
-        Set-ExecutionPolicy Bypass -Scope Process -Force -ErrorAction SilentlyContinue
+        Set-ExecutionPolicy Bypass -Scope Process -Force -ErrorAction Ignore
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
         Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
@@ -2744,7 +2744,7 @@ $Global:WgoWingetPath = $null
 function Find-WgoWinget {
     if ($Global:WgoWingetPath -and (Test-Path $Global:WgoWingetPath)) { return $Global:WgoWingetPath }
     try {
-        $cmd = Get-Command winget.exe -ErrorAction SilentlyContinue
+        $cmd = Get-Command winget.exe -ErrorAction Ignore
         if ($cmd -and $cmd.Source -and (Test-Path $cmd.Source)) {
             $Global:WgoWingetPath = $cmd.Source
             return $Global:WgoWingetPath
@@ -2856,7 +2856,7 @@ function Install-ViaChocolatey {
         } else {
             Write-Log (T 'LogInstallWarn' $DisplayName $proc.ExitCode $logFile) "WARN"
             try {
-                $tail = Get-Content -Path $logFile -Tail 5 -ErrorAction SilentlyContinue
+                $tail = Get-Content -Path $logFile -Tail 5 -ErrorAction Ignore
                 if ($tail) { Write-Log ("choco: " + ($tail -join " | ")) "WARN" }
             } catch {}
         }
