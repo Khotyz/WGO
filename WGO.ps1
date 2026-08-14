@@ -99,7 +99,7 @@ $Lang['en-US'] = @{
     GrpDrivers        = "Windows Update Drivers"
     ChkDrivers        = "Block automatic driver installation via Windows Update"
     GrpPagefile       = "Virtual Memory (Pagefile)"
-    ChkPagefile       = "Set static pagefile size (RAM x 1.5)"
+    ChkPagefile       = "Set optimized pagefile size (Min/Max based on installed RAM)"
     BtnRunSelected    = "Run Selected Optimizations"
     GrpInstaller      = "Useful Applications"
     BtnInstallApps    = "Install Selected"
@@ -199,6 +199,10 @@ $Lang['en-US'] = @{
     ChkDiskOptimize      = "Auto-detect disks (SSD/HDD) and configure TRIM / scheduled defrag"
     ChkHagsGameMode      = "Enable Game Mode and Hardware-Accelerated GPU Scheduling (HAGS)"
     ChkUltimatePerf      = "Enable Ultimate Performance power plan with CPU minimum state at 100%"
+    ChkCloudflareDns     = "Set Cloudflare DNS (1.1.1.1 / 1.0.0.1) on active network adapters"
+    ChkKernelGamingPriority = "Prioritize foreground games (Win32PrioritySeparation + MMCSS Games task)"
+    ChkGameDvrDisable    = "Disable Xbox Game DVR background recording"
+    ChkInputLagReduction = "Reduce input lag (disable mouse acceleration, Sticky/Filter Keys popups and Fullscreen Optimizations)"
     ChkDryRun            = "Dry Run (only log what would change, apply nothing)"
     BtnRestoreDefaults   = "Restore Defaults"
     BtnExportProfile     = "Export Profile"
@@ -216,6 +220,10 @@ $Lang['en-US'] = @{
     LogDiskOptimizeOk         = "Disk optimization applied: {0}"
     LogHagsGameModeOk         = "Game Mode and Hardware-Accelerated GPU Scheduling (HAGS) enabled. A restart is recommended for HAGS to take effect."
     LogUltimatePerfOk         = "Ultimate Performance power plan enabled and set active, with CPU minimum state at 100% (AC and DC)."
+    LogCloudflareDnsOk        = "Cloudflare DNS (1.1.1.1 primary / 1.0.0.1 secondary) set on {0} active adapter(s)."
+    LogKernelGamingPriorityOk = "Kernel priority tuned for foreground games (Win32PrioritySeparation=38) and MMCSS Games task configured (GPU Priority=8, Priority=6, High scheduling)."
+    LogGameDvrDisableOk       = "Xbox Game DVR background recording disabled (user setting and policy)."
+    LogInputLagReductionOk    = "Input lag reduced: mouse acceleration disabled, Sticky/Toggle/Filter Keys popups disabled, Fullscreen Optimizations disabled globally."
     LogMoreError              = "Error applying tweak ({0}): {1}"
     LogMoreDone               = "System cleanup & performance tweaks finished."
 
@@ -239,8 +247,8 @@ $Lang['en-US'] = @{
     LogDriversStart    = "Blocking automatic driver installation via Windows Update..."
     LogDriversOk       = "Automatic driver installation via Windows Update blocked."
     LogDriversError    = "Error blocking automatic drivers: {0}"
-    LogPagefileRam     = "Detected RAM: {0} MB. Calculated pagefile size (RAM x 1.5): {1} MB."
-    LogPagefileOk      = "Pagefile configured successfully: Initial and Maximum = {0} MB (fixed, no fragmentation)."
+    LogPagefileRam     = "Detected RAM: {0} MB. Recommended pagefile size: Min {1} MB / Max {2} MB."
+    LogPagefileOk      = "Optimized pagefile configured: Initial = {0} MB / Maximum = {1} MB."
     LogPagefileError   = "Error configuring pagefile: {0}"
     LogChocoSearching = "Checking whether Chocolatey is installed..."
     LogChocoFound     = "Chocolatey found at: {0}"
@@ -268,6 +276,8 @@ $Lang['en-US'] = @{
     BtnInstallChoco    = "Install Chocolatey"
     LogChocoRequiredFirst = "Chocolatey is not installed. Click 'Install Chocolatey' above first."
     LogUnhandledError  = "Unexpected error: {0}"
+    LogLastRunFound    = "Checkboxes restored to match your last run ({0}). Anything unchecked was not selected back then."
+    LogLastRunNone     = "No previous run found on this machine yet. Checkboxes are at their first-time defaults."
 }
 
 $Lang['pt-BR'] = @{
@@ -289,7 +299,7 @@ $Lang['pt-BR'] = @{
     GrpDrivers        = "Drivers via Windows Update"
     ChkDrivers        = "Bloquear instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers pelo Windows Update"
     GrpPagefile       = "Mem" + $c_oacute + "ria Virtual (Pagefile)"
-    ChkPagefile       = "Definir tamanho est" + $c_aacute + "tico da mem" + $c_oacute + "ria paginada (RAM x 1.5)"
+    ChkPagefile       = "Definir tamanho otimizado da mem" + $c_oacute + "ria paginada (M" + $c_iacute + "n/M" + $c_aacute + "x conforme RAM instalada)"
     BtnRunSelected    = "Executar Otimiza" + $c_ccedil + $c_otil + "es Selecionadas"
     GrpInstaller      = "Aplicativos " + $c_uacute + "teis"
     BtnInstallApps    = "Instalar Selecionados"
@@ -389,6 +399,10 @@ $Lang['pt-BR'] = @{
     ChkDiskOptimize      = "Detectar discos (SSD/HDD) automaticamente e configurar TRIM / desfragmenta" + $c_ccedil + $c_atil + "o agendada"
     ChkHagsGameMode      = "Ativar Modo de Jogo e agendamento de GPU acelerado por hardware (HAGS)"
     ChkUltimatePerf      = "Ativar plano de energia Desempenho M" + $c_aacute + "ximo (Ultimate Performance) com CPU m" + $c_iacute + "nima em 100%"
+    ChkCloudflareDns     = "Definir DNS Cloudflare (1.1.1.1 / 1.0.0.1) nos adaptadores de rede ativos"
+    ChkKernelGamingPriority = "Priorizar jogos em primeiro plano (Win32PrioritySeparation + tarefa MMCSS Games)"
+    ChkGameDvrDisable    = "Desativar grava" + $c_ccedil + $c_atil + "o em segundo plano do Game DVR do Xbox"
+    ChkInputLagReduction = "Reduzir input lag (desativar acelera" + $c_ccedil + $c_atil + "o do mouse, pop-ups de Teclas de Ader" + $c_ecirc + "ncia/Filtro e Otimiza" + $c_ccedil + $c_otil + "es de Tela Cheia)"
     ChkDryRun            = "Modo Simula" + $c_ccedil + $c_atil + "o (apenas registra o que seria alterado, sem aplicar)"
     BtnRestoreDefaults   = "Restaurar Padr" + $c_otil + "es"
     BtnExportProfile     = "Exportar Perfil"
@@ -406,6 +420,10 @@ $Lang['pt-BR'] = @{
     LogDiskOptimizeOk         = "Otimiza" + $c_ccedil + $c_atil + "o de disco aplicada: {0}"
     LogHagsGameModeOk         = "Modo de Jogo e HAGS (agendamento de GPU acelerado por hardware) ativados. Reinicie o PC para o HAGS ter efeito."
     LogUltimatePerfOk         = "Plano Desempenho M" + $c_aacute + "ximo ativado e definido como padr" + $c_atil + "o, com CPU m" + $c_iacute + "nima em 100% (energia e bateria)."
+    LogCloudflareDnsOk        = "DNS Cloudflare (1.1.1.1 prim" + $c_aacute + "rio / 1.0.0.1 secund" + $c_aacute + "rio) definido em {0} adaptador(es) ativo(s)."
+    LogKernelGamingPriorityOk = "Prioridade do kernel ajustada para jogos em primeiro plano (Win32PrioritySeparation=38) e tarefa MMCSS Games configurada (GPU Priority=8, Priority=6, agendamento Alto)."
+    LogGameDvrDisableOk       = "Grava" + $c_ccedil + $c_atil + "o em segundo plano do Game DVR do Xbox desativada (configura" + $c_ccedil + $c_atil + "o do usu" + $c_aacute + "rio e pol" + $c_iacute + "tica)."
+    LogInputLagReductionOk    = "Input lag reduzido: acelera" + $c_ccedil + $c_atil + "o do mouse desativada, pop-ups de Teclas de Ader" + $c_ecirc + "ncia/Alternar/Filtro desativados, Otimiza" + $c_ccedil + $c_otil + "es de Tela Cheia desativadas globalmente."
     LogMoreError              = "Erro ao aplicar ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpeza e desempenho do sistema conclu" + $c_iacute + "dos."
 
@@ -429,8 +447,8 @@ $Lang['pt-BR'] = @{
     LogDriversStart    = "Bloqueando instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers via Windows Update..."
     LogDriversOk       = "Instala" + $c_ccedil + $c_atil + "o autom" + $c_aacute + "tica de drivers pelo Windows Update bloqueada."
     LogDriversError    = "Erro ao bloquear drivers autom" + $c_aacute + "ticos: {0}"
-    LogPagefileRam     = "RAM detectada: {0} MB. Tamanho de pagefile calculado (RAM x 1.5): {1} MB."
-    LogPagefileOk      = "Pagefile configurado com sucesso: Inicial e M" + $c_aacute + "ximo = {0} MB (fixo, sem fragmenta" + $c_ccedil + $c_atil + "o)."
+    LogPagefileRam     = "RAM detectada: {0} MB. Tamanho de pagefile recomendado: M" + $c_iacute + "n {1} MB / M" + $c_aacute + "x {2} MB."
+    LogPagefileOk      = "Pagefile otimizado configurado: Inicial = {0} MB / M" + $c_aacute + "ximo = {1} MB."
     LogPagefileError   = "Erro ao configurar pagefile: {0}"
     LogChocoSearching = "Verificando se o Chocolatey est" + $c_aacute + " instalado..."
     LogChocoFound     = "Chocolatey encontrado em: {0}"
@@ -458,6 +476,8 @@ $Lang['pt-BR'] = @{
     BtnInstallChoco    = "Instalar Chocolatey"
     LogChocoRequiredFirst = "O Chocolatey n" + $c_atil + "o est" + $c_aacute + " instalado. Clique em 'Instalar Chocolatey' acima primeiro."
     LogUnhandledError      = "Erro inesperado: {0}"
+    LogLastRunFound    = "Checkboxes restaurados conforme sua " + $c_uacute + "ltima execu" + $c_ccedil + $c_atil + "o ({0}). O que estiver desmarcado n" + $c_atil + "o foi selecionado naquela vez."
+    LogLastRunNone     = "Nenhuma execu"+$c_ccedil+$c_atil+"o anterior encontrada nesta m"+$c_aacute+"quina ainda. Os checkboxes est"+$c_atil+"o nos padr"+$c_otil+"es iniciais."
 }
 
 $Lang['es-ES'] = @{
@@ -479,7 +499,7 @@ $Lang['es-ES'] = @{
     GrpDrivers        = "Controladores v" + [char]0x00ED + "a Windows Update"
     ChkDrivers        = "Bloquear instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores por Windows Update"
     GrpPagefile       = "Memoria Virtual (Pagefile)"
-    ChkPagefile       = "Establecer tama" + $c_enye + "o est" + [char]0x00E1 + "tico del archivo de paginaci" + [char]0x00F3 + "n (RAM x 1.5)"
+    ChkPagefile       = "Establecer tama" + $c_enye + "o optimizado del archivo de paginaci" + [char]0x00F3 + "n (M" + [char]0x00ED + "n/M" + [char]0x00E1 + "x seg" + [char]0x00FA + "n la RAM instalada)"
     BtnRunSelected    = "Ejecutar Optimizaciones Seleccionadas"
     GrpInstaller      = "Aplicaciones " + [char]0x00DA + "tiles"
     BtnInstallApps    = "Instalar Seleccionados"
@@ -579,6 +599,10 @@ $Lang['es-ES'] = @{
     ChkDiskOptimize      = "Detectar discos (SSD/HDD) autom" + [char]0x00E1 + "ticamente y configurar TRIM / desfragmentaci" + [char]0x00F3 + "n programada"
     ChkHagsGameMode      = "Activar Modo de Juego y la planificaci" + [char]0x00F3 + "n de GPU acelerada por hardware (HAGS)"
     ChkUltimatePerf      = "Activar el plan de energ" + [char]0x00ED + "a Rendimiento M" + [char]0x00E1 + "ximo (Ultimate Performance) con la CPU al m" + [char]0x00ED + "nimo en 100%"
+    ChkCloudflareDns     = "Establecer DNS de Cloudflare (1.1.1.1 / 1.0.0.1) en los adaptadores de red activos"
+    ChkKernelGamingPriority = "Priorizar juegos en primer plano (Win32PrioritySeparation + tarea MMCSS Games)"
+    ChkGameDvrDisable    = "Desactivar la grabaci" + [char]0x00F3 + "n en segundo plano de Xbox Game DVR"
+    ChkInputLagReduction = "Reducir el input lag (desactivar aceleraci" + [char]0x00F3 + "n del rat" + [char]0x00F3 + "n, ventanas emergentes de Teclas Especiales/Filtro y Optimizaciones de Pantalla Completa)"
     ChkDryRun            = "Modo Simulaci" + [char]0x00F3 + "n (solo registra los cambios sin aplicarlos)"
     BtnRestoreDefaults   = "Restaurar Valores Predeterminados"
     BtnExportProfile     = "Exportar Perfil"
@@ -596,6 +620,10 @@ $Lang['es-ES'] = @{
     LogDiskOptimizeOk         = "Optimizaci" + [char]0x00F3 + "n de disco aplicada: {0}"
     LogHagsGameModeOk         = "Modo de Juego y HAGS (planificaci" + [char]0x00F3 + "n de GPU acelerada por hardware) activados. Se recomienda reiniciar para que HAGS surta efecto."
     LogUltimatePerfOk         = "Plan Rendimiento M" + [char]0x00E1 + "ximo activado y establecido como predeterminado, con la CPU al m" + [char]0x00ED + "nimo en 100% (CA y bater" + [char]0x00ED + "a)."
+    LogCloudflareDnsOk        = "DNS de Cloudflare (1.1.1.1 principal / 1.0.0.1 secundario) establecido en {0} adaptador(es) activo(s)."
+    LogKernelGamingPriorityOk = "Prioridad del kernel ajustada para juegos en primer plano (Win32PrioritySeparation=38) y tarea MMCSS Games configurada (GPU Priority=8, Priority=6, programaci" + [char]0x00F3 + "n Alta)."
+    LogGameDvrDisableOk       = "Grabaci" + [char]0x00F3 + "n en segundo plano de Xbox Game DVR desactivada (configuraci" + [char]0x00F3 + "n del usuario y directiva)."
+    LogInputLagReductionOk    = "Input lag reducido: aceleraci" + [char]0x00F3 + "n del rat" + [char]0x00F3 + "n desactivada, ventanas emergentes de Teclas Especiales/Alternancia/Filtro desactivadas, Optimizaciones de Pantalla Completa desactivadas globalmente."
     LogMoreError              = "Error al aplicar el ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpieza y rendimiento del sistema finalizados."
 
@@ -619,8 +647,8 @@ $Lang['es-ES'] = @{
     LogDriversStart    = "Bloqueando la instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update..."
     LogDriversOk       = "Instalaci" + [char]0x00F3 + "n autom" + [char]0x00E1 + "tica de controladores mediante Windows Update bloqueada."
     LogDriversError    = "Error al bloquear los controladores autom" + [char]0x00E1 + "ticos: {0}"
-    LogPagefileRam     = "RAM detectada: {0} MB. Tama" + $c_enye + "o de pagefile calculado (RAM x 1.5): {1} MB."
-    LogPagefileOk      = "Pagefile configurado correctamente: Inicial y M" + [char]0x00E1 + "ximo = {0} MB (fijo, sin fragmentaci" + [char]0x00F3 + "n)."
+    LogPagefileRam     = "RAM detectada: {0} MB. Tama" + $c_enye + "o de pagefile recomendado: M" + [char]0x00ED + "n {1} MB / M" + [char]0x00E1 + "x {2} MB."
+    LogPagefileOk      = "Pagefile optimizado configurado: Inicial = {0} MB / M" + [char]0x00E1 + "ximo = {1} MB."
     LogPagefileError   = "Error al configurar el pagefile: {0}"
     LogChocoSearching = "Comprobando si Chocolatey est" + [char]0x00E1 + " instalado..."
     LogChocoFound     = "Chocolatey encontrado en: {0}"
@@ -648,6 +676,8 @@ $Lang['es-ES'] = @{
     BtnInstallChoco    = "Instalar Chocolatey"
     LogChocoRequiredFirst = "Chocolatey no est" + [char]0x00E1 + " instalado. Haga clic en 'Instalar Chocolatey' arriba primero."
     LogUnhandledError      = "Error inesperado: {0}"
+    LogLastRunFound    = "Casillas restauradas seg" + [char]0x00FA + "n tu " + [char]0x00FA + "ltima ejecuci" + [char]0x00F3 + "n ({0}). Lo que no est" + [char]0x00E9 + " marcado no fue seleccionado esa vez."
+    LogLastRunNone     = "No se encontr" + [char]0x00F3 + " ninguna ejecuci" + [char]0x00F3 + "n anterior en esta m" + [char]0x00E1 + "quina todav" + [char]0x00ED + "a. Las casillas est" + [char]0x00E1 + "n en sus valores predeterminados."
 }
 
 # zh-CN (Simplified Chinese) - built strictly with [char]0xXXXX code points
@@ -672,7 +702,7 @@ $Lang['zh-CN'] = @{
     GrpDrivers        = "Windows Update " + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F)
     ChkDrivers        = (ZH 0x963B,0x6B62) + "Windows Update " + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F)
     GrpPagefile       = (ZH 0x865A,0x62DF,0x5185,0x5B58) + " (Pagefile)"
-    ChkPagefile       = (ZH 0x8BBE,0x7F6E) + (ZH 0x9875,0x9762,0x6587,0x4EF6) + (ZH 0x56FA,0x5B9A) + (ZH 0x5927,0x5C0F) + " (RAM x 1.5)"
+    ChkPagefile       = (ZH 0x8BBE,0x7F6E) + (ZH 0x4F18,0x5316) + (ZH 0x9875,0x9762,0x6587,0x4EF6) + (ZH 0x5927,0x5C0F) + " (" + (ZH 0x6839,0x636E) + (ZH 0x5B89,0x88C5,0x5185,0x5B58) + (ZH 0x6700,0x5C0F,0x6700,0x5927,0x503C) + ")"
     BtnRunSelected    = (ZH 0x8FD0,0x884C) + (ZH 0x5DF2,0x9009) + (ZH 0x4F18,0x5316) + (ZH 0x9879,0x76EE)
     GrpInstaller      = (ZH 0x5B9E,0x7528) + (ZH 0x5E94,0x7528) + (ZH 0x7A0B,0x5E8F)
     BtnInstallApps    = (ZH 0x5B89,0x88C5) + (ZH 0x5DF2,0x9009) + (ZH 0x9879,0x76EE)
@@ -772,6 +802,10 @@ $Lang['zh-CN'] = @{
     ChkDiskOptimize      = (ZH 0x81EA,0x52A8,0x68C0,0x6D4B) + (ZH 0x78C1,0x76D8) + " (SSD/HDD) " + (ZH 0x5E76,0x914D,0x7F6E) + " TRIM " + (ZH 0x6216) + (ZH 0x8BA1,0x5212,0x788E,0x7247,0x6574,0x7406)
     ChkHagsGameMode      = (ZH 0x542F,0x7528) + (ZH 0x6E38,0x620F,0x6A21,0x5F0F) + (ZH 0x548C) + (ZH 0x786C,0x4EF6,0x52A0,0x901F) + "GPU" + (ZH 0x8C03,0x5EA6) + " (HAGS)"
     ChkUltimatePerf      = (ZH 0x542F,0x7528) + (ZH 0x6781,0x9650,0x6027,0x80FD) + (ZH 0x7535,0x6E90,0x8BA1,0x5212) + "," + "CPU " + (ZH 0x6700,0x4F4E,0x72B6,0x6001) + (ZH 0x8BBE,0x4E3A) + " 100%"
+    ChkCloudflareDns     = (ZH 0x5728) + (ZH 0x6D3B,0x52A8) + (ZH 0x7F51,0x7EDC,0x9002,0x914D,0x5668) + (ZH 0x4E0A) + (ZH 0x8BBE,0x7F6E) + " Cloudflare DNS (1.1.1.1 / 1.0.0.1)"
+    ChkKernelGamingPriority = (ZH 0x4F18,0x5148) + (ZH 0x524D,0x53F0) + (ZH 0x6E38,0x620F) + " (Win32PrioritySeparation + MMCSS Games " + (ZH 0x4EFB,0x52A1) + ")"
+    ChkGameDvrDisable    = (ZH 0x7981,0x7528) + " Xbox Game DVR " + (ZH 0x540E,0x53F0,0x5F55,0x5236)
+    ChkInputLagReduction = (ZH 0x51CF,0x5C11) + (ZH 0x8F93,0x5165,0x5EF6,0x8FDF) + " (" + (ZH 0x7981,0x7528) + (ZH 0x9F20,0x6807,0x52A0,0x901F) + "," + (ZH 0x7981,0x7528) + (ZH 0x7C98,0x952E,0x548C,0x8FC7,0x6EE4,0x952E) + (ZH 0x5F39,0x7A97) + "," + (ZH 0x7981,0x7528) + (ZH 0x5168,0x5C4F) + (ZH 0x4F18,0x5316) + ")"
     ChkDryRun            = (ZH 0x6A21,0x62DF,0x8FD0,0x884C,0x6A21,0x5F0F) + " (" + (ZH 0x4EC5,0x8BB0,0x5F55,0x5C06,0x8981,0x66F4,0x6539,0x7684,0x5185,0x5BB9,0x800C,0x4E0D,0x5B9E,0x9645,0x5E94,0x7528) + ")"
     BtnRestoreDefaults   = (ZH 0x6062,0x590D,0x9ED8,0x8BA4,0x8BBE,0x7F6E)
     BtnExportProfile     = (ZH 0x5BFC,0x51FA,0x914D,0x7F6E,0x6587,0x4EF6)
@@ -789,6 +823,10 @@ $Lang['zh-CN'] = @{
     LogDiskOptimizeOk         = (ZH 0x78C1,0x76D8,0x4F18,0x5316) + (ZH 0x5DF2,0x5E94,0x7528) + ": {0}"
     LogHagsGameModeOk         = (ZH 0x6E38,0x620F,0x6A21,0x5F0F) + (ZH 0x548C) + (ZH 0x786C,0x4EF6,0x52A0,0x901F) + "GPU" + (ZH 0x8C03,0x5EA6) + " (HAGS) " + (ZH 0x5DF2,0x542F,0x7528) + "." + (ZH 0x5EFA,0x8BAE) + (ZH 0x91CD,0x542F) + (ZH 0x4EE5,0x4F7F) + " HAGS " + (ZH 0x751F,0x6548) + "."
     LogUltimatePerfOk         = (ZH 0x6781,0x9650,0x6027,0x80FD) + (ZH 0x7535,0x6E90,0x8BA1,0x5212) + (ZH 0x5DF2,0x542F,0x7528) + (ZH 0x5E76) + (ZH 0x8BBE,0x4E3A) + (ZH 0x9ED8,0x8BA4) + "," + "CPU " + (ZH 0x6700,0x4F4E,0x72B6,0x6001) + (ZH 0x8BBE,0x4E3A) + " 100% (" + (ZH 0x4EA4,0x6D41) + (ZH 0x548C) + (ZH 0x7535,0x6C60) + ")."
+    LogCloudflareDnsOk        = "Cloudflare DNS (1.1.1.1 " + (ZH 0x4E3B) + " / 1.0.0.1 " + (ZH 0x5907) + ") " + (ZH 0x5DF2) + (ZH 0x5728) + " {0} " + (ZH 0x4E2A) + (ZH 0x6D3B,0x52A8) + (ZH 0x9002,0x914D,0x5668) + (ZH 0x4E0A) + (ZH 0x8BBE,0x7F6E) + "."
+    LogKernelGamingPriorityOk = (ZH 0x5DF2,0x4E3A) + (ZH 0x524D,0x53F0,0x6E38,0x620F) + (ZH 0x8C03,0x6574) + (ZH 0x5185,0x6838) + (ZH 0x4F18,0x5148,0x7EA7) + " (Win32PrioritySeparation=38)" + (ZH 0x5E76) + (ZH 0x914D,0x7F6E) + " MMCSS Games " + (ZH 0x4EFB,0x52A1) + " (GPU Priority=8, Priority=6, " + (ZH 0x9AD8) + (ZH 0x4F18,0x5148,0x7EA7,0x8C03,0x5EA6) + ")."
+    LogGameDvrDisableOk       = "Xbox Game DVR " + (ZH 0x540E,0x53F0,0x5F55,0x5236) + (ZH 0x5DF2,0x7981,0x7528) + " (" + (ZH 0x7528,0x6237,0x8BBE,0x7F6E) + (ZH 0x548C) + (ZH 0x7B56,0x7565) + ")."
+    LogInputLagReductionOk    = (ZH 0x8F93,0x5165,0x5EF6,0x8FDF) + (ZH 0x5DF2,0x51CF,0x5C11) + ": " + (ZH 0x9F20,0x6807,0x52A0,0x901F) + (ZH 0x5DF2,0x7981,0x7528) + "," + (ZH 0x7C98,0x952E,0x548C,0x8FC7,0x6EE4,0x952E) + (ZH 0x5F39,0x7A97) + (ZH 0x5DF2,0x7981,0x7528) + "," + (ZH 0x5168,0x5C4F) + (ZH 0x4F18,0x5316) + (ZH 0x5DF2) + (ZH 0x5168,0x5C40) + (ZH 0x7981,0x7528) + "."
     LogMoreError              = (ZH 0x5E94,0x7528) + (ZH 0x8C03,0x6574) + (ZH 0x65F6,0x51FA,0x9519) + " ({0}): {1}"
     LogMoreDone               = (ZH 0x7CFB,0x7EDF,0x6E05,0x7406,0x4E0E,0x6027,0x80FD) + (ZH 0x8C03,0x6574) + (ZH 0x5B8C,0x6210)
 
@@ -812,8 +850,8 @@ $Lang['zh-CN'] = @{
     LogDriversStart    = (ZH 0x6B63,0x5728) + (ZH 0x963B,0x6B62) + (ZH 0x81EA,0x52A8) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x5B89,0x88C5)
     LogDriversOk       = (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x81EA,0x52A8) + (ZH 0x5B89,0x88C5) + (ZH 0x5DF2,0x963B,0x6B62)
     LogDriversError    = (ZH 0x963B,0x6B62) + (ZH 0x9A71,0x52A8,0x7A0B,0x5E8F) + (ZH 0x51FA,0x9519) + ": {0}"
-    LogPagefileRam     = (ZH 0x68C0,0x6D4B) + " RAM: {0} MB" + "," + (ZH 0x8BA1,0x7B97) + " pagefile " + (ZH 0x5927,0x5C0F) + ": {1} MB"
-    LogPagefileOk      = "Pagefile " + (ZH 0x914D,0x7F6E) + (ZH 0x6210,0x529F) + ": {0} MB"
+    LogPagefileRam     = (ZH 0x68C0,0x6D4B) + " RAM: {0} MB" + "," + (ZH 0x63A8,0x8350) + " pagefile " + (ZH 0x5927,0x5C0F) + ": " + (ZH 0x6700,0x5C0F) + " {1} MB / " + (ZH 0x6700,0x5927) + " {2} MB"
+    LogPagefileOk      = (ZH 0x4F18,0x5316) + "Pagefile " + (ZH 0x914D,0x7F6E) + (ZH 0x6210,0x529F) + ": " + (ZH 0x521D,0x59CB) + " {0} MB / " + (ZH 0x6700,0x5927) + " {1} MB"
     LogPagefileError   = (ZH 0x914D,0x7F6E) + " pagefile " + (ZH 0x51FA,0x9519) + ": {0}"
     LogChocoSearching = (ZH 0x6B63,0x5728) + (ZH 0x68C0,0x67E5) + " Chocolatey " + (ZH 0x662F,0x5426) + (ZH 0x5DF2,0x5B89,0x88C5)
     LogChocoFound     = "Chocolatey " + (ZH 0x4F4D,0x7F6E) + ": {0}"
@@ -841,6 +879,8 @@ $Lang['zh-CN'] = @{
     BtnInstallChoco    = (ZH 0x5B89,0x88C5) + " Chocolatey"
     LogChocoRequiredFirst = "Chocolatey " + (ZH 0x672A,0x5B89,0x88C5) + "," + (ZH 0x8BF7,0x5148,0x70B9,0x51FB,0x4E0A,0x65B9,0x7684) + " " + (ZH 0x5B89,0x88C5) + " Chocolatey"
     LogUnhandledError      = (ZH 0x610F,0x5916,0x9519,0x8BEF) + ": {0}"
+    LogLastRunFound    = (ZH 0x590D,0x9009,0x6846) + (ZH 0x5DF2,0x6839,0x636E) + (ZH 0x4E0A,0x6B21,0x8FD0,0x884C) + " ({0}) " + (ZH 0x6062,0x590D) + "." + (ZH 0x672A,0x52FE,0x9009,0x9879) + (ZH 0x8868,0x793A,0x5F53,0x65F6,0x672A,0x9009,0x62E9)
+    LogLastRunNone     = (ZH 0x672C,0x673A) + (ZH 0x5C1A,0x672A) + (ZH 0x53D1,0x73B0) + (ZH 0x4EE5,0x5F80,0x8FD0,0x884C,0x8BB0,0x5F55) + "," + (ZH 0x590D,0x9009,0x6846) + (ZH 0x4FDD,0x6301) + (ZH 0x521D,0x59CB,0x9ED8,0x8BA4,0x503C)
 }
 
 $Global:CurrentLangCode = "pt-BR"
@@ -1296,6 +1336,10 @@ $Global:CurrentLangCode = "pt-BR"
                                 <CheckBox x:Name="chkDiskOptimize" Content="Auto-configure TRIM / scheduled defrag (SSD/HDD)" IsChecked="True"/>
                                 <CheckBox x:Name="chkHagsGameMode" Content="Enable Game Mode and HAGS" IsChecked="False"/>
                                 <CheckBox x:Name="chkUltimatePerf" Content="Enable Ultimate Performance with CPU min state at 100%" IsChecked="False"/>
+                                <CheckBox x:Name="chkCloudflareDns" Content="Set Cloudflare DNS (1.1.1.1 / 1.0.0.1)" IsChecked="False"/>
+                                <CheckBox x:Name="chkKernelGamingPriority" Content="Prioritize foreground games (kernel + MMCSS)" IsChecked="False"/>
+                                <CheckBox x:Name="chkGameDvrDisable" Content="Disable Xbox Game DVR background recording" IsChecked="False"/>
+                                <CheckBox x:Name="chkInputLagReduction" Content="Reduce input lag (mouse accel, Sticky Keys, Fullscreen Optimizations)" IsChecked="False"/>
                             </StackPanel>
                         </GroupBox>
 
@@ -1567,7 +1611,7 @@ $names = @(
     'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
     'grpAdvancedTweaks','chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
     'grpMoreOptimizations','chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
-    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
+    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkCloudflareDns','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
     'btnRunSelected','btnRestoreDefaults','btnExportProfile','btnImportProfile',
     'grpInstaller','btnInstallApps',
     'txtChocoRequired','txtChocoStatus','btnInstallChoco',
@@ -1598,7 +1642,7 @@ $script:optimizationCheckboxNames = @(
     'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
     'chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
     'chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
-    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize'
+    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkCloudflareDns','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction'
 )
 
 # ============================================================================
@@ -1709,6 +1753,12 @@ function Update-UILanguage {
     $ctrl['chkOfficeTelemetry'].Content  = $t.ChkOfficeTelemetry
     $ctrl['chkExtraSchedTasks'].Content  = $t.ChkExtraSchedTasks
     $ctrl['chkDiskOptimize'].Content     = $t.ChkDiskOptimize
+    $ctrl['chkHagsGameMode'].Content     = $t.ChkHagsGameMode
+    $ctrl['chkUltimatePerf'].Content     = $t.ChkUltimatePerf
+    $ctrl['chkCloudflareDns'].Content    = $t.ChkCloudflareDns
+    $ctrl['chkKernelGamingPriority'].Content = $t.ChkKernelGamingPriority
+    $ctrl['chkGameDvrDisable'].Content   = $t.ChkGameDvrDisable
+    $ctrl['chkInputLagReduction'].Content = $t.ChkInputLagReduction
 
     $ctrl['chkDryRun'].Content           = $t.ChkDryRun
 
@@ -2194,7 +2244,22 @@ function Set-WgoAdvancedTweaks {
             if (-not (Test-Path $advKey))  { New-Item -Path $advKey -Force | Out-Null }
             New-ItemProperty -Path $edgeKey -Name "StartupBoostEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
             New-ItemProperty -Path $edgeKey -Name "BackgroundModeEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $advKey -Name "TaskbarDa" -Value 0 -PropertyType DWord -Force | Out-Null
+
+            # Widgets icon toggle is cosmetic and, on some machines, blocked
+            # at the ACL level (AV/GPO/OEM tooling) even under an elevated
+            # HKCU write. Keep it from failing the whole feature: try the
+            # normal provider first, then fall back to reg.exe, which uses a
+            # different code path and sometimes succeeds where the registry
+            # provider is denied.
+            try {
+                New-ItemProperty -Path $advKey -Name "TaskbarDa" -Value 0 -PropertyType DWord -Force | Out-Null
+            } catch {
+                & reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarDa" /t REG_DWORD /d 0 /f 2>$null | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Log (T 'LogAdvError' "EdgeWidgets/TaskbarDa" $_.Exception.Message) "WARN"
+                }
+            }
+
             Write-Log (T 'LogAdvEdgeWidgetsOk') "OK"
         } catch {
             Write-Log (T 'LogAdvError' "EdgeWidgets" $_.Exception.Message) "ERROR"
@@ -2273,11 +2338,18 @@ function Set-WgoMoreOptimizations {
         [bool]$OfficeTelemetry = $false,
         [bool]$ExtraSchedTasks = $false,
         [bool]$DiskOptimize    = $false,
+        [bool]$HagsGameMode    = $false,
+        [bool]$UltimatePerf    = $false,
+        [bool]$CloudflareDns   = $false,
+        [bool]$KernelGamingPriority = $false,
+        [bool]$GameDvrDisable  = $false,
+        [bool]$InputLagReduction = $false,
         [bool]$DryRun          = $false
     )
 
     if (-not ($Hibernation -or $PowerPlan -or $TempCleanup -or $HotCorners -or $RecallBlock -or
-               $BootTimeout -or $OfficeTelemetry -or $ExtraSchedTasks -or $DiskOptimize)) { return }
+               $BootTimeout -or $OfficeTelemetry -or $ExtraSchedTasks -or $DiskOptimize -or
+               $HagsGameMode -or $UltimatePerf -or $CloudflareDns -or $KernelGamingPriority -or $GameDvrDisable -or $InputLagReduction)) { return }
 
     Write-Log (T 'LogMoreStart') "INFO"
     if ($DryRun) { Write-Log (T 'LogDryRunNote') "WARN" }
@@ -2470,6 +2542,159 @@ function Set-WgoMoreOptimizations {
         }
     }
 
+    # 10. Enable Game Mode and Hardware-Accelerated GPU Scheduling (HAGS)
+    if ($HagsGameMode) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkHagsGameMode')) "INFO"
+        } else {
+            try {
+                $gameBarKey  = "HKCU:\Software\Microsoft\GameBar"
+                $graphicsKey = "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers"
+                if (-not (Test-Path $gameBarKey))  { New-Item -Path $gameBarKey -Force | Out-Null }
+                if (-not (Test-Path $graphicsKey)) { New-Item -Path $graphicsKey -Force | Out-Null }
+                New-ItemProperty -Path $gameBarKey -Name "AutoGameModeEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $gameBarKey -Name "AllowAutoGameMode"   -Value 1 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $graphicsKey -Name "HwSchMode" -Value 2 -PropertyType DWord -Force | Out-Null
+                Write-Log (T 'LogHagsGameModeOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "HagsGameMode" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 11. Enable Ultimate Performance power plan with CPU minimum state at 100%
+    if ($UltimatePerf) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkUltimatePerf')) "INFO"
+        } else {
+            try {
+                $ultimateGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61"
+                $existing = (& powercfg.exe /list) -join "`n"
+                $scheme = $null
+                if ($existing -match "([0-9a-fA-F-]{36})\s+\(.*Ultimate Performance.*\)") {
+                    $scheme = $Matches[1]
+                } else {
+                    $dup = & powercfg.exe -duplicatescheme $ultimateGuid
+                    if ($dup -match "([0-9a-fA-F-]{8}-[0-9a-fA-F-]{4}-[0-9a-fA-F-]{4}-[0-9a-fA-F-]{4}-[0-9a-fA-F-]{12})") {
+                        $scheme = $Matches[1]
+                    }
+                }
+                if (-not $scheme) { $scheme = $ultimateGuid }
+
+                & powercfg.exe /setacvalueindex $scheme SUB_PROCESSOR PROCTHROTTLEMIN 100 2>$null | Out-Null
+                & powercfg.exe /setdcvalueindex $scheme SUB_PROCESSOR PROCTHROTTLEMIN 100 2>$null | Out-Null
+                & powercfg.exe /setactive $scheme 2>$null | Out-Null
+
+                Write-Log (T 'LogUltimatePerfOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "UltimatePerf" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 12. Set Cloudflare DNS (1.1.1.1 / 1.0.0.1) on active adapters
+    if ($CloudflareDns) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkCloudflareDns')) "INFO"
+        } else {
+            try {
+                $adapters = Get-NetAdapter -ErrorAction Stop | Where-Object { $_.Status -eq 'Up' }
+                $count = 0
+                foreach ($ad in $adapters) {
+                    Set-DnsClientServerAddress -InterfaceIndex $ad.ifIndex -ServerAddresses ("1.1.1.1","1.0.0.1") -ErrorAction Stop
+                    $count++
+                }
+                Write-Log (T 'LogCloudflareDnsOk' $count) "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "CloudflareDns" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 13. Prioritize foreground games at the kernel/MMCSS level
+    if ($KernelGamingPriority) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkKernelGamingPriority')) "INFO"
+        } else {
+            try {
+                # Give the foreground app a bigger, fixed CPU time slice
+                # instead of splitting it evenly with background processes.
+                $priorityKey = "HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl"
+                if (-not (Test-Path $priorityKey)) { New-Item -Path $priorityKey -Force | Out-Null }
+                New-ItemProperty -Path $priorityKey -Name "Win32PrioritySeparation" -Value 38 -PropertyType DWord -Force | Out-Null
+
+                # Tell MMCSS to treat the "Games" task class as high priority
+                # so games get a bigger share of CPU/GPU scheduling.
+                $gamesTaskKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games"
+                if (-not (Test-Path $gamesTaskKey)) { New-Item -Path $gamesTaskKey -Force | Out-Null }
+                New-ItemProperty -Path $gamesTaskKey -Name "GPU Priority"         -Value 8    -PropertyType DWord  -Force | Out-Null
+                New-ItemProperty -Path $gamesTaskKey -Name "Priority"             -Value 6    -PropertyType DWord  -Force | Out-Null
+                New-ItemProperty -Path $gamesTaskKey -Name "Scheduling Category"  -Value "High" -PropertyType String -Force | Out-Null
+                New-ItemProperty -Path $gamesTaskKey -Name "SFIO Priority"        -Value "High" -PropertyType String -Force | Out-Null
+
+                Write-Log (T 'LogKernelGamingPriorityOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "KernelGamingPriority" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 14. Disable Xbox Game DVR background recording (saves CPU/IOPS while gaming)
+    if ($GameDvrDisable) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkGameDvrDisable')) "INFO"
+        } else {
+            try {
+                $gameConfigKey = "HKCU:\System\GameConfigStore"
+                $gameDvrPolicyKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR"
+                if (-not (Test-Path $gameConfigKey))    { New-Item -Path $gameConfigKey -Force | Out-Null }
+                if (-not (Test-Path $gameDvrPolicyKey)) { New-Item -Path $gameDvrPolicyKey -Force | Out-Null }
+                New-ItemProperty -Path $gameConfigKey -Name "GameDVR_Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $gameDvrPolicyKey -Name "AllowGameDVR" -Value 0 -PropertyType DWord -Force | Out-Null
+
+                Write-Log (T 'LogGameDvrDisableOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "GameDvrDisable" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 15. Reduce input lag: mouse acceleration, accessibility popups, Fullscreen Optimizations
+    if ($InputLagReduction) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkInputLagReduction')) "INFO"
+        } else {
+            try {
+                # Disable mouse acceleration ("Enhance Pointer Precision").
+                # These are REG_SZ (string) values, not DWORD.
+                $mouseKey = "HKCU:\Control Panel\Mouse"
+                Set-ItemProperty -Path $mouseKey -Name "MouseSpeed"      -Value "0" -Type String -Force
+                Set-ItemProperty -Path $mouseKey -Name "MouseThreshold1" -Value "0" -Type String -Force
+                Set-ItemProperty -Path $mouseKey -Name "MouseThreshold2" -Value "0" -Type String -Force
+
+                # Disable the Sticky/Toggle/Filter Keys shortcut popups that can
+                # interrupt gameplay (does not remove accessibility features,
+                # only the auto-trigger via keyboard shortcut).
+                $accessKey = "HKCU:\Control Panel\Accessibility"
+                Set-ItemProperty -Path "$accessKey\StickyKeys"        -Name "Flags" -Value "58" -Type String -Force
+                Set-ItemProperty -Path "$accessKey\ToggleKeys"        -Name "Flags" -Value "58" -Type String -Force
+                Set-ItemProperty -Path "$accessKey\Keyboard Response" -Name "Flags" -Value "58" -Type String -Force
+
+                # Force Fullscreen Optimizations off globally, so games run in
+                # true exclusive fullscreen instead of the borderless overlay
+                # mode, which lowers input lag on many titles.
+                $gameConfigKey = "HKCU:\System\GameConfigStore"
+                if (-not (Test-Path $gameConfigKey)) { New-Item -Path $gameConfigKey -Force | Out-Null }
+                New-ItemProperty -Path $gameConfigKey -Name "GameDVR_FSEBehaviorMode"          -Value 2 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $gameConfigKey -Name "GameDVR_HonorUserFSEBehaviorMode" -Value 1 -PropertyType DWord -Force | Out-Null
+
+                Write-Log (T 'LogInputLagReductionOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "InputLagReduction" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
     Write-Log (T 'LogMoreDone') "OK"
 }
 
@@ -2499,13 +2724,32 @@ function Set-WgoBlockDriverUpdates {
 # 12. FUNCTION 7 - VIRTUAL MEMORY (PAGEFILE) TUNING
 # ============================================================================
 
+function Get-WgoOptimizedPagefileSize {
+    param([double]$RamMB)
+    # Recommended Initial/Maximum pagefile size by installed RAM, tuned to
+    # avoid an oversized pagefile on high-RAM systems while keeping enough
+    # headroom on low-RAM ones.
+    $ramGB = $RamMB / 1024
+    if     ($ramGB -le 2)  { return @{ Min = 3072; Max = 6144  } }
+    elseif ($ramGB -le 4)  { return @{ Min = 4096; Max = 8192  } }
+    elseif ($ramGB -le 6)  { return @{ Min = 4096; Max = 9216  } }
+    elseif ($ramGB -le 8)  { return @{ Min = 4096; Max = 12288 } }
+    elseif ($ramGB -le 12) { return @{ Min = 4096; Max = 10240 } }
+    elseif ($ramGB -le 16) { return @{ Min = 4096; Max = 8192  } }
+    elseif ($ramGB -le 24) { return @{ Min = 2048; Max = 4096  } }
+    elseif ($ramGB -le 32) { return @{ Min = 2048; Max = 4096  } }
+    else                   { return @{ Min = 1024; Max = 2048  } }
+}
+
 function Set-WgoPagefile {
     try {
         $cs = Get-CimInstance -ClassName Win32_ComputerSystem
         $ramMB = [Math]::Round($cs.TotalPhysicalMemory / 1MB)
-        $pageMB = [Math]::Round($ramMB * 1.5)
+        $rec = Get-WgoOptimizedPagefileSize -RamMB $ramMB
+        $minMB = $rec.Min
+        $maxMB = $rec.Max
 
-        Write-Log (T 'LogPagefileRam' $ramMB $pageMB) "INFO"
+        Write-Log (T 'LogPagefileRam' $ramMB $minMB $maxMB) "INFO"
 
         # Disable automatic management
         $cs2 = Get-CimInstance -ClassName Win32_ComputerSystem
@@ -2520,16 +2764,16 @@ function Set-WgoPagefile {
                     Where-Object { $_.Name -eq $pagefilePath }
 
         if ($existing) {
-            Set-CimInstance -InputObject $existing -Property @{ InitialSize = $pageMB; MaximumSize = $pageMB } -ErrorAction Stop
+            Set-CimInstance -InputObject $existing -Property @{ InitialSize = $minMB; MaximumSize = $maxMB } -ErrorAction Stop
         } else {
             $newPF = New-CimInstance -ClassName Win32_PageFileSetting -Property @{
                 Name        = $pagefilePath
-                InitialSize = $pageMB
-                MaximumSize = $pageMB
+                InitialSize = $minMB
+                MaximumSize = $maxMB
             } -ErrorAction Stop
         }
 
-        Write-Log (T 'LogPagefileOk' $pageMB) "OK"
+        Write-Log (T 'LogPagefileOk' $minMB $maxMB) "OK"
     } catch {
         Write-Log (T 'LogPagefileError' $_.Exception.Message) "ERROR"
     }
@@ -3037,6 +3281,12 @@ $ctrl['btnRunSelected'].Add_Click({
     $doOfficeTelemetry = [bool]$ctrl['chkOfficeTelemetry'].IsChecked
     $doExtraSchedTasks = [bool]$ctrl['chkExtraSchedTasks'].IsChecked
     $doDiskOptimize    = [bool]$ctrl['chkDiskOptimize'].IsChecked
+    $doHagsGameMode    = [bool]$ctrl['chkHagsGameMode'].IsChecked
+    $doUltimatePerf    = [bool]$ctrl['chkUltimatePerf'].IsChecked
+    $doCloudflareDns   = [bool]$ctrl['chkCloudflareDns'].IsChecked
+    $doKernelGamingPriority = [bool]$ctrl['chkKernelGamingPriority'].IsChecked
+    $doGameDvrDisable  = [bool]$ctrl['chkGameDvrDisable'].IsChecked
+    $doInputLagReduction = [bool]$ctrl['chkInputLagReduction'].IsChecked
 
     $doDryRun = [bool]$ctrl['chkDryRun'].IsChecked
 
@@ -3045,7 +3295,8 @@ $ctrl['btnRunSelected'].Add_Click({
               $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry,
               $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency,
               $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
-              $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doDryRun)
+              $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf, $doCloudflareDns,
+              $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction, $doDryRun)
         try {
             Write-Log (T 'LogOptStart') "INFO"
 
@@ -3080,7 +3331,10 @@ $ctrl['btnRunSelected'].Add_Click({
                 Set-WgoMoreOptimizations -Hibernation $doHibernation -PowerPlan $doPowerPlan `
                     -TempCleanup $doTempCleanup -HotCorners $doHotCorners -RecallBlock $doRecallBlock `
                     -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
-                    -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize -DryRun $true
+                    -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize `
+                    -HagsGameMode $doHagsGameMode -UltimatePerf $doUltimatePerf -CloudflareDns $doCloudflareDns `
+                    -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
+                    -InputLagReduction $doInputLagReduction -DryRun $true
             } else {
                 New-WgoRestorePoint | Out-Null
 
@@ -3100,7 +3354,10 @@ $ctrl['btnRunSelected'].Add_Click({
                 Set-WgoMoreOptimizations -Hibernation $doHibernation -PowerPlan $doPowerPlan `
                     -TempCleanup $doTempCleanup -HotCorners $doHotCorners -RecallBlock $doRecallBlock `
                     -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
-                    -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize -DryRun $false
+                    -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize `
+                    -HagsGameMode $doHagsGameMode -UltimatePerf $doUltimatePerf -CloudflareDns $doCloudflareDns `
+                    -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
+                    -InputLagReduction $doInputLagReduction -DryRun $false
             }
 
             Write-Log (T 'LogOptDone') "OK"
@@ -3113,9 +3370,11 @@ $ctrl['btnRunSelected'].Add_Click({
                        $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry,
                        $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency,
                        $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
-                       $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doDryRun) `
+                       $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf, $doCloudflareDns,
+                       $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction, $doDryRun) `
       -OnCompleted {
         $ctrl['btnRunSelected'].IsEnabled = $true
+        Save-WgoLastRunState
     }
 })
 
@@ -3137,6 +3396,7 @@ $ctrl['btnRestoreDefaults'].Add_Click({
         }
     } -OnCompleted {
         $ctrl['btnRestoreDefaults'].IsEnabled = $true
+        Remove-Item -Path $Global:WgoLastRunPath -Force -ErrorAction Ignore
     }
 })
 
@@ -3180,6 +3440,47 @@ $ctrl['btnImportProfile'].Add_Click({
         Write-Log (T 'LogImportError' $_.Exception.Message) "ERROR"
     }
 })
+
+# ============================================================================
+# LAST-RUN STATE (so re-opening the tool shows what you actually ran last,
+# instead of always resetting to the same fixed defaults)
+# ============================================================================
+
+$Global:WgoLastRunPath = Join-Path $env:LOCALAPPDATA "WGO\last-run.json"
+
+function Save-WgoLastRunState {
+    try {
+        $dir = Split-Path $Global:WgoLastRunPath -Parent
+        if (-not (Test-Path $dir)) { New-Item -Path $dir -ItemType Directory -Force | Out-Null }
+        $state = @{ Timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss") }
+        foreach ($n in $script:optimizationCheckboxNames) {
+            if ($ctrl[$n]) { $state[$n] = [bool]$ctrl[$n].IsChecked }
+        }
+        if ($ctrl['chkDryRun']) { $state['chkDryRun'] = [bool]$ctrl['chkDryRun'].IsChecked }
+        ($state | ConvertTo-Json) | Set-Content -Path $Global:WgoLastRunPath -Encoding UTF8
+    } catch {}
+}
+
+function Restore-WgoLastRunState {
+    try {
+        if (-not (Test-Path $Global:WgoLastRunPath)) {
+            Write-Log (T 'LogLastRunNone') "INFO"
+            return
+        }
+        $state = Get-Content -Path $Global:WgoLastRunPath -Raw | ConvertFrom-Json
+        foreach ($n in $script:optimizationCheckboxNames) {
+            if ($ctrl[$n] -and ($state.PSObject.Properties.Name -contains $n)) {
+                $ctrl[$n].IsChecked = [bool]$state.$n
+            }
+        }
+        if ($ctrl['chkDryRun'] -and ($state.PSObject.Properties.Name -contains 'chkDryRun')) {
+            $ctrl['chkDryRun'].IsChecked = [bool]$state.chkDryRun
+        }
+        Write-Log (T 'LogLastRunFound' $state.Timestamp) "INFO"
+    } catch {
+        Write-Log (T 'LogLastRunNone') "INFO"
+    }
+}
 
 $ctrl['btnInstallChoco'].Add_Click({
     try {
@@ -3280,6 +3581,7 @@ $ctrl['btnRunMassgrave'].Add_Click({
 # ============================================================================
 
 Update-UILanguage -Code $Global:CurrentLangCode
+Restore-WgoLastRunState
 Write-Log $Lang[$Global:CurrentLangCode].MsgReady "INFO"
 
 $window.ShowDialog() | Out-Null
