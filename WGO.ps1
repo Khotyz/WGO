@@ -134,6 +134,8 @@ $Lang['en-US'] = @{
     AppBleachbitDesc  = "Free, open-source tool to clean disk clutter and protect privacy."
     AppMoonlightDesc  = "Open-source game streaming client, used to connect to a Sunshine or NVIDIA GameStream host."
     AppSunshineDesc   = "Self-hosted, open-source game stream host for Moonlight, with low-latency GPU-accelerated encoding."
+    AppNilesoftShellDesc = "Powerful, highly customizable open-source context menu manager for File Explorer (MIT license)."
+    AppOptiscalerClientDesc = "Open-source desktop manager to install and update OptiScaler (DLSS/FSR/XeSS frame generation and upscaling injector) across your game library. Third-party GitHub project, not Microsoft-signed - review it before use."
     MsgReady          = "Ready."
     MsgDone           = "Done."
 
@@ -203,6 +205,9 @@ $Lang['en-US'] = @{
     ChkKernelGamingPriority = "Prioritize foreground games (Win32PrioritySeparation + MMCSS Games task)"
     ChkGameDvrDisable    = "Disable Xbox Game DVR background recording"
     ChkInputLagReduction = "Reduce input lag (disable mouse acceleration, Sticky/Filter Keys popups and Fullscreen Optimizations)"
+    ChkSearchIndexOptimize = "Exclude junk/cache folders from Windows Search indexing (frees RAM/CPU used by the indexer)"
+    ChkGhostAdapters      = "Remove hidden/ghost network adapters from Device Manager"
+    ChkFastStartup        = "Disable Fast Startup (prevents accumulated RAM/session leak across reboots)"
     ChkDryRun            = "Dry Run (only log what would change, apply nothing)"
     BtnRestoreDefaults   = "Restore Defaults"
     BtnExportProfile     = "Export Profile"
@@ -224,6 +229,11 @@ $Lang['en-US'] = @{
     LogKernelGamingPriorityOk = "Kernel priority tuned for foreground games (Win32PrioritySeparation=38) and MMCSS Games task configured (GPU Priority=8, Priority=6, High scheduling)."
     LogGameDvrDisableOk       = "Xbox Game DVR background recording disabled (user setting and policy)."
     LogInputLagReductionOk    = "Input lag reduced: mouse acceleration disabled, Sticky/Toggle/Filter Keys popups disabled, Fullscreen Optimizations disabled globally."
+    LogSearchIndexOptimizeOk  = "Junk/cache folders excluded from Windows Search indexing; indexing of encrypted items and Outlook disabled via policy."
+    LogGhostAdaptersOk        = "Removed {0} hidden/ghost network adapter(s) from Device Manager."
+    LogGhostAdaptersNone      = "No hidden/ghost network adapters found."
+    LogFastStartupOk          = "Fast Startup disabled (HiberbootEnabled=0)."
+    LogShaderCacheCleanOk     = "DirectX Shader Cache (D3DSCache, NVIDIA/AMD/Intel shader caches) cleaned."
     LogMoreError              = "Error applying tweak ({0}): {1}"
     LogMoreDone               = "System cleanup & performance tweaks finished."
 
@@ -334,6 +344,8 @@ $Lang['pt-BR'] = @{
     AppBleachbitDesc  = "Ferramenta gratuita e de c" + $c_oacute + "digo aberto para limpar arquivos desnecess" + $c_aacute + "rios do disco e proteger a privacidade."
     AppMoonlightDesc  = "Cliente de streaming de jogos de c" + $c_oacute + "digo aberto, usado para conectar a um host Sunshine ou NVIDIA GameStream."
     AppSunshineDesc   = "Host de streaming de jogos auto-hospedado e de c" + $c_oacute + "digo aberto para o Moonlight, com codifica" + $c_ccedil + $c_atil + "o acelerada por GPU e baixa lat" + $c_ecirc + "ncia."
+    AppNilesoftShellDesc = "Gerenciador de menu de contexto do Explorador de Arquivos, poderoso, de c" + $c_oacute + "digo aberto e altamente personaliz" + $c_aacute + "vel (licen" + $c_ccedil + "a MIT)."
+    AppOptiscalerClientDesc = "Gerenciador de c" + $c_oacute + "digo aberto para instalar e atualizar o OptiScaler (injetor de upscaling/gera" + $c_ccedil + $c_atil + "o de frames DLSS/FSR/XeSS) em toda a sua biblioteca de jogos. Projeto de terceiros no GitHub, n" + $c_atil + "o assinado pela Microsoft - revise antes de usar."
     MsgReady          = "Pronto."
     MsgDone           = "Conclu" + $c_iacute + "do."
 
@@ -403,6 +415,9 @@ $Lang['pt-BR'] = @{
     ChkKernelGamingPriority = "Priorizar jogos em primeiro plano (Win32PrioritySeparation + tarefa MMCSS Games)"
     ChkGameDvrDisable    = "Desativar grava" + $c_ccedil + $c_atil + "o em segundo plano do Game DVR do Xbox"
     ChkInputLagReduction = "Reduzir input lag (desativar acelera" + $c_ccedil + $c_atil + "o do mouse, pop-ups de Teclas de Ader" + $c_ecirc + "ncia/Filtro e Otimiza" + $c_ccedil + $c_otil + "es de Tela Cheia)"
+    ChkSearchIndexOptimize = "Excluir pastas de lixo/cache da indexa" + $c_ccedil + $c_atil + "o do Windows Search (libera RAM/CPU usados pelo indexador)"
+    ChkGhostAdapters      = "Remover adaptadores de rede ocultos/fantasmas do Gerenciador de Dispositivos"
+    ChkFastStartup        = "Desativar Inicializa" + $c_ccedil + $c_atil + "o R" + $c_aacute + "pida (evita vazamento acumulado de RAM/sess" + $c_atil + "o entre reinicializa" + $c_ccedil + $c_otil + "es)"
     ChkDryRun            = "Modo Simula" + $c_ccedil + $c_atil + "o (apenas registra o que seria alterado, sem aplicar)"
     BtnRestoreDefaults   = "Restaurar Padr" + $c_otil + "es"
     BtnExportProfile     = "Exportar Perfil"
@@ -424,6 +439,11 @@ $Lang['pt-BR'] = @{
     LogKernelGamingPriorityOk = "Prioridade do kernel ajustada para jogos em primeiro plano (Win32PrioritySeparation=38) e tarefa MMCSS Games configurada (GPU Priority=8, Priority=6, agendamento Alto)."
     LogGameDvrDisableOk       = "Grava" + $c_ccedil + $c_atil + "o em segundo plano do Game DVR do Xbox desativada (configura" + $c_ccedil + $c_atil + "o do usu" + $c_aacute + "rio e pol" + $c_iacute + "tica)."
     LogInputLagReductionOk    = "Input lag reduzido: acelera" + $c_ccedil + $c_atil + "o do mouse desativada, pop-ups de Teclas de Ader" + $c_ecirc + "ncia/Alternar/Filtro desativados, Otimiza" + $c_ccedil + $c_otil + "es de Tela Cheia desativadas globalmente."
+    LogSearchIndexOptimizeOk  = "Pastas de lixo/cache exclu" + $c_iacute + "das da indexa" + $c_ccedil + $c_atil + "o do Windows Search; indexa" + $c_ccedil + $c_atil + "o de itens criptografados e do Outlook desativada via diretiva."
+    LogGhostAdaptersOk        = "{0} adaptador(es) de rede oculto(s)/fantasma(s) removido(s) do Gerenciador de Dispositivos."
+    LogGhostAdaptersNone      = "Nenhum adaptador de rede oculto/fantasma encontrado."
+    LogFastStartupOk          = "Inicializa" + $c_ccedil + $c_atil + "o R" + $c_aacute + "pida desativada (HiberbootEnabled=0)."
+    LogShaderCacheCleanOk     = "Cache de Shader do DirectX (D3DSCache, caches de shader NVIDIA/AMD/Intel) limpo."
     LogMoreError              = "Erro ao aplicar ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpeza e desempenho do sistema conclu" + $c_iacute + "dos."
 
@@ -534,6 +554,8 @@ $Lang['es-ES'] = @{
     AppBleachbitDesc  = "Herramienta gratuita y de c" + [char]0x00F3 + "digo abierto para limpiar archivos innecesarios del disco y proteger la privacidad."
     AppMoonlightDesc  = "Cliente de transmisi" + [char]0x00F3 + "n de juegos de c" + [char]0x00F3 + "digo abierto, usado para conectarse a un host Sunshine o NVIDIA GameStream."
     AppSunshineDesc   = "Host de transmisi" + [char]0x00F3 + "n de juegos autoalojado y de c" + [char]0x00F3 + "digo abierto para Moonlight, con codificaci" + [char]0x00F3 + "n acelerada por GPU y baja latencia."
+    AppNilesoftShellDesc = "Gestor de men" + [char]0x00FA + " contextual para el Explorador de archivos, potente, de c" + [char]0x00F3 + "digo abierto y muy personalizable (licencia MIT)."
+    AppOptiscalerClientDesc = "Gestor de escritorio de c" + [char]0x00F3 + "digo abierto para instalar y actualizar OptiScaler (inyector de escalado/generaci" + [char]0x00F3 + "n de fotogramas DLSS/FSR/XeSS) en toda tu biblioteca de juegos. Proyecto de terceros en GitHub, no firmado por Microsoft - rev" + [char]0x00ED + "salo antes de usarlo."
     MsgReady          = "Listo."
     MsgDone           = "Completado."
 
@@ -603,6 +625,9 @@ $Lang['es-ES'] = @{
     ChkKernelGamingPriority = "Priorizar juegos en primer plano (Win32PrioritySeparation + tarea MMCSS Games)"
     ChkGameDvrDisable    = "Desactivar la grabaci" + [char]0x00F3 + "n en segundo plano de Xbox Game DVR"
     ChkInputLagReduction = "Reducir el input lag (desactivar aceleraci" + [char]0x00F3 + "n del rat" + [char]0x00F3 + "n, ventanas emergentes de Teclas Especiales/Filtro y Optimizaciones de Pantalla Completa)"
+    ChkSearchIndexOptimize = "Excluir carpetas de basura/cach" + [char]0x00E9 + " de la indexaci" + [char]0x00F3 + "n de Windows Search (libera RAM/CPU usados por el indexador)"
+    ChkGhostAdapters      = "Eliminar adaptadores de red ocultos/fantasma del Administrador de dispositivos"
+    ChkFastStartup        = "Desactivar Inicio r" + [char]0x00E1 + "pido (evita la fuga acumulada de RAM/sesi" + [char]0x00F3 + "n entre reinicios)"
     ChkDryRun            = "Modo Simulaci" + [char]0x00F3 + "n (solo registra los cambios sin aplicarlos)"
     BtnRestoreDefaults   = "Restaurar Valores Predeterminados"
     BtnExportProfile     = "Exportar Perfil"
@@ -624,6 +649,11 @@ $Lang['es-ES'] = @{
     LogKernelGamingPriorityOk = "Prioridad del kernel ajustada para juegos en primer plano (Win32PrioritySeparation=38) y tarea MMCSS Games configurada (GPU Priority=8, Priority=6, programaci" + [char]0x00F3 + "n Alta)."
     LogGameDvrDisableOk       = "Grabaci" + [char]0x00F3 + "n en segundo plano de Xbox Game DVR desactivada (configuraci" + [char]0x00F3 + "n del usuario y directiva)."
     LogInputLagReductionOk    = "Input lag reducido: aceleraci" + [char]0x00F3 + "n del rat" + [char]0x00F3 + "n desactivada, ventanas emergentes de Teclas Especiales/Alternancia/Filtro desactivadas, Optimizaciones de Pantalla Completa desactivadas globalmente."
+    LogSearchIndexOptimizeOk  = "Carpetas de basura/cach" + [char]0x00E9 + " excluidas de la indexaci" + [char]0x00F3 + "n de Windows Search; indexaci" + [char]0x00F3 + "n de elementos cifrados y de Outlook desactivada mediante directiva."
+    LogGhostAdaptersOk        = "Se eliminaron {0} adaptador(es) de red oculto(s)/fantasma del Administrador de dispositivos."
+    LogGhostAdaptersNone      = "No se encontraron adaptadores de red ocultos/fantasma."
+    LogFastStartupOk          = "Inicio r" + [char]0x00E1 + "pido desactivado (HiberbootEnabled=0)."
+    LogShaderCacheCleanOk     = "Cach" + [char]0x00E9 + " de Shader de DirectX (D3DSCache, cach" + [char]0x00E9 + "s de shader de NVIDIA/AMD/Intel) limpiada."
     LogMoreError              = "Error al aplicar el ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpieza y rendimiento del sistema finalizados."
 
@@ -737,6 +767,8 @@ $Lang['zh-CN'] = @{
     AppBleachbitDesc  = (ZH 0x514D,0x8D39) + (ZH 0x5F00,0x6E90) + (ZH 0x5DE5,0x5177) + "," + (ZH 0x7528,0x4E8E,0x6E05,0x7406,0x78C1,0x76D8,0x5783,0x573E,0x5E76,0x4FDD,0x62A4,0x9690,0x79C1)
     AppMoonlightDesc  = (ZH 0x5F00,0x6E90,0x6E38,0x620F,0x4E32,0x6D41,0x5BA2,0x6237,0x7AEF) + "," + (ZH 0x7528,0x4E8E,0x8FDE,0x63A5) + " Sunshine " + (ZH 0x6216) + " NVIDIA GameStream " + (ZH 0x4E3B,0x673A)
     AppSunshineDesc   = (ZH 0x81EA,0x6258,0x7BA1,0x7684,0x5F00,0x6E90,0x6E38,0x620F,0x4E32,0x6D41,0x4E3B,0x673A) + "," + (ZH 0x914D,0x5408) + " Moonlight " + (ZH 0x4F7F,0x7528) + "," + (ZH 0x652F,0x6301) + " GPU " + (ZH 0x786C,0x4EF6,0x52A0,0x901F,0x7F16,0x7801) + "," + (ZH 0x5EF6,0x8FDF,0x6781,0x4F4E)
+    AppNilesoftShellDesc = (ZH 0x5F3A,0x5927,0x7684,0x5F00,0x6E90) + " Windows " + (ZH 0x8D44,0x6E90,0x7BA1,0x7406,0x5668,0x53F3,0x952E,0x83DC,0x5355,0x5B9A,0x5236,0x5DE5,0x5177) + "," + (ZH 0x9AD8,0x5EA6,0x53EF,0x914D,0x7F6E) + "(MIT " + (ZH 0x8BB8,0x53EF,0x8BC1) + ")"
+    AppOptiscalerClientDesc = (ZH 0x5F00,0x6E90,0x684C,0x9762,0x7BA1,0x7406,0x5DE5,0x5177) + "," + (ZH 0x7528,0x4E8E,0x5728,0x6574,0x4E2A,0x6E38,0x620F,0x5E93,0x4E2D,0x5B89,0x88C5,0x548C,0x66F4,0x65B0) + " OptiScaler" + "(DLSS/FSR/XeSS " + (ZH 0x8D85,0x5206,0x8FA8,0x7387,0x548C,0x5E27,0x751F,0x6210,0x6CE8,0x5165,0x5DE5,0x5177) + ")" + "," + (ZH 0x6765,0x81EA) + " GitHub " + (ZH 0x7684,0x7B2C,0x4E09,0x65B9,0x9879,0x76EE) + "," + (ZH 0x975E,0x5FAE,0x8F6F,0x7B7E,0x540D) + "," + (ZH 0x8BF7,0x5728,0x4F7F,0x7528,0x524D,0x81EA,0x884C,0x5BA1,0x67E5)
     MsgReady          = (ZH 0x5C31,0x7EEA)
     MsgDone           = (ZH 0x5B8C,0x6210)
 
@@ -806,6 +838,9 @@ $Lang['zh-CN'] = @{
     ChkKernelGamingPriority = (ZH 0x4F18,0x5148) + (ZH 0x524D,0x53F0) + (ZH 0x6E38,0x620F) + " (Win32PrioritySeparation + MMCSS Games " + (ZH 0x4EFB,0x52A1) + ")"
     ChkGameDvrDisable    = (ZH 0x7981,0x7528) + " Xbox Game DVR " + (ZH 0x540E,0x53F0,0x5F55,0x5236)
     ChkInputLagReduction = (ZH 0x51CF,0x5C11) + (ZH 0x8F93,0x5165,0x5EF6,0x8FDF) + " (" + (ZH 0x7981,0x7528) + (ZH 0x9F20,0x6807,0x52A0,0x901F) + "," + (ZH 0x7981,0x7528) + (ZH 0x7C98,0x952E,0x548C,0x8FC7,0x6EE4,0x952E) + (ZH 0x5F39,0x7A97) + "," + (ZH 0x7981,0x7528) + (ZH 0x5168,0x5C4F) + (ZH 0x4F18,0x5316) + ")"
+    ChkSearchIndexOptimize = (ZH 0x4ECE) + " Windows " + (ZH 0x641C,0x7D22,0x7D22,0x5F15) + (ZH 0x4E2D,0x6392,0x9664) + (ZH 0x5783,0x573E,0x7F13,0x5B58,0x6587,0x4EF6,0x5939) + " (" + (ZH 0x91CA,0x653E,0x7D22,0x5F15,0x5668,0x5360,0x7528,0x7684) + " RAM/CPU)"
+    ChkGhostAdapters      = (ZH 0x4ECE) + (ZH 0x8BBE,0x5907,0x7BA1,0x7406,0x5668) + (ZH 0x5220,0x9664) + (ZH 0x9690,0x85CF,0x6216,0x5E7D,0x7075) + (ZH 0x7F51,0x7EDC,0x9002,0x914D,0x5668)
+    ChkFastStartup        = (ZH 0x7981,0x7528) + (ZH 0x5FEB,0x901F,0x542F,0x52A8) + " (" + (ZH 0x9632,0x6B62,0x91CD,0x542F,0x95F4,0x7D2F,0x79EF) + " RAM " + (ZH 0x6CC4,0x6F0F) + ")"
     ChkDryRun            = (ZH 0x6A21,0x62DF,0x8FD0,0x884C,0x6A21,0x5F0F) + " (" + (ZH 0x4EC5,0x8BB0,0x5F55,0x5C06,0x8981,0x66F4,0x6539,0x7684,0x5185,0x5BB9,0x800C,0x4E0D,0x5B9E,0x9645,0x5E94,0x7528) + ")"
     BtnRestoreDefaults   = (ZH 0x6062,0x590D,0x9ED8,0x8BA4,0x8BBE,0x7F6E)
     BtnExportProfile     = (ZH 0x5BFC,0x51FA,0x914D,0x7F6E,0x6587,0x4EF6)
@@ -827,6 +862,11 @@ $Lang['zh-CN'] = @{
     LogKernelGamingPriorityOk = (ZH 0x5DF2,0x4E3A) + (ZH 0x524D,0x53F0,0x6E38,0x620F) + (ZH 0x8C03,0x6574) + (ZH 0x5185,0x6838) + (ZH 0x4F18,0x5148,0x7EA7) + " (Win32PrioritySeparation=38)" + (ZH 0x5E76) + (ZH 0x914D,0x7F6E) + " MMCSS Games " + (ZH 0x4EFB,0x52A1) + " (GPU Priority=8, Priority=6, " + (ZH 0x9AD8) + (ZH 0x4F18,0x5148,0x7EA7,0x8C03,0x5EA6) + ")."
     LogGameDvrDisableOk       = "Xbox Game DVR " + (ZH 0x540E,0x53F0,0x5F55,0x5236) + (ZH 0x5DF2,0x7981,0x7528) + " (" + (ZH 0x7528,0x6237,0x8BBE,0x7F6E) + (ZH 0x548C) + (ZH 0x7B56,0x7565) + ")."
     LogInputLagReductionOk    = (ZH 0x8F93,0x5165,0x5EF6,0x8FDF) + (ZH 0x5DF2,0x51CF,0x5C11) + ": " + (ZH 0x9F20,0x6807,0x52A0,0x901F) + (ZH 0x5DF2,0x7981,0x7528) + "," + (ZH 0x7C98,0x952E,0x548C,0x8FC7,0x6EE4,0x952E) + (ZH 0x5F39,0x7A97) + (ZH 0x5DF2,0x7981,0x7528) + "," + (ZH 0x5168,0x5C4F) + (ZH 0x4F18,0x5316) + (ZH 0x5DF2) + (ZH 0x5168,0x5C40) + (ZH 0x7981,0x7528) + "."
+    LogSearchIndexOptimizeOk  = (ZH 0x5DF2,0x4ECE) + " Windows " + (ZH 0x641C,0x7D22,0x7D22,0x5F15) + (ZH 0x4E2D,0x6392,0x9664) + (ZH 0x5783,0x573E,0x7F13,0x5B58,0x6587,0x4EF6,0x5939) + "," + (ZH 0x5DF2,0x901A,0x8FC7,0x7B56,0x7565) + (ZH 0x7981,0x7528) + (ZH 0x52A0,0x5BC6,0x9879,0x76EE,0x548C) + " Outlook " + (ZH 0x7684,0x7D22,0x5F15)
+    LogGhostAdaptersOk        = (ZH 0x5DF2,0x4ECE) + (ZH 0x8BBE,0x5907,0x7BA1,0x7406,0x5668) + (ZH 0x5220,0x9664) + " {0} " + (ZH 0x4E2A,0x9690,0x85CF,0x6216,0x5E7D,0x7075,0x7F51,0x7EDC,0x9002,0x914D,0x5668)
+    LogGhostAdaptersNone      = (ZH 0x672A,0x627E,0x5230) + (ZH 0x9690,0x85CF,0x6216,0x5E7D,0x7075,0x7F51,0x7EDC,0x9002,0x914D,0x5668)
+    LogFastStartupOk          = (ZH 0x5FEB,0x901F,0x542F,0x52A8) + (ZH 0x5DF2,0x7981,0x7528) + " (HiberbootEnabled=0)"
+    LogShaderCacheCleanOk     = "DirectX " + (ZH 0x7740,0x8272,0x5668,0x7F13,0x5B58) + " (D3DSCache" + "," + "NVIDIA/AMD/Intel " + (ZH 0x7740,0x8272,0x5668,0x7F13,0x5B58) + ")" + (ZH 0x5DF2,0x6E05,0x7406)
     LogMoreError              = (ZH 0x5E94,0x7528) + (ZH 0x8C03,0x6574) + (ZH 0x65F6,0x51FA,0x9519) + " ({0}): {1}"
     LogMoreDone               = (ZH 0x7CFB,0x7EDF,0x6E05,0x7406,0x4E0E,0x6027,0x80FD) + (ZH 0x8C03,0x6574) + (ZH 0x5B8C,0x6210)
 
@@ -1340,6 +1380,9 @@ $Global:CurrentLangCode = "pt-BR"
                                 <CheckBox x:Name="chkKernelGamingPriority" Content="Prioritize foreground games (kernel + MMCSS)" IsChecked="False"/>
                                 <CheckBox x:Name="chkGameDvrDisable" Content="Disable Xbox Game DVR background recording" IsChecked="False"/>
                                 <CheckBox x:Name="chkInputLagReduction" Content="Reduce input lag (mouse accel, Sticky Keys, Fullscreen Optimizations)" IsChecked="False"/>
+                                <CheckBox x:Name="chkSearchIndexOptimize" Content="Exclude junk/cache folders from Windows Search indexing" IsChecked="False"/>
+                                <CheckBox x:Name="chkGhostAdapters" Content="Remove hidden/ghost network adapters (Device Manager)" IsChecked="False"/>
+                                <CheckBox x:Name="chkFastStartup" Content="Disable Fast Startup (prevents accumulated RAM leak on boot)" IsChecked="False"/>
                             </StackPanel>
                         </GroupBox>
 
@@ -1463,6 +1506,20 @@ $Global:CurrentLangCode = "pt-BR"
                                     <StackPanel>
                                         <CheckBox x:Name="chkSunshine" Content="Sunshine" FontWeight="Bold" Tag="sunshine"/>
                                         <TextBlock x:Name="txtSunshineDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkNilesoftShell" Content="Nilesoft Shell" FontWeight="Bold" Tag="nilesoftshell"/>
+                                        <TextBlock x:Name="txtNilesoftShellDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkOptiscalerClient" Content="Optiscaler Client" FontWeight="Bold" Tag="optiscalerclient"/>
+                                        <TextBlock x:Name="txtOptiscalerClientDesc" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
                                     </StackPanel>
                                 </Border>
 
@@ -1612,6 +1669,7 @@ $names = @(
     'grpAdvancedTweaks','chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
     'grpMoreOptimizations','chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
     'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkCloudflareDns','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
+    'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup',
     'btnRunSelected','btnRestoreDefaults','btnExportProfile','btnImportProfile',
     'grpInstaller','btnInstallApps',
     'txtChocoRequired','txtChocoStatus','btnInstallChoco',
@@ -1629,6 +1687,8 @@ $names = @(
     'chkBleachbit','txtBleachbitDesc',
     'chkMoonlight','txtMoonlightDesc',
     'chkSunshine','txtSunshineDesc',
+    'chkNilesoftShell','txtNilesoftShellDesc',
+    'chkOptiscalerClient','txtOptiscalerClientDesc',
     'txtExtScriptsWarning',
     'txtAmdOptimizerTitle','txtAmdOptimizerDesc','btnRunAmdOptimizer',
     'txtMassgraveTitle','txtMassgraveDesc','btnRunMassgrave'
@@ -1642,7 +1702,8 @@ $script:optimizationCheckboxNames = @(
     'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
     'chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
     'chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
-    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkCloudflareDns','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction'
+    'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkCloudflareDns','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
+    'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup'
 )
 
 # ============================================================================
@@ -1759,6 +1820,9 @@ function Update-UILanguage {
     $ctrl['chkKernelGamingPriority'].Content = $t.ChkKernelGamingPriority
     $ctrl['chkGameDvrDisable'].Content   = $t.ChkGameDvrDisable
     $ctrl['chkInputLagReduction'].Content = $t.ChkInputLagReduction
+    $ctrl['chkSearchIndexOptimize'].Content = $t.ChkSearchIndexOptimize
+    $ctrl['chkGhostAdapters'].Content     = $t.ChkGhostAdapters
+    $ctrl['chkFastStartup'].Content       = $t.ChkFastStartup
 
     $ctrl['chkDryRun'].Content           = $t.ChkDryRun
 
@@ -1802,6 +1866,10 @@ function Update-UILanguage {
     $ctrl['txtMoonlightDesc'].Text       = $t.AppMoonlightDesc
     $ctrl['chkSunshine'].Content          = "Sunshine"
     $ctrl['txtSunshineDesc'].Text        = $t.AppSunshineDesc
+    $ctrl['chkNilesoftShell'].Content     = "Nilesoft Shell"
+    $ctrl['txtNilesoftShellDesc'].Text   = $t.AppNilesoftShellDesc
+    $ctrl['chkOptiscalerClient'].Content  = "Optiscaler Client"
+    $ctrl['txtOptiscalerClientDesc'].Text = $t.AppOptiscalerClientDesc
 
     $ctrl['tabExternalScripts'].Header    = $t.TabExternalScripts
     $ctrl['txtExtScriptsWarning'].Text    = $t.TxtExtScriptsWarning
@@ -2278,12 +2346,19 @@ function Set-WgoAdvancedTweaks {
         }
     }
 
-    # 4. Block UWP apps from running in background
+    # 4. Block UWP apps from running in background (per-user setting, plus
+    # the machine-wide Group Policy equivalent so it's enforced for every
+    # user account and can't be re-enabled from the Settings app).
     if ($AppsBackground) {
         try {
             $bgKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
             if (-not (Test-Path $bgKey)) { New-Item -Path $bgKey -Force | Out-Null }
             New-ItemProperty -Path $bgKey -Name "LetAppsRunInBackground" -Value 2 -PropertyType DWord -Force | Out-Null
+
+            $bgPolicyKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy"
+            if (-not (Test-Path $bgPolicyKey)) { New-Item -Path $bgPolicyKey -Force | Out-Null }
+            New-ItemProperty -Path $bgPolicyKey -Name "LetAppsRunInBackground" -Value 2 -PropertyType DWord -Force | Out-Null
+
             Write-Log (T 'LogAdvAppsBackgroundOk') "OK"
         } catch {
             Write-Log (T 'LogAdvError' "AppsBackground" $_.Exception.Message) "ERROR"
@@ -2344,12 +2419,16 @@ function Set-WgoMoreOptimizations {
         [bool]$KernelGamingPriority = $false,
         [bool]$GameDvrDisable  = $false,
         [bool]$InputLagReduction = $false,
+        [bool]$SearchIndexOptimize = $false,
+        [bool]$GhostAdapters   = $false,
+        [bool]$FastStartup     = $false,
         [bool]$DryRun          = $false
     )
 
     if (-not ($Hibernation -or $PowerPlan -or $TempCleanup -or $HotCorners -or $RecallBlock -or
                $BootTimeout -or $OfficeTelemetry -or $ExtraSchedTasks -or $DiskOptimize -or
-               $HagsGameMode -or $UltimatePerf -or $CloudflareDns -or $KernelGamingPriority -or $GameDvrDisable -or $InputLagReduction)) { return }
+               $HagsGameMode -or $UltimatePerf -or $CloudflareDns -or $KernelGamingPriority -or $GameDvrDisable -or $InputLagReduction -or
+               $SearchIndexOptimize -or $GhostAdapters -or $FastStartup)) { return }
 
     Write-Log (T 'LogMoreStart') "INFO"
     if ($DryRun) { Write-Log (T 'LogDryRunNote') "WARN" }
@@ -2404,6 +2483,25 @@ function Set-WgoMoreOptimizations {
                 Stop-Service -Name wuauserv -Force -ErrorAction Ignore
                 Remove-Item -Path "$env:WINDIR\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction Ignore
                 Start-Service -Name wuauserv -ErrorAction Ignore
+
+                # DirectX Shader Cache cleanup (D3D/NVIDIA/AMD/Intel). Purely
+                # regenerated cache data - safe to delete, only costs a brief
+                # one-time shader recompile the next time each game runs.
+                $shaderCachePaths = @(
+                    "$env:LOCALAPPDATA\D3DSCache",
+                    "$env:LOCALAPPDATA\NVIDIA\DXCache",
+                    "$env:LOCALAPPDATA\NVIDIA\GLCache",
+                    "$env:LOCALAPPDATA\AMD\DxCache",
+                    "$env:LOCALAPPDATA\AMD\DxcCache",
+                    "$env:LOCALAPPDATA\AMD\VkCache",
+                    "$env:LOCALAPPDATA\Intel\ShaderCache"
+                )
+                foreach ($scPath in $shaderCachePaths) {
+                    if (Test-Path $scPath) {
+                        Remove-Item -Path "$scPath\*" -Recurse -Force -ErrorAction Ignore
+                    }
+                }
+                Write-Log (T 'LogShaderCacheCleanOk') "OK"
 
                 Write-Log (T 'LogTempCleanupOk') "OK"
             } catch {
@@ -2695,6 +2793,102 @@ function Set-WgoMoreOptimizations {
         }
     }
 
+    # 16. Exclude junk/cache folders from Windows Search indexing. Uses the
+    # documented FILE_ATTRIBUTE_NOT_CONTENT_INDEXED flag (same effect as the
+    # Explorer "Allow files in this folder to have contents indexed" checkbox)
+    # instead of touching the internal, undocumented CrawlScopeManager
+    # database, so Start Menu / Explorer search keeps working normally for
+    # everything else. Also disables indexing of encrypted items and Outlook
+    # data via the official Windows Search Group Policy keys.
+    if ($SearchIndexOptimize) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkSearchIndexOptimize')) "INFO"
+        } else {
+            try {
+                $junkPaths = @(
+                    "$env:TEMP",
+                    "$env:WINDIR\Temp",
+                    "$env:WINDIR\Prefetch",
+                    "$env:WINDIR\SoftwareDistribution\Download",
+                    "$env:LOCALAPPDATA\Temp",
+                    "$env:LOCALAPPDATA\D3DSCache",
+                    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
+                    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
+                    "$env:LOCALAPPDATA\Packages"
+                )
+                foreach ($jp in $junkPaths) {
+                    if (Test-Path $jp) {
+                        try {
+                            $folder = Get-Item -Path $jp -Force -ErrorAction Stop
+                            $folder.Attributes = $folder.Attributes -bor [System.IO.FileAttributes]::NotContentIndexed
+                        } catch { }
+                    }
+                }
+
+                $searchPolicyKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+                if (-not (Test-Path $searchPolicyKey)) { New-Item -Path $searchPolicyKey -Force | Out-Null }
+                New-ItemProperty -Path $searchPolicyKey -Name "AllowIndexingEncryptedStoresOrItems" -Value 0 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $searchPolicyKey -Name "PreventIndexingOutlook"              -Value 1 -PropertyType DWord -Force | Out-Null
+
+                Write-Log (T 'LogSearchIndexOptimizeOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "SearchIndexOptimize" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 17. Remove hidden/ghost network adapters from Device Manager. Only
+    # targets devices in the "Net" class whose current PnP Status is
+    # "Unknown" (i.e. no longer physically present / phantom entries left
+    # behind by VPNs, virtual switches, old USB NICs, etc.). Active/currently
+    # present adapters are never touched.
+    if ($GhostAdapters) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkGhostAdapters')) "INFO"
+        } else {
+            try {
+                $removed = 0
+                $ghosts = Get-PnpDevice -Class Net -ErrorAction Stop |
+                    Where-Object { $_.Status -eq 'Unknown' }
+
+                foreach ($g in $ghosts) {
+                    try {
+                        & pnputil.exe /remove-device $g.InstanceId 2>$null | Out-Null
+                        $removed++
+                        Write-Log ("  - $($g.FriendlyName)") "INFO"
+                    } catch { }
+                }
+
+                if ($removed -gt 0) {
+                    Write-Log (T 'LogGhostAdaptersOk' $removed) "OK"
+                } else {
+                    Write-Log (T 'LogGhostAdaptersNone') "OK"
+                }
+            } catch {
+                Write-Log (T 'LogMoreError' "GhostAdapters" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 18. Disable Fast Startup (hybrid boot). Fast Startup hibernates the
+    # kernel session instead of a full shutdown, which can accumulate stale
+    # driver/RAM state across reboots. Safe on desktops/laptops alike; a
+    # normal Restart is unaffected either way, only Shutdown behavior changes.
+    if ($FastStartup) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkFastStartup')) "INFO"
+        } else {
+            try {
+                $powerKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
+                if (-not (Test-Path $powerKey)) { New-Item -Path $powerKey -Force | Out-Null }
+                New-ItemProperty -Path $powerKey -Name "HiberbootEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+                Write-Log (T 'LogFastStartupOk') "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "FastStartup" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
     Write-Log (T 'LogMoreDone') "OK"
 }
 
@@ -2807,7 +3001,9 @@ function Restore-WgoDefaults {
             "HKLM:\SOFTWARE\Policies\Microsoft\Edge",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization",
             "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive",
-            "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching"
+            "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
         )
         foreach ($k in $keysToRemove) {
             if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore }
@@ -2848,6 +3044,34 @@ function Restore-WgoDefaults {
 
         # --- Boot menu timeout back to the Windows default (30s) ---
         & bcdedit.exe /timeout 30 2>$null | Out-Null
+
+        # --- Fast Startup back to the Windows default (enabled) ---
+        try {
+            $powerKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
+            if (Test-Path $powerKey) {
+                New-ItemProperty -Path $powerKey -Name "HiberbootEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
+            }
+        } catch { }
+
+        # --- Remove the NotContentIndexed flag this script may have set on
+        # junk/cache folders, restoring default Windows Search indexing scope ---
+        try {
+            $junkPaths = @(
+                "$env:TEMP", "$env:WINDIR\Temp", "$env:WINDIR\Prefetch",
+                "$env:LOCALAPPDATA\Temp", "$env:LOCALAPPDATA\D3DSCache",
+                "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
+                "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
+                "$env:LOCALAPPDATA\Packages"
+            )
+            foreach ($jp in $junkPaths) {
+                if (Test-Path $jp) {
+                    $folder = Get-Item -Path $jp -Force -ErrorAction Ignore
+                    if ($folder) {
+                        $folder.Attributes = $folder.Attributes -band (-bnot [System.IO.FileAttributes]::NotContentIndexed)
+                    }
+                }
+            }
+        } catch { }
 
         # --- Re-enable services disabled by this script ---
         foreach ($svcName in @("DiagTrack", "dmwappushservice")) {
@@ -3014,6 +3238,8 @@ $Global:WgoAppCatalog = @{
     'bleachbit'                = @{ Name = "BleachBit";                 WingetId = "BleachBit.BleachBit";                  ChocoId = "bleachbit" }
     'moonlight'               = @{ Name = "Moonlight";                 WingetId = "MoonlightGameStreamingProject.Moonlight"; ChocoId = "moonlight-qt" }
     'sunshine'                = @{ Name = "Sunshine";                  WingetId = "LizardByte.Sunshine";                  ChocoId = "sunshine" }
+    'nilesoftshell'           = @{ Name = "Nilesoft Shell";            WingetId = "Nilesoft.Shell";                       ChocoId = "nilesoft-shell" }
+    'optiscalerclient'        = @{ Name = "Optiscaler Client";         WingetId = "Agustinm28.OptiscalerClient";          ChocoId = "" }
 }
 
 # Locates winget.exe (App Installer), caching the resolved path like Find-WgoChocolatey.
@@ -3287,6 +3513,9 @@ $ctrl['btnRunSelected'].Add_Click({
     $doKernelGamingPriority = [bool]$ctrl['chkKernelGamingPriority'].IsChecked
     $doGameDvrDisable  = [bool]$ctrl['chkGameDvrDisable'].IsChecked
     $doInputLagReduction = [bool]$ctrl['chkInputLagReduction'].IsChecked
+    $doSearchIndexOptimize = [bool]$ctrl['chkSearchIndexOptimize'].IsChecked
+    $doGhostAdapters   = [bool]$ctrl['chkGhostAdapters'].IsChecked
+    $doFastStartup     = [bool]$ctrl['chkFastStartup'].IsChecked
 
     $doDryRun = [bool]$ctrl['chkDryRun'].IsChecked
 
@@ -3296,7 +3525,8 @@ $ctrl['btnRunSelected'].Add_Click({
               $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency,
               $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
               $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf, $doCloudflareDns,
-              $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction, $doDryRun)
+              $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction,
+              $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup, $doDryRun)
         try {
             Write-Log (T 'LogOptStart') "INFO"
 
@@ -3323,6 +3553,10 @@ $ctrl['btnRunSelected'].Add_Click({
                     @{ Flag = $doAppsBackground;  Key = 'ChkAppsBackground' },
                     @{ Flag = $doNetworkLatency;  Key = 'ChkNetworkLatency' }
                 )
+                # Note: SearchIndexOptimize / GhostAdapters / FastStartup are
+                # part of the "System Cleanup & Performance" group and are
+                # logged by Set-WgoMoreOptimizations itself below, same as
+                # every other item in that group.
                 foreach ($item in $dryItems) {
                     if ($item.Flag) { Write-Log (T 'LogDryRunPrefix' (T $item.Key)) "INFO" }
                 }
@@ -3334,7 +3568,9 @@ $ctrl['btnRunSelected'].Add_Click({
                     -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize `
                     -HagsGameMode $doHagsGameMode -UltimatePerf $doUltimatePerf -CloudflareDns $doCloudflareDns `
                     -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
-                    -InputLagReduction $doInputLagReduction -DryRun $true
+                    -InputLagReduction $doInputLagReduction `
+                    -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
+                    -DryRun $true
             } else {
                 New-WgoRestorePoint | Out-Null
 
@@ -3357,7 +3593,9 @@ $ctrl['btnRunSelected'].Add_Click({
                     -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize `
                     -HagsGameMode $doHagsGameMode -UltimatePerf $doUltimatePerf -CloudflareDns $doCloudflareDns `
                     -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
-                    -InputLagReduction $doInputLagReduction -DryRun $false
+                    -InputLagReduction $doInputLagReduction `
+                    -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
+                    -DryRun $false
             }
 
             Write-Log (T 'LogOptDone') "OK"
@@ -3371,7 +3609,8 @@ $ctrl['btnRunSelected'].Add_Click({
                        $doDiagTrackFull, $doEdgeWidgets, $doDeliveryOpt, $doAppsBackground, $doNetworkLatency,
                        $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
                        $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf, $doCloudflareDns,
-                       $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction, $doDryRun) `
+                       $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction,
+                       $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup, $doDryRun) `
       -OnCompleted {
         $ctrl['btnRunSelected'].IsEnabled = $true
         Save-WgoLastRunState
@@ -3522,7 +3761,9 @@ $ctrl['btnInstallApps'].Add_Click({
         @{ Chk = $ctrl['chkMemreduct']; Name = "Mem Reduct" },
         @{ Chk = $ctrl['chkBleachbit']; Name = "BleachBit" },
         @{ Chk = $ctrl['chkMoonlight']; Name = "Moonlight" },
-        @{ Chk = $ctrl['chkSunshine'];  Name = "Sunshine" }
+        @{ Chk = $ctrl['chkSunshine'];  Name = "Sunshine" },
+        @{ Chk = $ctrl['chkNilesoftShell']; Name = "Nilesoft Shell" },
+        @{ Chk = $ctrl['chkOptiscalerClient']; Name = "Optiscaler Client" }
     )
 
     $selected = @()
