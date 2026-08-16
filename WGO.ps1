@@ -208,6 +208,8 @@ $Lang['en-US'] = @{
     ChkSearchIndexOptimize = "Exclude junk/cache folders from Windows Search indexing (frees RAM/CPU used by the indexer)"
     ChkGhostAdapters      = "Remove hidden/ghost network adapters from Device Manager"
     ChkFastStartup        = "Disable Fast Startup (prevents accumulated RAM/session leak across reboots)"
+    ChkResidualServices   = "Set low-value background services (PcaSvc, WerSvc, wisvc, RetailDemo) to Manual startup"
+    ChkStandbyListClean   = "Clear Standby List memory cache now (instantly frees cached RAM)"
     ChkDryRun            = "Dry Run (only log what would change, apply nothing)"
     BtnRestoreDefaults   = "Restore Defaults"
     BtnExportProfile     = "Export Profile"
@@ -233,6 +235,9 @@ $Lang['en-US'] = @{
     LogGhostAdaptersOk        = "Removed {0} hidden/ghost network adapter(s) from Device Manager."
     LogGhostAdaptersNone      = "No hidden/ghost network adapters found."
     LogFastStartupOk          = "Fast Startup disabled (HiberbootEnabled=0)."
+    LogResidualServicesOk     = "{0} low-value background service(s) set to Manual startup: {1}"
+    LogStandbyListCleanOk     = "Standby List memory cache cleared, freeing {0} MB of cached RAM."
+    LogStandbyListCleanFail   = "Could not clear the Standby List cache (this is a best-effort action and does not affect system stability)."
     LogShaderCacheCleanOk     = "DirectX Shader Cache (D3DSCache, NVIDIA/AMD/Intel shader caches) cleaned."
     LogMoreError              = "Error applying tweak ({0}): {1}"
     LogMoreDone               = "System cleanup & performance tweaks finished."
@@ -418,6 +423,8 @@ $Lang['pt-BR'] = @{
     ChkSearchIndexOptimize = "Excluir pastas de lixo/cache da indexa" + $c_ccedil + $c_atil + "o do Windows Search (libera RAM/CPU usados pelo indexador)"
     ChkGhostAdapters      = "Remover adaptadores de rede ocultos/fantasmas do Gerenciador de Dispositivos"
     ChkFastStartup        = "Desativar Inicializa" + $c_ccedil + $c_atil + "o R" + $c_aacute + "pida (evita vazamento acumulado de RAM/sess" + $c_atil + "o entre reinicializa" + $c_ccedil + $c_otil + "es)"
+    ChkResidualServices   = "Definir servi" + $c_ccedil + "os residentes de baixo valor (PcaSvc, WerSvc, wisvc, RetailDemo) como Manual"
+    ChkStandbyListClean   = "Limpar agora o cache de mem" + $c_oacute + "ria da Standby List (libera RAM em cache instantaneamente)"
     ChkDryRun            = "Modo Simula" + $c_ccedil + $c_atil + "o (apenas registra o que seria alterado, sem aplicar)"
     BtnRestoreDefaults   = "Restaurar Padr" + $c_otil + "es"
     BtnExportProfile     = "Exportar Perfil"
@@ -443,6 +450,9 @@ $Lang['pt-BR'] = @{
     LogGhostAdaptersOk        = "{0} adaptador(es) de rede oculto(s)/fantasma(s) removido(s) do Gerenciador de Dispositivos."
     LogGhostAdaptersNone      = "Nenhum adaptador de rede oculto/fantasma encontrado."
     LogFastStartupOk          = "Inicializa" + $c_ccedil + $c_atil + "o R" + $c_aacute + "pida desativada (HiberbootEnabled=0)."
+    LogResidualServicesOk     = "{0} servi" + $c_ccedil + "o(s) residente(s) de baixo valor definido(s) como Manual: {1}"
+    LogStandbyListCleanOk     = "Cache de mem" + $c_oacute + "ria da Standby List limpo, liberando {0} MB de RAM em cache."
+    LogStandbyListCleanFail   = "N" + $c_atil + "o foi poss" + $c_iacute + "vel limpar o cache da Standby List (a" + $c_ccedil + $c_atil + "o de melhor esfor" + $c_ccedil + "o, n" + $c_atil + "o afeta a estabilidade do sistema)."
     LogShaderCacheCleanOk     = "Cache de Shader do DirectX (D3DSCache, caches de shader NVIDIA/AMD/Intel) limpo."
     LogMoreError              = "Erro ao aplicar ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpeza e desempenho do sistema conclu" + $c_iacute + "dos."
@@ -628,6 +638,8 @@ $Lang['es-ES'] = @{
     ChkSearchIndexOptimize = "Excluir carpetas de basura/cach" + [char]0x00E9 + " de la indexaci" + [char]0x00F3 + "n de Windows Search (libera RAM/CPU usados por el indexador)"
     ChkGhostAdapters      = "Eliminar adaptadores de red ocultos/fantasma del Administrador de dispositivos"
     ChkFastStartup        = "Desactivar Inicio r" + [char]0x00E1 + "pido (evita la fuga acumulada de RAM/sesi" + [char]0x00F3 + "n entre reinicios)"
+    ChkResidualServices   = "Establecer servicios residentes de bajo valor (PcaSvc, WerSvc, wisvc, RetailDemo) en Manual"
+    ChkStandbyListClean   = "Limpiar ahora la cach" + [char]0x00E9 + " de memoria de la Standby List (libera RAM en cach" + [char]0x00E9 + " al instante)"
     ChkDryRun            = "Modo Simulaci" + [char]0x00F3 + "n (solo registra los cambios sin aplicarlos)"
     BtnRestoreDefaults   = "Restaurar Valores Predeterminados"
     BtnExportProfile     = "Exportar Perfil"
@@ -653,6 +665,9 @@ $Lang['es-ES'] = @{
     LogGhostAdaptersOk        = "Se eliminaron {0} adaptador(es) de red oculto(s)/fantasma del Administrador de dispositivos."
     LogGhostAdaptersNone      = "No se encontraron adaptadores de red ocultos/fantasma."
     LogFastStartupOk          = "Inicio r" + [char]0x00E1 + "pido desactivado (HiberbootEnabled=0)."
+    LogResidualServicesOk     = "{0} servicio(s) residente(s) de bajo valor establecido(s) en Manual: {1}"
+    LogStandbyListCleanOk     = "Cach" + [char]0x00E9 + " de memoria de la Standby List limpiada, liberando {0} MB de RAM en cach" + [char]0x00E9 + "."
+    LogStandbyListCleanFail   = "No se pudo limpiar la cach" + [char]0x00E9 + " de la Standby List (acci" + [char]0x00F3 + "n de mejor esfuerzo, no afecta la estabilidad del sistema)."
     LogShaderCacheCleanOk     = "Cach" + [char]0x00E9 + " de Shader de DirectX (D3DSCache, cach" + [char]0x00E9 + "s de shader de NVIDIA/AMD/Intel) limpiada."
     LogMoreError              = "Error al aplicar el ajuste ({0}): {1}"
     LogMoreDone               = "Ajustes de limpieza y rendimiento del sistema finalizados."
@@ -841,6 +856,8 @@ $Lang['zh-CN'] = @{
     ChkSearchIndexOptimize = (ZH 0x4ECE) + " Windows " + (ZH 0x641C,0x7D22,0x7D22,0x5F15) + (ZH 0x4E2D,0x6392,0x9664) + (ZH 0x5783,0x573E,0x7F13,0x5B58,0x6587,0x4EF6,0x5939) + " (" + (ZH 0x91CA,0x653E,0x7D22,0x5F15,0x5668,0x5360,0x7528,0x7684) + " RAM/CPU)"
     ChkGhostAdapters      = (ZH 0x4ECE) + (ZH 0x8BBE,0x5907,0x7BA1,0x7406,0x5668) + (ZH 0x5220,0x9664) + (ZH 0x9690,0x85CF,0x6216,0x5E7D,0x7075) + (ZH 0x7F51,0x7EDC,0x9002,0x914D,0x5668)
     ChkFastStartup        = (ZH 0x7981,0x7528) + (ZH 0x5FEB,0x901F,0x542F,0x52A8) + " (" + (ZH 0x9632,0x6B62,0x91CD,0x542F,0x95F4,0x7D2F,0x79EF) + " RAM " + (ZH 0x6CC4,0x6F0F) + ")"
+    ChkResidualServices   = (ZH 0x5C06,0x4F4E,0x4EF7,0x503C,0x5E38,0x9A7B,0x670D,0x52A1) + " (PcaSvc, WerSvc, wisvc, RetailDemo) " + (ZH 0x8BBE,0x4E3A) + (ZH 0x624B,0x52A8,0x542F,0x52A8)
+    ChkStandbyListClean   = (ZH 0x7ACB,0x5373,0x6E05,0x9664) + " Standby List " + (ZH 0x5185,0x5B58,0x7F13,0x5B58) + " (" + (ZH 0x7ACB,0x5373,0x91CA,0x653E,0x7F13,0x5B58,0x7684) + " RAM)"
     ChkDryRun            = (ZH 0x6A21,0x62DF,0x8FD0,0x884C,0x6A21,0x5F0F) + " (" + (ZH 0x4EC5,0x8BB0,0x5F55,0x5C06,0x8981,0x66F4,0x6539,0x7684,0x5185,0x5BB9,0x800C,0x4E0D,0x5B9E,0x9645,0x5E94,0x7528) + ")"
     BtnRestoreDefaults   = (ZH 0x6062,0x590D,0x9ED8,0x8BA4,0x8BBE,0x7F6E)
     BtnExportProfile     = (ZH 0x5BFC,0x51FA,0x914D,0x7F6E,0x6587,0x4EF6)
@@ -866,6 +883,9 @@ $Lang['zh-CN'] = @{
     LogGhostAdaptersOk        = (ZH 0x5DF2,0x4ECE) + (ZH 0x8BBE,0x5907,0x7BA1,0x7406,0x5668) + (ZH 0x5220,0x9664) + " {0} " + (ZH 0x4E2A,0x9690,0x85CF,0x6216,0x5E7D,0x7075,0x7F51,0x7EDC,0x9002,0x914D,0x5668)
     LogGhostAdaptersNone      = (ZH 0x672A,0x627E,0x5230) + (ZH 0x9690,0x85CF,0x6216,0x5E7D,0x7075,0x7F51,0x7EDC,0x9002,0x914D,0x5668)
     LogFastStartupOk          = (ZH 0x5FEB,0x901F,0x542F,0x52A8) + (ZH 0x5DF2,0x7981,0x7528) + " (HiberbootEnabled=0)"
+    LogResidualServicesOk     = (ZH 0x5DF2,0x5C06) + " {0} " + (ZH 0x4E2A,0x4F4E,0x4EF7,0x503C,0x5E38,0x9A7B,0x670D,0x52A1,0x8BBE,0x4E3A,0x624B,0x52A8,0x542F,0x52A8) + ": {1}"
+    LogStandbyListCleanOk     = "Standby List " + (ZH 0x5185,0x5B58,0x7F13,0x5B58,0x5DF2,0x6E05,0x9664) + "," + (ZH 0x91CA,0x653E,0x4E86) + " {0} MB " + (ZH 0x7F13,0x5B58) + " RAM"
+    LogStandbyListCleanFail   = (ZH 0x65E0,0x6CD5,0x6E05,0x9664) + " Standby List " + (ZH 0x7F13,0x5B58) + " (" + (ZH 0x6B64,0x64CD,0x4F5C,0x4E0D,0x5F71,0x54CD,0x7CFB,0x7EDF,0x7A33,0x5B9A,0x6027) + ")"
     LogShaderCacheCleanOk     = "DirectX " + (ZH 0x7740,0x8272,0x5668,0x7F13,0x5B58) + " (D3DSCache" + "," + "NVIDIA/AMD/Intel " + (ZH 0x7740,0x8272,0x5668,0x7F13,0x5B58) + ")" + (ZH 0x5DF2,0x6E05,0x7406)
     LogMoreError              = (ZH 0x5E94,0x7528) + (ZH 0x8C03,0x6574) + (ZH 0x65F6,0x51FA,0x9519) + " ({0}): {1}"
     LogMoreDone               = (ZH 0x7CFB,0x7EDF,0x6E05,0x7406,0x4E0E,0x6027,0x80FD) + (ZH 0x8C03,0x6574) + (ZH 0x5B8C,0x6210)
@@ -1383,6 +1403,8 @@ $Global:CurrentLangCode = "pt-BR"
                                 <CheckBox x:Name="chkSearchIndexOptimize" Content="Exclude junk/cache folders from Windows Search indexing" IsChecked="False"/>
                                 <CheckBox x:Name="chkGhostAdapters" Content="Remove hidden/ghost network adapters (Device Manager)" IsChecked="False"/>
                                 <CheckBox x:Name="chkFastStartup" Content="Disable Fast Startup (prevents accumulated RAM leak on boot)" IsChecked="False"/>
+                                <CheckBox x:Name="chkResidualServices" Content="Set low-value background services (PcaSvc, WerSvc, wisvc, RetailDemo) to Manual" IsChecked="False"/>
+                                <CheckBox x:Name="chkStandbyListClean" Content="Clear Standby List memory cache now (frees cached RAM instantly)" IsChecked="False"/>
                             </StackPanel>
                         </GroupBox>
 
@@ -1670,6 +1692,7 @@ $names = @(
     'grpMoreOptimizations','chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
     'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkCloudflareDns','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
     'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup',
+    'chkResidualServices','chkStandbyListClean',
     'btnRunSelected','btnRestoreDefaults','btnExportProfile','btnImportProfile',
     'grpInstaller','btnInstallApps',
     'txtChocoRequired','txtChocoStatus','btnInstallChoco',
@@ -1703,7 +1726,8 @@ $script:optimizationCheckboxNames = @(
     'chkDiagTrackFull','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
     'chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners','chkRecallBlock',
     'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkCloudflareDns','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
-    'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup'
+    'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup',
+    'chkResidualServices','chkStandbyListClean'
 )
 
 # ============================================================================
@@ -1823,6 +1847,8 @@ function Update-UILanguage {
     $ctrl['chkSearchIndexOptimize'].Content = $t.ChkSearchIndexOptimize
     $ctrl['chkGhostAdapters'].Content     = $t.ChkGhostAdapters
     $ctrl['chkFastStartup'].Content       = $t.ChkFastStartup
+    $ctrl['chkResidualServices'].Content  = $t.ChkResidualServices
+    $ctrl['chkStandbyListClean'].Content  = $t.ChkStandbyListClean
 
     $ctrl['chkDryRun'].Content           = $t.ChkDryRun
 
@@ -2422,13 +2448,15 @@ function Set-WgoMoreOptimizations {
         [bool]$SearchIndexOptimize = $false,
         [bool]$GhostAdapters   = $false,
         [bool]$FastStartup     = $false,
+        [bool]$ResidualServices = $false,
+        [bool]$StandbyListClean = $false,
         [bool]$DryRun          = $false
     )
 
     if (-not ($Hibernation -or $PowerPlan -or $TempCleanup -or $HotCorners -or $RecallBlock -or
                $BootTimeout -or $OfficeTelemetry -or $ExtraSchedTasks -or $DiskOptimize -or
                $HagsGameMode -or $UltimatePerf -or $CloudflareDns -or $KernelGamingPriority -or $GameDvrDisable -or $InputLagReduction -or
-               $SearchIndexOptimize -or $GhostAdapters -or $FastStartup)) { return }
+               $SearchIndexOptimize -or $GhostAdapters -or $FastStartup -or $ResidualServices -or $StandbyListClean)) { return }
 
     Write-Log (T 'LogMoreStart') "INFO"
     if ($DryRun) { Write-Log (T 'LogDryRunNote') "WARN" }
@@ -2594,7 +2622,13 @@ function Set-WgoMoreOptimizations {
                     "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload",
                     "\Microsoft\Windows\Windows Error Reporting\QueueReporting",
                     "\Microsoft\Office\OfficeTelemetryAgentFallBack2016",
-                    "\Microsoft\Office\OfficeTelemetryAgentLogOn2016"
+                    "\Microsoft\Office\OfficeTelemetryAgentLogOn2016",
+                    "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser",
+                    "\Microsoft\Windows\Application Experience\ProgramDataUpdater",
+                    "\Microsoft\Windows\Application Experience\StartupAppTask",
+                    "\Microsoft\Windows\Autochk\Proxy",
+                    "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator",
+                    "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip"
                 )
                 foreach ($task in $extraTasks) {
                     try { Disable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
@@ -2885,6 +2919,79 @@ function Set-WgoMoreOptimizations {
                 Write-Log (T 'LogFastStartupOk') "OK"
             } catch {
                 Write-Log (T 'LogMoreError' "FastStartup" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 19. Set low-value, telemetry/compat-only background services to Manual
+    # startup. None of these are used by games, drivers or Explorer; each one
+    # still starts on demand if something genuinely needs it (Manual just
+    # means "not automatically at boot"), so nothing is lost, only the
+    # resident thread/handle these services otherwise hold from boot onward.
+    if ($ResidualServices) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkResidualServices')) "INFO"
+        } else {
+            try {
+                # PcaSvc          - Program Compatibility Assistant
+                # WerSvc          - Windows Error Reporting (still starts on-demand when a crash occurs)
+                # wisvc           - Windows Insider Service (irrelevant if not enrolled in the Insider program)
+                # RetailDemo      - Retail Demo Service (store-kiosk demo mode only)
+                $targetServices = @("PcaSvc", "WerSvc", "wisvc", "RetailDemo")
+                $applied = @()
+                foreach ($svcName in $targetServices) {
+                    $svc = Get-Service -Name $svcName -ErrorAction Ignore
+                    if ($svc) {
+                        try {
+                            Set-Service -Name $svcName -StartupType Manual -ErrorAction Stop
+                            $applied += $svcName
+                        } catch { }
+                    }
+                }
+                Write-Log (T 'LogResidualServicesOk' $applied.Count ($applied -join ", ")) "OK"
+            } catch {
+                Write-Log (T 'LogMoreError' "ResidualServices" $_.Exception.Message) "ERROR"
+            }
+        }
+    }
+
+    # 20. Clear the Standby List memory cache right now. The Standby List is
+    # RAM Windows keeps holding onto from closed apps "just in case" they
+    # reopen; it is pure cache, nothing is lost, and the memory manager
+    # reclaims it instantly if anything else needs it - this action just
+    # forces that reclaim immediately instead of waiting for pressure.
+    # Uses the same documented native API (NtSetSystemInformation with
+    # SystemMemoryListInformation / MemoryPurgeStandbyList) that utilities
+    # like Mem Reduct and ISLC use, called in-process via P/Invoke so nothing
+    # extra needs to be downloaded.
+    if ($StandbyListClean) {
+        if ($DryRun) {
+            Write-Log (T 'LogDryRunPrefix' (T 'ChkStandbyListClean')) "INFO"
+        } else {
+            try {
+                $before = (Get-CimInstance Win32_OperatingSystem -ErrorAction Stop).FreePhysicalMemory
+
+                if (-not ("Wgo.NativeMemory" -as [type])) {
+                    Add-Type -Namespace Wgo -Name NativeMemory -MemberDefinition @'
+[DllImport("ntdll.dll")]
+public static extern int NtSetSystemInformation(int SystemInformationClass, ref int SystemInformation, int SystemInformationLength);
+'@
+                }
+
+                # SystemMemoryListInformation = 0x50 (80); MemoryPurgeStandbyList = 4
+                $cmd = 4
+                $result = [Wgo.NativeMemory]::NtSetSystemInformation(0x50, [ref]$cmd, 4)
+
+                if ($result -eq 0) {
+                    Start-Sleep -Milliseconds 500
+                    $after = (Get-CimInstance Win32_OperatingSystem -ErrorAction Stop).FreePhysicalMemory
+                    $freedMb = [Math]::Max(0, [Math]::Round(($after - $before) / 1024))
+                    Write-Log (T 'LogStandbyListCleanOk' $freedMb) "OK"
+                } else {
+                    Write-Log (T 'LogStandbyListCleanFail') "WARN"
+                }
+            } catch {
+                Write-Log (T 'LogStandbyListCleanFail') "WARN"
             }
         }
     }
@@ -3516,6 +3623,8 @@ $ctrl['btnRunSelected'].Add_Click({
     $doSearchIndexOptimize = [bool]$ctrl['chkSearchIndexOptimize'].IsChecked
     $doGhostAdapters   = [bool]$ctrl['chkGhostAdapters'].IsChecked
     $doFastStartup     = [bool]$ctrl['chkFastStartup'].IsChecked
+    $doResidualServices = [bool]$ctrl['chkResidualServices'].IsChecked
+    $doStandbyListClean = [bool]$ctrl['chkStandbyListClean'].IsChecked
 
     $doDryRun = [bool]$ctrl['chkDryRun'].IsChecked
 
@@ -3526,7 +3635,8 @@ $ctrl['btnRunSelected'].Add_Click({
               $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
               $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf, $doCloudflareDns,
               $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction,
-              $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup, $doDryRun)
+              $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup,
+              $doResidualServices, $doStandbyListClean, $doDryRun)
         try {
             Write-Log (T 'LogOptStart') "INFO"
 
@@ -3570,6 +3680,7 @@ $ctrl['btnRunSelected'].Add_Click({
                     -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
                     -InputLagReduction $doInputLagReduction `
                     -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
+                    -ResidualServices $doResidualServices -StandbyListClean $doStandbyListClean `
                     -DryRun $true
             } else {
                 New-WgoRestorePoint | Out-Null
@@ -3595,6 +3706,7 @@ $ctrl['btnRunSelected'].Add_Click({
                     -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
                     -InputLagReduction $doInputLagReduction `
                     -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
+                    -ResidualServices $doResidualServices -StandbyListClean $doStandbyListClean `
                     -DryRun $false
             }
 
@@ -3610,7 +3722,8 @@ $ctrl['btnRunSelected'].Add_Click({
                        $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners, $doRecallBlock,
                        $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf, $doCloudflareDns,
                        $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction,
-                       $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup, $doDryRun) `
+                       $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup,
+                       $doResidualServices, $doStandbyListClean, $doDryRun) `
       -OnCompleted {
         $ctrl['btnRunSelected'].IsEnabled = $true
         Save-WgoLastRunState
