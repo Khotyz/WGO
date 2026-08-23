@@ -138,7 +138,9 @@ $Global:WgoSharedFunctionNames = @(
     'Test-WgoChocolatey', 'Find-WgoWinget', 'Install-ViaWinget',
     'Install-ViaChocolatey', 'Install-WgoApp', 'Start-WgoExternalScriptAsCurrentUser',
     'Set-WgoServiceMgmt', 'Clear-WgoWinSxS', 'Invoke-WgoSystemIntegrity', 'Clear-WgoDNS',
-    'Test-WgoAppInstalled', 'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp'
+    'Test-WgoAppInstalled', 'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp',
+    'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoTimerResolutionNative',
+    'Set-WgoXboxServices'
 )
 
 # ============================================================================

@@ -496,12 +496,14 @@ function Set-WgoMoreOptimizations {
         [bool]$ResidualServices = $false,
         [bool]$StandbyListClean = $false,
         [bool]$LargeSystemCache = $false,
+        [bool]$AutoStandbyClean = $false,
         [bool]$DryRun          = $false
     )
     if (-not ($Hibernation -or $PowerPlan -or $TempCleanup -or $HotCorners -or
                $BootTimeout -or $OfficeTelemetry -or $ExtraSchedTasks -or $DiskOptimize -or
                $HagsGameMode -or $UltimatePerf -or $KernelGamingPriority -or $GameDvrDisable -or $InputLagReduction -or
-               $SearchIndexOptimize -or $GhostAdapters -or $FastStartup -or $ResidualServices -or $StandbyListClean -or $LargeSystemCache)) { return }
+               $SearchIndexOptimize -or $GhostAdapters -or $FastStartup -or $ResidualServices -or $StandbyListClean -or
+               $LargeSystemCache -or $AutoStandbyClean)) { return }
     Write-Log (T 'LogMoreStart') "INFO"
     if ($DryRun) { Write-Log (T 'LogDryRunNote') "WARN" }
 
@@ -804,7 +806,7 @@ function Set-WgoMoreOptimizations {
         if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkResidualServices')) "INFO" }
         else {
             try {
-                $targetServices = @("PcaSvc", "WerSvc", "wisvc", "RetailDemo")
+                $targetServices = @("PcaSvc", "WerSvc", "wisvc", "RetailDemo", "Fax", "RemoteRegistry", "MapsBroker", "lfsvc", "WMPNetworkSvc", "PhoneSvc", "CDPSvc", "SEMgrSvc")
                 $applied = @()
                 foreach ($svcName in $targetServices) {
                     $svc = Get-Service -Name $svcName -ErrorAction Ignore
@@ -844,6 +846,24 @@ function Set-WgoMoreOptimizations {
                     Write-Log (T 'LogLargeSystemCacheSkipped' $totalRamGb) "INFO"
                 }
             } catch { Write-Log (T 'LogMoreError' "LargeSystemCache" $_.Exception.Message) "ERROR" }
+        }
+    }
+    if ($AutoStandbyClean) {
+        if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkAutoStandbyClean')) "INFO" }
+        else {
+            try {
+                $taskName = "WGO_StandbyClean"
+                $nativeModule = Join-Path $Global:WgoRootPath "Modules\Wgo.Native\Wgo.Native.psm1"
+                $taskCmd = "Import-Module '$nativeModule' -Force; Invoke-WgoStandbyListPurge | Out-Null"
+                $encodedCmd = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($taskCmd))
+                $action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -EncodedCommand $encodedCmd"
+                $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration ([TimeSpan]::MaxValue)
+                $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+                $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+                Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction Ignore
+                Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force -ErrorAction Stop | Out-Null
+                Write-Log (T 'LogAutoStandbyCleanOk') "OK"
+            } catch { Write-Log (T 'LogMoreError' "AutoStandbyClean" $_.Exception.Message) "ERROR" }
         }
     }
     Write-Log (T 'LogMoreDone') "OK"
@@ -1041,10 +1061,15 @@ function Set-WgoExtraTweaks2 {
         [bool]$FastShutdown     = $false,
         [bool]$PrefetchSSD      = $false,
         [bool]$RemoveWinBackup  = $false,
-        [bool]$TcpIpReset       = $false
+        [bool]$TcpIpReset       = $false,
+        [bool]$RemoveOnedrive   = $false,
+        [bool]$DisableGameBar   = $false,
+        [bool]$DisableStore     = $false,
+        [bool]$DisableWer       = $false
     )
     if (-not ($HostsBlock -or $PrivacyDeep -or $CacheClean -or $UiCleanup -or $TcpAutotuning -or
-              $DoH -or $FastShutdown -or $PrefetchSSD -or $RemoveWinBackup -or $TcpIpReset)) { return }
+              $DoH -or $FastShutdown -or $PrefetchSSD -or $RemoveWinBackup -or $TcpIpReset -or
+              $RemoveOnedrive -or $DisableGameBar -or $DisableStore -or $DisableWer)) { return }
     Write-Log (T 'LogExtra2Start') "INFO"
 
     if ($HostsBlock) {
@@ -1205,6 +1230,71 @@ function Set-WgoExtraTweaks2 {
         }
     }
 
+    if ($RemoveOnedrive) {
+        try {
+            Stop-Process -Name "OneDrive" -Force -ErrorAction Ignore
+            $uninstaller = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
+            if (-not (Test-Path $uninstaller)) { $uninstaller = "$env:SYSTEMROOT\System32\OneDriveSetup.exe" }
+            if (Test-Path $uninstaller) {
+                Start-Process -FilePath $uninstaller -ArgumentList "/uninstall" -Wait -ErrorAction Stop
+            }
+            foreach ($path in @(
+                "$env:USERPROFILE\OneDrive", "$env:LOCALAPPDATA\Microsoft\OneDrive",
+                "$env:PROGRAMDATA\Microsoft OneDrive", "$env:SYSTEMDRIVE\OneDriveTemp"
+            )) {
+                if (Test-Path $path) { Remove-Item -Path $path -Recurse -Force -ErrorAction Ignore }
+            }
+            Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\OneDrive" -Recurse -Force -ErrorAction Ignore
+            Write-Log (T 'LogRemoveOnedriveOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtra2Error' "RemoveOnedrive" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($DisableGameBar) {
+        try {
+            $gbKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\GameBar"
+            if (-not (Test-Path $gbKey)) { New-Item -Path $gbKey -Force | Out-Null }
+            New-ItemProperty -Path $gbKey -Name "Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $gbKey -Name "ShowStartupPanel" -Value 0 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogGameBarOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtra2Error' "DisableGameBar" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($DisableStore) {
+        try {
+            $storeKey = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
+            if (-not (Test-Path $storeKey)) { New-Item -Path $storeKey -Force | Out-Null }
+            New-ItemProperty -Path $storeKey -Name "RemoveWindowsStore" -Value 1 -PropertyType DWord -Force | Out-Null
+            $svc = Get-Service -Name "PushToInstall" -ErrorAction Ignore
+            if ($svc) {
+                Stop-Service -Name "PushToInstall" -Force -ErrorAction Ignore
+                Set-Service -Name "PushToInstall" -StartupType Disabled -ErrorAction Ignore
+            }
+            Write-Log (T 'LogStoreOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtra2Error' "DisableStore" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($DisableWer) {
+        try {
+            $werKey = "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting"
+            if (-not (Test-Path $werKey)) { New-Item -Path $werKey -Force | Out-Null }
+            New-ItemProperty -Path $werKey -Name "Disabled" -Value 1 -PropertyType DWord -Force | Out-Null
+            $svc = Get-Service -Name "WerSvc" -ErrorAction Ignore
+            if ($svc) {
+                Stop-Service -Name "WerSvc" -Force -ErrorAction Ignore
+                Set-Service -Name "WerSvc" -StartupType Disabled -ErrorAction Ignore
+            }
+            Write-Log (T 'LogWerOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtra2Error' "DisableWer" $_.Exception.Message) "ERROR"
+        }
+    }
+
     Write-Log (T 'LogExtra2Done') "OK"
 }
 
@@ -1216,9 +1306,13 @@ function Set-WgoRiskyTweaks {
         [bool]$DisableSmartScreen  = $false,
         [bool]$DisableDefenderRT   = $false,
         [bool]$DisableWinUpdateSvc = $false,
-        [bool]$DisableBits         = $false
+        [bool]$DisableBits         = $false,
+        [bool]$DisableFirewall     = $false,
+        [bool]$DisableDEP          = $false,
+        [bool]$NvidiaMaxPerf       = $false
     )
-    if (-not ($DisableUAC -or $DisableSmartScreen -or $DisableDefenderRT -or $DisableWinUpdateSvc -or $DisableBits)) { return }
+    if (-not ($DisableUAC -or $DisableSmartScreen -or $DisableDefenderRT -or $DisableWinUpdateSvc -or $DisableBits -or
+              $DisableFirewall -or $DisableDEP -or $NvidiaMaxPerf)) { return }
     Write-Log (T 'LogRiskyStart') "WARN"
 
     if ($DisableUAC) {
@@ -1269,7 +1363,230 @@ function Set-WgoRiskyTweaks {
             Write-Log (T 'LogRiskyError' "BITS" $_.Exception.Message) "ERROR"
         }
     }
+    if ($DisableFirewall) {
+        try {
+            Set-NetFirewallProfile -All -Enabled False -ErrorAction Stop
+            Write-Log (T 'LogRiskyFirewallOk') "WARN"
+        } catch {
+            Write-Log (T 'LogRiskyError' "Firewall" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($DisableDEP) {
+        try {
+            & bcdedit /set nx AlwaysOff | Out-Null
+            Write-Log (T 'LogRiskyDEPOk') "WARN"
+        } catch {
+            Write-Log (T 'LogRiskyError' "DEP" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($NvidiaMaxPerf) {
+        try {
+            $gpuBase = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+            $applied = 0
+            if (Test-Path $gpuBase) {
+                Get-ChildItem -Path $gpuBase -ErrorAction Stop | Where-Object { $_.PSChildName -match '^\d{4}$' } | ForEach-Object {
+                    try {
+                        New-ItemProperty -Path $_.PSPath -Name "PowerMizerEnable" -Value 0 -PropertyType DWord -Force | Out-Null
+                        New-ItemProperty -Path $_.PSPath -Name "PerfLevelSrc" -Value 0x3333 -PropertyType DWord -Force | Out-Null
+                        $applied++
+                    } catch { }
+                }
+            }
+            if ($applied -gt 0) {
+                Write-Log (T 'LogRiskyNvidiaPerfOk' $applied) "WARN"
+            } else {
+                Write-Log (T 'LogRiskyNvidiaPerfNone') "INFO"
+            }
+        } catch {
+            Write-Log (T 'LogRiskyError' "NvidiaMaxPerf" $_.Exception.Message) "ERROR"
+        }
+    }
     Write-Log (T 'LogRiskyDone') "WARN"
+}
+
+function Set-WgoCpuTimerTweaks {
+    param(
+        [bool]$DisableCoreParking = $false,
+        [bool]$DisableHPET        = $false,
+        [bool]$TimerResolution    = $false,
+        [bool]$HungAppTimeout     = $false
+    )
+    if (-not ($DisableCoreParking -or $DisableHPET -or $TimerResolution -or $HungAppTimeout)) { return }
+    Write-Log (T 'LogCpuTimerStart') "INFO"
+
+    if ($DisableCoreParking) {
+        try {
+            $subKey = "54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583"
+            $attrPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\$subKey"
+            if (Test-Path $attrPath) {
+                New-ItemProperty -Path $attrPath -Name "Attributes" -Value 2 -PropertyType DWord -Force | Out-Null
+            }
+            $plans = powercfg /list | Select-String -Pattern '([0-9a-fA-F-]{36})' | ForEach-Object { $_.Matches[0].Value }
+            foreach ($guid in $plans) {
+                & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 2>$null
+                & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 2>$null
+            }
+            & powercfg -setactive (powercfg /getactivescheme | Select-String -Pattern '([0-9a-fA-F-]{36})').Matches[0].Value 2>$null
+            Write-Log (T 'LogCoreParkingOk') "OK"
+        } catch {
+            Write-Log (T 'LogCpuTimerError' "CoreParking" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($DisableHPET) {
+        try {
+            & bcdedit /set useplatformclock false | Out-Null
+            & bcdedit /set tscsyncpolicy Enhanced | Out-Null
+            Write-Log (T 'LogHPETOk') "WARN"
+        } catch {
+            Write-Log (T 'LogCpuTimerError' "HPET" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($TimerResolution) {
+        try {
+            $applied = Set-WgoTimerResolutionNative
+            if ($null -ne $applied) {
+                Write-Log (T 'LogTimerResolutionOk' ([math]::Round($applied / 10000, 2))) "OK"
+            } else {
+                Write-Log (T 'LogTimerResolutionFail') "WARN"
+            }
+        } catch {
+            Write-Log (T 'LogCpuTimerError' "TimerResolution" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($HungAppTimeout) {
+        try {
+            $deskKey = "HKCU:\Control Panel\Desktop"
+            New-ItemProperty -Path $deskKey -Name "HungAppTimeout" -Value "1000" -PropertyType String -Force | Out-Null
+            New-ItemProperty -Path $deskKey -Name "WaitToKillAppTimeout" -Value "2000" -PropertyType String -Force | Out-Null
+            Write-Log (T 'LogHungAppOk') "OK"
+        } catch {
+            Write-Log (T 'LogCpuTimerError' "HungAppTimeout" $_.Exception.Message) "ERROR"
+        }
+    }
+    Write-Log (T 'LogCpuTimerDone') "OK"
+}
+
+function Set-WgoGpuTweaks {
+    param(
+        [bool]$IncreaseTdrNvidia      = $false,
+        [bool]$DisableNvidiaTelemetry = $false
+    )
+    if (-not ($IncreaseTdrNvidia -or $DisableNvidiaTelemetry)) { return }
+    Write-Log (T 'LogGpuStart') "INFO"
+
+    if ($IncreaseTdrNvidia) {
+        try {
+            $gfxKey = "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers"
+            if (-not (Test-Path $gfxKey)) { New-Item -Path $gfxKey -Force | Out-Null }
+            New-ItemProperty -Path $gfxKey -Name "TdrDelay" -Value 10 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $gfxKey -Name "TdrDdiDelay" -Value 10 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogTdrNvidiaOk') "OK"
+        } catch {
+            Write-Log (T 'LogGpuError' "TdrNvidia" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($DisableNvidiaTelemetry) {
+        try {
+            $stopped = 0
+            foreach ($svcName in @("NvTelemetryContainer", "NvContainerLocalSystem")) {
+                $svc = Get-Service -Name $svcName -ErrorAction Ignore
+                if ($svc) {
+                    Stop-Service -Name $svcName -Force -ErrorAction Ignore
+                    Set-Service -Name $svcName -StartupType Disabled -ErrorAction Ignore
+                    $stopped++
+                }
+            }
+            $disabledTasks = 0
+            Get-ScheduledTask -ErrorAction Ignore | Where-Object { $_.TaskName -match 'NvTmMon|NvTmRep|NvProfileUpdaterDaily|NvProfileUpdaterOnLogon|NvDriverUpdateCheckDaily' } | ForEach-Object {
+                try { Disable-ScheduledTask -TaskName $_.TaskName -TaskPath $_.TaskPath -ErrorAction Stop | Out-Null; $disabledTasks++ } catch { }
+            }
+            Write-Log (T 'LogNvidiaTelemetryOk' $stopped $disabledTasks) "OK"
+        } catch {
+            Write-Log (T 'LogGpuError' "NvidiaTelemetry" $_.Exception.Message) "ERROR"
+        }
+    }
+    Write-Log (T 'LogGpuDone') "OK"
+}
+
+function Set-WgoNetworkAdvanced {
+    param(
+        [bool]$DisableNagle = $false,
+        [bool]$DisableIPv6  = $false,
+        [bool]$RssOptimize  = $false
+    )
+    if (-not ($DisableNagle -or $DisableIPv6 -or $RssOptimize)) { return }
+    Write-Log (T 'LogNetAdvStart') "INFO"
+
+    if ($DisableNagle) {
+        try {
+            $ifBase = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
+            $applied = 0
+            if (Test-Path $ifBase) {
+                Get-ChildItem -Path $ifBase -ErrorAction Stop | ForEach-Object {
+                    try {
+                        New-ItemProperty -Path $_.PSPath -Name "TCPNoDelay" -Value 1 -PropertyType DWord -Force | Out-Null
+                        New-ItemProperty -Path $_.PSPath -Name "TcpAckFrequency" -Value 1 -PropertyType DWord -Force | Out-Null
+                        $applied++
+                    } catch { }
+                }
+            }
+            Write-Log (T 'LogNagleOk' $applied) "OK"
+        } catch {
+            Write-Log (T 'LogNetAdvError' "Nagle" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($DisableIPv6) {
+        try {
+            $v6Key = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+            New-ItemProperty -Path $v6Key -Name "DisabledComponents" -Value 0xFF -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogIPv6Ok') "WARN"
+        } catch {
+            Write-Log (T 'LogNetAdvError' "IPv6" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($RssOptimize) {
+        try {
+            $rssKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Ndis\Parameters\Rss"
+            if (-not (Test-Path $rssKey)) { New-Item -Path $rssKey -Force | Out-Null }
+            $cores = (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors
+            $maxProcs = [Math]::Max(2, [Math]::Min(4, $cores))
+            New-ItemProperty -Path $rssKey -Name "RssBaseProcessor" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $rssKey -Name "RssMaxProcessors" -Value $maxProcs -PropertyType DWord -Force | Out-Null
+            & netsh int tcp set global rssprofile=closest 2>$null | Out-Null
+            Write-Log (T 'LogRssOk' $maxProcs) "OK"
+        } catch {
+            Write-Log (T 'LogNetAdvError' "Rss" $_.Exception.Message) "ERROR"
+        }
+    }
+    Write-Log (T 'LogNetAdvDone') "OK"
+}
+
+function Set-WgoXboxServices {
+    # Intentionally kept out of $Global:WgoUI_OptimizationCheckboxNames - never touched by
+    # "Select All", "Maximum Optimization", or any predefined profile. Xbox/Game Pass and
+    # kernel-level anti-cheat (e.g. Vanguard, EAC) can depend on these, so this is opt-in only.
+    param(
+        [bool]$DisableXboxServices = $false
+    )
+    if (-not $DisableXboxServices) { return }
+    Write-Log (T 'LogXboxStart') "INFO"
+    try {
+        $targetServices = @("XblAuthManager", "XblGameSave", "XboxNetApiSvc", "XboxGipSvc")
+        $applied = @()
+        foreach ($svcName in $targetServices) {
+            $svc = Get-Service -Name $svcName -ErrorAction Ignore
+            if ($svc) {
+                try {
+                    Stop-Service -Name $svcName -Force -ErrorAction Ignore
+                    Set-Service -Name $svcName -StartupType Disabled -ErrorAction Stop
+                    $applied += $svcName
+                } catch { }
+            }
+        }
+        Write-Log (T 'LogXboxOk' $applied.Count ($applied -join ", ")) "OK"
+    } catch {
+        Write-Log (T 'LogMoreError' "XboxServices" $_.Exception.Message) "ERROR"
+    }
 }
 
 Export-ModuleMember -Function @(
@@ -1278,5 +1595,6 @@ Export-ModuleMember -Function @(
     'Set-WgoExtraPrivacy', 'Set-WgoAdvancedTweaks', 'Set-WgoBlockDriverUpdates',
     'Set-WgoPagefile', 'Get-WgoOptimizedPagefileSize', 'Set-WgoMoreOptimizations',
     'Restore-WgoDefaults', 'Set-WgoServiceMgmt',
-    'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp'
+    'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp',
+    'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoXboxServices'
 )

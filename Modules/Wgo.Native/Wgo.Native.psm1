@@ -80,4 +80,27 @@ public static extern bool AdjustTokenPrivileges(IntPtr TokenHandle, bool Disable
     }
 }
 
-Export-ModuleMember -Function Invoke-WgoStandbyListPurge
+function Set-WgoTimerResolutionNative {
+    # Sets the system-wide minimum timer resolution via NtSetTimerResolution (ntdll.dll).
+    # DesiredResolution100ns: 5000 = 0.5ms. Returns the resolution actually applied (100ns units), or $null on failure.
+    if (-not ("Wgo.NativeTimer" -as [type])) {
+        Add-Type -Namespace Wgo -Name NativeTimer -MemberDefinition @'
+[DllImport("ntdll.dll")]
+public static extern int NtSetTimerResolution(uint DesiredResolution, bool SetResolution, ref uint CurrentResolution);
+'@
+    }
+    try {
+        [uint32]$current = 0
+        $result = [Wgo.NativeTimer]::NtSetTimerResolution(5000, $true, [ref]$current)
+        if ($result -ne 0) {
+            try { Write-Log ("Timer resolution: NtSetTimerResolution returned NTSTATUS 0x{0:X8}" -f $result) "WARN" } catch { }
+            return $null
+        }
+        return $current
+    } catch {
+        try { Write-Log ("Timer resolution: unexpected error - " + $_.Exception.Message) "WARN" } catch { }
+        return $null
+    }
+}
+
+Export-ModuleMember -Function Invoke-WgoStandbyListPurge, Set-WgoTimerResolutionNative

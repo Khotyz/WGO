@@ -443,6 +443,7 @@
                                 <Button x:Name="btnProfileLaptop"  Content="Laptop Optimization"  Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,10" Padding="14,8"/>
                                 <Button x:Name="btnProfileGamer"   Content="Gamer PC Optimization" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,10" Padding="14,8"/>
                                 <Button x:Name="btnProfilePrivacy" Content="Maximum Privacy"        Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,10" Padding="14,8"/>
+                                <Button x:Name="btnProfileEsports" Content="eSports"                Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,10" Padding="14,8"/>
                                 <Button x:Name="btnProfileMax"     Content="Maximum Optimization" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,10" Padding="14,8"/>
                             </WrapPanel>
                         </GroupBox>
@@ -511,6 +512,9 @@
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkNetworkLatency" Style="{StaticResource WrapCheckBoxStyle}" Content="Network optimization / latency reduction (TCP-IP)" IsChecked="False"/>
                                 </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkHungAppTimeout" Style="{StaticResource WrapCheckBoxStyle}" Content="Reduce hung app timeout (faster response when a program freezes)" IsChecked="False"/>
+                                </Border>
                             </WrapPanel>
                         </GroupBox>
 
@@ -530,6 +534,19 @@
                                 </Border>
                             </WrapPanel>
                         </GroupBox>
+
+                        <Border BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5" CornerRadius="10" Margin="0,10,0,0" Padding="14,10">
+                            <StackPanel>
+                                <TextBlock x:Name="txtXboxServicesNote" Text="Kept separate from every profile and from Select All: Game Pass, Xbox achievements, and kernel-level anti-cheat (Vanguard, EAC) can depend on these services. Only enable this if you don't use any of that." TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" Margin="0,0,0,10" FontSize="12"/>
+                                <GroupBox x:Name="grpXboxServices" Header="Xbox Services (not included in any profile)" BorderBrush="{DynamicResource AccentBrush}">
+                                    <WrapPanel>
+                                        <Border Style="{StaticResource GridOptionCardStyle}">
+                                            <CheckBox x:Name="chkDisableXboxServices" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Xbox services (XblAuthManager, XblGameSave, XboxNetApiSvc, XboxGipSvc)" IsChecked="False"/>
+                                        </Border>
+                                    </WrapPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Border>
 
                         <GroupBox x:Name="grpMoreOptimizations" Header="System Cleanup &amp; Performance">
                             <WrapPanel>
@@ -590,6 +607,48 @@
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkLargeSystemCache" Style="{StaticResource WrapCheckBoxStyle}" Content="Optimize system cache for high-RAM systems (8GB+, auto-detected)" IsChecked="False"/>
                                 </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkAutoStandbyClean" Style="{StaticResource WrapCheckBoxStyle}" Content="Auto-clean Standby List every 5 minutes (background scheduled task)" IsChecked="False"/>
+                                </Border>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpCpuTimerTweaks" Header="CPU &amp; Timer Tweaks">
+                            <WrapPanel>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableCoreParking" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Core Parking (keeps all CPU cores active, reduces latency in games)" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableHPET" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable HPET - may improve FPS on some systems (requires restart)" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkTimerResolution" Style="{StaticResource WrapCheckBoxStyle}" Content="Increase timer resolution to 0.5ms (reduces input lag)" IsChecked="False"/>
+                                </Border>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpGpuTweaks" Header="GPU &amp; Driver Tweaks">
+                            <WrapPanel>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkIncreaseTdrNvidia" Style="{StaticResource WrapCheckBoxStyle}" Content="Increase NVIDIA driver timeout (TDR) to prevent crashes in demanding games" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableNvidiaTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable NVIDIA telemetry services and scheduled tasks" IsChecked="False"/>
+                                </Border>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpNetworkAdvanced" Header="Advanced Network Tweaks">
+                            <WrapPanel>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableNagle" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Nagle's algorithm on all network adapters" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableIPv6" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable IPv6 on all network interfaces" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkRssOptimize" Style="{StaticResource WrapCheckBoxStyle}" Content="Optimize Receive Side Scaling (RSS) for lower network latency" IsChecked="False"/>
+                                </Border>
                             </WrapPanel>
                         </GroupBox>
 
@@ -625,6 +684,18 @@
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkTcpIpReset" Style="{StaticResource WrapCheckBoxStyle}" Content="Reset TCP/IP stack (fixes network connectivity issues)" IsChecked="False"/>
                                 </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkRemoveOnedrive" Style="{StaticResource WrapCheckBoxStyle}" Content="Completely uninstall OneDrive from the system" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableGameBar" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable the Game Bar interface and shortcuts" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableStore" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Windows Store (prevents background activity, keeps winget)" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableWer" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Windows Error Reporting completely" IsChecked="False"/>
+                                </Border>
                             </WrapPanel>
                         </GroupBox>
 
@@ -647,6 +718,15 @@
                                         </Border>
                                         <Border Style="{StaticResource GridOptionCardStyle}">
                                             <CheckBox x:Name="chkRiskyBits" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable BITS (Background Intelligent Transfer)" IsChecked="False"/>
+                                        </Border>
+                                        <Border Style="{StaticResource GridOptionCardStyle}">
+                                            <CheckBox x:Name="chkRiskyDisableFirewall" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Windows Firewall (high risk, offline games only)" IsChecked="False"/>
+                                        </Border>
+                                        <Border Style="{StaticResource GridOptionCardStyle}">
+                                            <CheckBox x:Name="chkRiskyDisableDEP" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable DEP (Data Execution Prevention) - may cause instability" IsChecked="False"/>
+                                        </Border>
+                                        <Border Style="{StaticResource GridOptionCardStyle}">
+                                            <CheckBox x:Name="chkRiskyNvidiaMaxPerf" Style="{StaticResource WrapCheckBoxStyle}" Content="Force NVIDIA GPU maximum performance mode (may increase power consumption)" IsChecked="False"/>
                                         </Border>
                                     </WrapPanel>
                                 </GroupBox>

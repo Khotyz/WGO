@@ -6,20 +6,25 @@ $Global:WgoUI_Ctrl = @{}
 $Global:WgoUI_OptimizationCheckboxNames = @(
     'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
     'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
-    'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
+    'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency','chkHungAppTimeout',
     'chkDisableSysMain','chkDisableWSearch','chkDisableSpooler','chkWinSxSCleanup',
     'chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners',
     'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
     'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup',
-    'chkResidualServices','chkStandbyListClean','chkLargeSystemCache',
+    'chkResidualServices','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
+    'chkDisableCoreParking','chkDisableHPET','chkTimerResolution',
+    'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
+    'chkDisableNagle','chkDisableIPv6','chkRssOptimize',
     'chkHostsBlock','chkPrivacyDeep','chkCacheClean','chkUiCleanup','chkTcpAutotuning',
-    'chkDoH','chkFastShutdown','chkPrefetchSSD','chkRemoveWinBackup','chkTcpIpReset'
+    'chkDoH','chkFastShutdown','chkPrefetchSSD','chkRemoveWinBackup','chkTcpIpReset',
+    'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer'
 )
 
 # Risky tweaks are intentionally excluded from Select All, profile presets, and
 # last-run persistence - they must be re-confirmed by the user every single time.
 $Global:WgoUI_RiskyCheckboxNames = @(
-    'chkRiskyUAC','chkRiskySmartScreen','chkRiskyDefenderRT','chkRiskyWinUpdateSvc','chkRiskyBits'
+    'chkRiskyUAC','chkRiskySmartScreen','chkRiskyDefenderRT','chkRiskyWinUpdateSvc','chkRiskyBits',
+    'chkRiskyDisableFirewall','chkRiskyDisableDEP','chkRiskyNvidiaMaxPerf'
 )
 
 $Global:WgoUI_Profiles = @{
@@ -42,12 +47,13 @@ $Global:WgoUI_Profiles = @{
     Gamer = @(
         'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
         'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
-        'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
+        'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency','chkHungAppTimeout',
         'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
         'chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
         'chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
         'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup','chkResidualServices','chkStandbyListClean',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning','chkLargeSystemCache'
+        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning','chkLargeSystemCache',
+        'chkAutoStandbyClean','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle'
     )
     Privacy = @(
         'chkBloat','chkSearch','chkPrivacy',
@@ -55,6 +61,18 @@ $Global:WgoUI_Profiles = @{
         'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground',
         'chkOfficeTelemetry','chkExtraSchedTasks',
         'chkHostsBlock','chkPrivacyDeep','chkDoH','chkUiCleanup','chkCacheClean'
+    )
+    Esports = @(
+        'chkVisual','chkPagefile',
+        'chkCopilotBlock',
+        'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
+        'chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
+        'chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
+        'chkGhostAdapters','chkFastStartup','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
+        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning',
+        'chkDisableCoreParking','chkTimerResolution','chkHungAppTimeout',
+        'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
+        'chkDisableNagle','chkRssOptimize'
     )
 }
 
@@ -139,11 +157,15 @@ function Update-WgoUILanguage {
     $c['chkDeliveryOpt'].Content                     = $t.ChkDeliveryOpt
     $c['chkAppsBackground'].Content                  = $t.ChkAppsBackground
     $c['chkNetworkLatency'].Content                  = $t.ChkNetworkLatency
+    $c['chkHungAppTimeout'].Content                  = $t.ChkHungAppTimeout
     $c['grpServiceMgmt'].Header                      = $t.GrpServiceMgmt
     $c['chkDisableSysMain'].Content                  = $t.ChkDisableSysMain
     $c['chkDisableWSearch'].Content                  = $t.ChkDisableWSearch
     $c['chkDisableSpooler'].Content                  = $t.ChkDisableSpooler
     $c['chkWinSxSCleanup'].Content                   = $t.ChkWinSxSCleanup
+    $c['txtXboxServicesNote'].Text                   = $t.TxtXboxServicesNote
+    $c['grpXboxServices'].Header                     = $t.GrpXboxServices
+    $c['chkDisableXboxServices'].Content              = $t.ChkDisableXboxServices
     $c['grpMoreOptimizations'].Header                = $t.GrpMoreOptimizations
     $c['chkHibernation'].Content                     = $t.ChkHibernation
     $c['chkPowerPlan'].Content                       = $t.ChkPowerPlan
@@ -164,6 +186,18 @@ function Update-WgoUILanguage {
     $c['chkResidualServices'].Content                = $t.ChkResidualServices
     $c['chkStandbyListClean'].Content                = $t.ChkStandbyListClean
     $c['chkLargeSystemCache'].Content                = $t.ChkLargeSystemCache
+    $c['chkAutoStandbyClean'].Content                = $t.ChkAutoStandbyClean
+    $c['grpCpuTimerTweaks'].Header                   = $t.GrpCpuTimerTweaks
+    $c['chkDisableCoreParking'].Content              = $t.ChkDisableCoreParking
+    $c['chkDisableHPET'].Content                     = $t.ChkDisableHPET
+    $c['chkTimerResolution'].Content                 = $t.ChkTimerResolution
+    $c['grpGpuTweaks'].Header                        = $t.GrpGpuTweaks
+    $c['chkIncreaseTdrNvidia'].Content                = $t.ChkIncreaseTdrNvidia
+    $c['chkDisableNvidiaTelemetry'].Content          = $t.ChkDisableNvidiaTelemetry
+    $c['grpNetworkAdvanced'].Header                  = $t.GrpNetworkAdvanced
+    $c['chkDisableNagle'].Content                    = $t.ChkDisableNagle
+    $c['chkDisableIPv6'].Content                     = $t.ChkDisableIPv6
+    $c['chkRssOptimize'].Content                     = $t.ChkRssOptimize
     $c['grpExtraTweaks2'].Header                     = $t.GrpExtraTweaks2
     $c['chkHostsBlock'].Content                      = $t.ChkHostsBlock
     $c['chkPrivacyDeep'].Content                     = $t.ChkPrivacyDeep
@@ -175,6 +209,10 @@ function Update-WgoUILanguage {
     $c['chkPrefetchSSD'].Content                     = $t.ChkPrefetchSSD
     $c['chkRemoveWinBackup'].Content                 = $t.ChkRemoveWinBackup
     $c['chkTcpIpReset'].Content                      = $t.ChkTcpIpReset
+    $c['chkRemoveOnedrive'].Content                  = $t.ChkRemoveOnedrive
+    $c['chkDisableGameBar'].Content                  = $t.ChkDisableGameBar
+    $c['chkDisableStore'].Content                    = $t.ChkDisableStore
+    $c['chkDisableWer'].Content                      = $t.ChkDisableWer
     $c['txtRiskyWarning'].Text                       = $t.TxtRiskyWarning
     $c['grpRiskyTweaks'].Header                      = $t.GrpRiskyTweaks
     $c['chkRiskyUAC'].Content                        = $t.ChkRiskyUAC
@@ -182,11 +220,15 @@ function Update-WgoUILanguage {
     $c['chkRiskyDefenderRT'].Content                 = $t.ChkRiskyDefenderRT
     $c['chkRiskyWinUpdateSvc'].Content                = $t.ChkRiskyWinUpdateSvc
     $c['chkRiskyBits'].Content                       = $t.ChkRiskyBits
+    $c['chkRiskyDisableFirewall'].Content            = $t.ChkRiskyDisableFirewall
+    $c['chkRiskyDisableDEP'].Content                 = $t.ChkRiskyDisableDEP
+    $c['chkRiskyNvidiaMaxPerf'].Content               = $t.ChkRiskyNvidiaMaxPerf
     $c['grpProfiles'].Header                         = $t.GrpProfiles
     $c['btnProfileBasic'].Content                    = $t.BtnProfileBasic
     $c['btnProfileLaptop'].Content                   = $t.BtnProfileLaptop
     $c['btnProfileGamer'].Content                    = $t.BtnProfileGamer
     $c['btnProfilePrivacy'].Content                   = $t.BtnProfilePrivacy
+    $c['btnProfileEsports'].Content                   = $t.BtnProfileEsports
     $c['btnProfileMax'].Content                      = $t.BtnProfileMax
     $c['chkDryRun'].Content                          = $t.ChkDryRun
     $c['btnRunSelected'].Content                     = $t.BtnRunSelected
@@ -338,15 +380,20 @@ function Initialize-WgoUI {
         'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
         'grpAdvancedTweaks','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
         'grpServiceMgmt','chkDisableSysMain','chkDisableWSearch','chkDisableSpooler','chkWinSxSCleanup',
+        'txtXboxServicesNote','grpXboxServices','chkDisableXboxServices',
         'grpMoreOptimizations','chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners',
         'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
         'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup',
-        'chkResidualServices','chkStandbyListClean','chkLargeSystemCache',
+        'chkResidualServices','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
+        'grpCpuTimerTweaks','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkHungAppTimeout',
+        'grpGpuTweaks','chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
+        'grpNetworkAdvanced','chkDisableNagle','chkDisableIPv6','chkRssOptimize',
         'grpExtraTweaks2','chkHostsBlock','chkPrivacyDeep','chkCacheClean','chkUiCleanup','chkTcpAutotuning',
         'chkDoH','chkFastShutdown','chkPrefetchSSD','chkRemoveWinBackup','chkTcpIpReset',
+        'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer',
         'txtRiskyWarning','grpRiskyTweaks','chkRiskyUAC','chkRiskySmartScreen','chkRiskyDefenderRT',
-        'chkRiskyWinUpdateSvc','chkRiskyBits',
-        'grpProfiles','btnProfileBasic','btnProfileLaptop','btnProfileGamer','btnProfilePrivacy','btnProfileMax',
+        'chkRiskyWinUpdateSvc','chkRiskyBits','chkRiskyDisableFirewall','chkRiskyDisableDEP','chkRiskyNvidiaMaxPerf',
+        'grpProfiles','btnProfileBasic','btnProfileLaptop','btnProfileGamer','btnProfilePrivacy','btnProfileEsports','btnProfileMax',
         'btnRunSelected','btnRestoreDefaults','btnExportProfile','btnImportProfile',
         'btnInstallApps',
         'txtChocoRequired','txtChocoStatus','btnInstallChoco',
@@ -461,6 +508,9 @@ function Initialize-WgoUI {
     $c['btnProfilePrivacy'].Add_Click({
         Set-WgoUIProfilePreset -EnabledNames $Global:WgoUI_Profiles.Privacy -ProfileLabel (T 'BtnProfilePrivacy')
     })
+    $c['btnProfileEsports'].Add_Click({
+        Set-WgoUIProfilePreset -EnabledNames $Global:WgoUI_Profiles.Esports -ProfileLabel (T 'BtnProfileEsports')
+    })
     $c['btnProfileMax'].Add_Click({
         Set-WgoUIProfilePreset -EnabledNames $Global:WgoUI_OptimizationCheckboxNames -ProfileLabel (T 'BtnProfileMax')
     })
@@ -524,14 +574,33 @@ function Initialize-WgoUI {
         $doPrefetchSSD = [bool]$c['chkPrefetchSSD'].IsChecked
         $doRemoveWinBackup = [bool]$c['chkRemoveWinBackup'].IsChecked
         $doTcpIpReset = [bool]$c['chkTcpIpReset'].IsChecked
+        $doRemoveOnedrive = [bool]$c['chkRemoveOnedrive'].IsChecked
+        $doDisableGameBar = [bool]$c['chkDisableGameBar'].IsChecked
+        $doDisableStore = [bool]$c['chkDisableStore'].IsChecked
+        $doDisableWer = [bool]$c['chkDisableWer'].IsChecked
+        $doAutoStandbyClean = [bool]$c['chkAutoStandbyClean'].IsChecked
+        $doHungAppTimeout = [bool]$c['chkHungAppTimeout'].IsChecked
+        $doDisableCoreParking = [bool]$c['chkDisableCoreParking'].IsChecked
+        $doDisableHPET = [bool]$c['chkDisableHPET'].IsChecked
+        $doTimerResolution = [bool]$c['chkTimerResolution'].IsChecked
+        $doIncreaseTdrNvidia = [bool]$c['chkIncreaseTdrNvidia'].IsChecked
+        $doDisableNvidiaTelemetry = [bool]$c['chkDisableNvidiaTelemetry'].IsChecked
+        $doDisableNagle = [bool]$c['chkDisableNagle'].IsChecked
+        $doDisableIPv6 = [bool]$c['chkDisableIPv6'].IsChecked
+        $doRssOptimize = [bool]$c['chkRssOptimize'].IsChecked
         $doRiskyUAC = [bool]$c['chkRiskyUAC'].IsChecked
         $doRiskySmartScreen = [bool]$c['chkRiskySmartScreen'].IsChecked
         $doRiskyDefenderRT = [bool]$c['chkRiskyDefenderRT'].IsChecked
         $doRiskyWinUpdateSvc = [bool]$c['chkRiskyWinUpdateSvc'].IsChecked
         $doRiskyBits = [bool]$c['chkRiskyBits'].IsChecked
+        $doRiskyDisableFirewall = [bool]$c['chkRiskyDisableFirewall'].IsChecked
+        $doRiskyDisableDEP = [bool]$c['chkRiskyDisableDEP'].IsChecked
+        $doRiskyNvidiaMaxPerf = [bool]$c['chkRiskyNvidiaMaxPerf'].IsChecked
+        $doDisableXboxServices = [bool]$c['chkDisableXboxServices'].IsChecked
         $doDryRun = [bool]$c['chkDryRun'].IsChecked
 
-        $anyRisky = $doRiskyUAC -or $doRiskySmartScreen -or $doRiskyDefenderRT -or $doRiskyWinUpdateSvc -or $doRiskyBits
+        $anyRisky = $doRiskyUAC -or $doRiskySmartScreen -or $doRiskyDefenderRT -or $doRiskyWinUpdateSvc -or $doRiskyBits -or
+                    $doRiskyDisableFirewall -or $doRiskyDisableDEP -or $doRiskyNvidiaMaxPerf
         if ($anyRisky -and -not $doDryRun) {
             if (-not (Show-WgoConfirm -Message (T 'LogRiskyConfirm') -Title "WGO")) {
                 $c['btnRunSelected'].IsEnabled = $true
@@ -551,7 +620,13 @@ function Initialize-WgoUI {
                   $doResidualServices, $doStandbyListClean, $doLargeSystemCache,
                   $doHostsBlock, $doPrivacyDeep, $doCacheClean, $doUiCleanup, $doTcpAutotuning,
                   $doDoH, $doFastShutdown, $doPrefetchSSD, $doRemoveWinBackup, $doTcpIpReset,
+                  $doRemoveOnedrive, $doDisableGameBar, $doDisableStore, $doDisableWer, $doAutoStandbyClean,
+                  $doHungAppTimeout, $doDisableCoreParking, $doDisableHPET, $doTimerResolution,
+                  $doIncreaseTdrNvidia, $doDisableNvidiaTelemetry,
+                  $doDisableNagle, $doDisableIPv6, $doRssOptimize,
                   $doRiskyUAC, $doRiskySmartScreen, $doRiskyDefenderRT, $doRiskyWinUpdateSvc, $doRiskyBits,
+                  $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
+                  $doDisableXboxServices,
                   $doDryRun)
             try {
                 Write-Log (T 'LogOptStart') "INFO"
@@ -573,6 +648,7 @@ function Initialize-WgoUI {
                         @{ Flag = $doDeliveryOpt;     Key = 'ChkDeliveryOpt' },
                         @{ Flag = $doAppsBackground;  Key = 'ChkAppsBackground' },
                         @{ Flag = $doNetworkLatency;  Key = 'ChkNetworkLatency' },
+                        @{ Flag = $doHungAppTimeout;  Key = 'ChkHungAppTimeout' },
                         @{ Flag = $doDisableSysMain;  Key = 'ChkDisableSysMain' },
                         @{ Flag = $doDisableWSearch;  Key = 'ChkDisableWSearch' },
                         @{ Flag = $doDisableSpooler;  Key = 'ChkDisableSpooler' },
@@ -588,11 +664,28 @@ function Initialize-WgoUI {
                         @{ Flag = $doRemoveWinBackup; Key = 'ChkRemoveWinBackup' },
                         @{ Flag = $doTcpIpReset;      Key = 'ChkTcpIpReset' },
                         @{ Flag = $doLargeSystemCache; Key = 'ChkLargeSystemCache' },
+                        @{ Flag = $doRemoveOnedrive;  Key = 'ChkRemoveOnedrive' },
+                        @{ Flag = $doDisableGameBar;  Key = 'ChkDisableGameBar' },
+                        @{ Flag = $doDisableStore;    Key = 'ChkDisableStore' },
+                        @{ Flag = $doDisableWer;      Key = 'ChkDisableWer' },
+                        @{ Flag = $doAutoStandbyClean; Key = 'ChkAutoStandbyClean' },
+                        @{ Flag = $doDisableCoreParking; Key = 'ChkDisableCoreParking' },
+                        @{ Flag = $doDisableHPET;     Key = 'ChkDisableHPET' },
+                        @{ Flag = $doTimerResolution; Key = 'ChkTimerResolution' },
+                        @{ Flag = $doIncreaseTdrNvidia; Key = 'ChkIncreaseTdrNvidia' },
+                        @{ Flag = $doDisableNvidiaTelemetry; Key = 'ChkDisableNvidiaTelemetry' },
+                        @{ Flag = $doDisableNagle;    Key = 'ChkDisableNagle' },
+                        @{ Flag = $doDisableIPv6;     Key = 'ChkDisableIPv6' },
+                        @{ Flag = $doRssOptimize;     Key = 'ChkRssOptimize' },
                         @{ Flag = $doRiskyUAC;           Key = 'ChkRiskyUAC' },
                         @{ Flag = $doRiskySmartScreen;   Key = 'ChkRiskySmartScreen' },
                         @{ Flag = $doRiskyDefenderRT;    Key = 'ChkRiskyDefenderRT' },
                         @{ Flag = $doRiskyWinUpdateSvc;  Key = 'ChkRiskyWinUpdateSvc' },
-                        @{ Flag = $doRiskyBits;          Key = 'ChkRiskyBits' }
+                        @{ Flag = $doRiskyBits;          Key = 'ChkRiskyBits' },
+                        @{ Flag = $doRiskyDisableFirewall; Key = 'ChkRiskyDisableFirewall' },
+                        @{ Flag = $doRiskyDisableDEP;    Key = 'ChkRiskyDisableDEP' },
+                        @{ Flag = $doRiskyNvidiaMaxPerf; Key = 'ChkRiskyNvidiaMaxPerf' },
+                        @{ Flag = $doDisableXboxServices; Key = 'ChkDisableXboxServices' }
                     )
                     foreach ($item in $dryItems) {
                         if ($item.Flag) { Write-Log (T 'LogDryRunPrefix' (T $item.Key)) "INFO" }
@@ -606,6 +699,7 @@ function Initialize-WgoUI {
                         -InputLagReduction $doInputLagReduction `
                         -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
                         -ResidualServices $doResidualServices -StandbyListClean $doStandbyListClean -LargeSystemCache $doLargeSystemCache `
+                        -AutoStandbyClean $doAutoStandbyClean `
                         -DryRun $true
                 } else {
                     New-WgoRestorePoint | Out-Null
@@ -623,9 +717,16 @@ function Initialize-WgoUI {
                     if ($doWinSxSCleanup) { Clear-WgoWinSxS }
                     Set-WgoExtraTweaks2 -HostsBlock $doHostsBlock -PrivacyDeep $doPrivacyDeep -CacheClean $doCacheClean `
                         -UiCleanup $doUiCleanup -TcpAutotuning $doTcpAutotuning -DoH $doDoH `
-                        -FastShutdown $doFastShutdown -PrefetchSSD $doPrefetchSSD -RemoveWinBackup $doRemoveWinBackup -TcpIpReset $doTcpIpReset
+                        -FastShutdown $doFastShutdown -PrefetchSSD $doPrefetchSSD -RemoveWinBackup $doRemoveWinBackup -TcpIpReset $doTcpIpReset `
+                        -RemoveOnedrive $doRemoveOnedrive -DisableGameBar $doDisableGameBar -DisableStore $doDisableStore -DisableWer $doDisableWer
+                    Set-WgoCpuTimerTweaks -DisableCoreParking $doDisableCoreParking -DisableHPET $doDisableHPET `
+                        -TimerResolution $doTimerResolution -HungAppTimeout $doHungAppTimeout
+                    Set-WgoGpuTweaks -IncreaseTdrNvidia $doIncreaseTdrNvidia -DisableNvidiaTelemetry $doDisableNvidiaTelemetry
+                    Set-WgoNetworkAdvanced -DisableNagle $doDisableNagle -DisableIPv6 $doDisableIPv6 -RssOptimize $doRssOptimize
                     Set-WgoRiskyTweaks -DisableUAC $doRiskyUAC -DisableSmartScreen $doRiskySmartScreen `
-                        -DisableDefenderRT $doRiskyDefenderRT -DisableWinUpdateSvc $doRiskyWinUpdateSvc -DisableBits $doRiskyBits
+                        -DisableDefenderRT $doRiskyDefenderRT -DisableWinUpdateSvc $doRiskyWinUpdateSvc -DisableBits $doRiskyBits `
+                        -DisableFirewall $doRiskyDisableFirewall -DisableDEP $doRiskyDisableDEP -NvidiaMaxPerf $doRiskyNvidiaMaxPerf
+                    Set-WgoXboxServices -DisableXboxServices $doDisableXboxServices
                     Set-WgoMoreOptimizations -Hibernation $doHibernation -PowerPlan $doPowerPlan `
                         -TempCleanup $doTempCleanup -HotCorners $doHotCorners `
                         -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
@@ -635,6 +736,7 @@ function Initialize-WgoUI {
                         -InputLagReduction $doInputLagReduction `
                         -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
                         -ResidualServices $doResidualServices -StandbyListClean $doStandbyListClean -LargeSystemCache $doLargeSystemCache `
+                        -AutoStandbyClean $doAutoStandbyClean `
                         -DryRun $false
                 }
                 Write-Log (T 'LogOptDone') "OK"
@@ -652,7 +754,13 @@ function Initialize-WgoUI {
                            $doResidualServices, $doStandbyListClean, $doLargeSystemCache,
                            $doHostsBlock, $doPrivacyDeep, $doCacheClean, $doUiCleanup, $doTcpAutotuning,
                            $doDoH, $doFastShutdown, $doPrefetchSSD, $doRemoveWinBackup, $doTcpIpReset,
+                           $doRemoveOnedrive, $doDisableGameBar, $doDisableStore, $doDisableWer, $doAutoStandbyClean,
+                           $doHungAppTimeout, $doDisableCoreParking, $doDisableHPET, $doTimerResolution,
+                           $doIncreaseTdrNvidia, $doDisableNvidiaTelemetry,
+                           $doDisableNagle, $doDisableIPv6, $doRssOptimize,
                            $doRiskyUAC, $doRiskySmartScreen, $doRiskyDefenderRT, $doRiskyWinUpdateSvc, $doRiskyBits,
+                           $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
+                           $doDisableXboxServices,
                            $doDryRun) `
           -OnCompleted {
             $c['btnRunSelected'].IsEnabled = $true
@@ -661,7 +769,8 @@ function Initialize-WgoUI {
                 $doHibernation, $doFastStartup, $doHagsGameMode, $doDrivers,
                 $doVisual, $doPagefile, $doKernelGamingPriority, $doUltimatePerf,
                 $doDisableSysMain, $doDisableWSearch, $doDisableSpooler,
-                $doRiskyUAC, $doRiskyWinUpdateSvc, $doLargeSystemCache
+                $doRiskyUAC, $doRiskyWinUpdateSvc, $doLargeSystemCache,
+                $doDisableHPET, $doRiskyDisableDEP
             )
             if (-not $doDryRun -and ($restartRequiredFlags -contains $true)) {
                 if (Show-WgoConfirm -Message (T 'LogRestartPrompt') -Title "WGO") {
