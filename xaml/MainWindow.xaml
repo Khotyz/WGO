@@ -895,6 +895,13 @@
                                     </StackPanel>
                                 </Border>
 
+                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkDnsJumper" Content="DNS Jumper" FontWeight="Bold" Tag="dnsjumper"/>
+                                        <TextBlock x:Name="txtDnsJumperDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
                             </WrapPanel>
                         </GroupBox>
 
@@ -926,13 +933,6 @@
                                     <StackPanel>
                                         <CheckBox x:Name="chkShareX" Content="ShareX" FontWeight="Bold" Tag="sharex"/>
                                         <TextBlock x:Name="txtShareXDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkDnsJumper" Content="DNS Jumper" FontWeight="Bold" Tag="dnsjumper"/>
-                                        <TextBlock x:Name="txtDnsJumperDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
                                     </StackPanel>
                                 </Border>
 

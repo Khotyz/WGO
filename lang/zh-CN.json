@@ -74,7 +74,6 @@
   "AppOptiscalerClientDesc": "开源桌面管理工具,用于在整个游戏库中安装和更新 OptiScaler(DLSS/FSR/XeSS 超分辨率和帧生成注入工具),来自 GitHub 的第三方项目,非微软签名,请在使用前自行审查",
   "AppFlowLauncherDesc": "快速开源的键盘启动器(可替代 Win 键),用于启动应用文件网页搜索和插件,相比 Windows 搜索或 PowerToys Run 更轻量且可扩展",
   "AppShareXDesc": "免费开源的截图/录屏工具,内置编辑标注,支持 GIF/视频捕获,可一键上传到数十种目标服务,比 Windows 自带的截图工具功能更完整",
-  "AppDnsJumperDesc": "免费便携工具,可快速切换、测试和对比 DNS 服务器(Google、Cloudflare、OpenDNS 等),实现更快更私密的上网体验",
   "MsgReady": "就绪",
   "MsgDone": "完成",
   "GrpExtraPrivacy": "附加遥测阻止",
@@ -357,7 +356,7 @@
   "LogNetAdvError": "应用网络调整失败（{0}）：{1}",
   "LogNetAdvStart": "正在应用高级网络调整...",
   "LogNvidiaTelemetryOk": "已禁用 NVIDIA 遥测（{0} 个服务，{1} 个定时任务）。",
-  "LogRemoveOnedriveOk": "已从系统卸载 OneDrive。",
+  "LogRemoveOnedriveOk": "已卸载 OneDrive 应用。",
   "LogRiskyDEPOk": "已在整个系统中禁用 DEP（数据执行保护）。需要重新启动。",
   "LogRiskyFirewallOk": "已在所有配置文件上禁用 Windows 防火墙。",
   "LogRiskyNvidiaPerfNone": "未找到可修改的 NVIDIA 显卡注册表项。",
@@ -373,5 +372,8 @@
   "ChkDisableXboxServices": "禁用 Xbox 服务（XblAuthManager、XblGameSave、XboxNetApiSvc、XboxGipSvc）",
   "LogXboxStart": "正在禁用 Xbox 服务...",
   "LogXboxOk": "已禁用 {0} 个 Xbox 服务：{1}",
-  "LogAdvEdgeWidgetsAllFailed": "所有子项设置均失败"
+  "LogAdvEdgeWidgetsAllFailed": "所有子项设置均失败",
+  "LogRemoveOnedriveKfmWarning": "您的桌面、文档或图片文件夹存储在 OneDrive 内（Windows“备份文件夹”功能）。为避免丢失这些文件，OneDrive 数据文件夹未被删除 - 请先将需要的文件移出，如需要再手动删除它。",
+  "LogRemoveOnedriveDataKept": "OneDrive 数据文件夹（您的文件）保持未动 - 仅删除了应用本身。确认里面没有重要内容后，可手动删除它。",
+  "AppDnsJumperDesc": "免费工具，可快速切换网络适配器的 DNS 服务器、测试响应时间并找到最快的 DNS - 有助于降低延迟和解锁网站。"
 }

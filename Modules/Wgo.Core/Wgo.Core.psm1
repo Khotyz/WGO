@@ -38,11 +38,7 @@ $BloatwareCriticalProtect = @(
     "Microsoft.VCLibs",
     "Microsoft.UI.Xaml",
     "Microsoft.WindowsStore",
-    "Microsoft.NET.Native",
-    # Apps installable through WGO's own App Installer tab must never be treated as bloatware,
-    # even if a profile preset re-enables "Remove bloatware / AI apps".
-    "MouriNaruto.NanaZip",
-    "40174MouriNaruto.NanaZip"
+    "Microsoft.NET.Native"
 )
 
 $BloatwareTargets = @(
@@ -100,18 +96,15 @@ function Remove-WgoBloatware {
     foreach ($appName in $BloatwareTargets) {
         if (Test-WgoProtectedPackage -Name $appName) { continue }
         try {
-            # Match by exact name or "prefix." (package family convention), not a loose
-            # "*substring*" wildcard - avoids catching unrelated packages that merely happen
-            # to contain the target string somewhere in their name.
-            $pkgs = Get-AppxPackage -AllUsers -ErrorAction Ignore |
-                    Where-Object { ($_.Name -eq $appName -or $_.Name -like "$appName.*") -and -not (Test-WgoProtectedPackage -Name $_.Name) }
+            $pkgs = Get-AppxPackage -AllUsers -Name "*$appName*" -ErrorAction Ignore |
+                    Where-Object { -not (Test-WgoProtectedPackage -Name $_.Name) }
             foreach ($p in $pkgs) {
                 Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction Ignore
                 Write-Log (T 'LogBloatUserRemoved' $p.Name) "OK"
             }
 
             $prov = Get-AppxProvisionedPackage -Online -ErrorAction Ignore |
-                    Where-Object { ($_.DisplayName -eq $appName -or $_.DisplayName -like "$appName.*") -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) }
+                    Where-Object { $_.DisplayName -like "*$appName*" -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) }
             foreach ($pp in $prov) {
                 Remove-AppxProvisionedPackage -Online -PackageName $pp.PackageName -ErrorAction Ignore
                 Write-Log (T 'LogBloatProvRemoved' $pp.DisplayName) "OK"
@@ -547,17 +540,15 @@ function Set-WgoMoreOptimizations {
         if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkTempCleanup')) "INFO" }
         else {
             try {
-                Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction Ignore
-                Remove-Item -Path "$env:WINDIR\Temp\*" -Recurse -Force -ErrorAction Ignore
+                Remove-WgoPathSafely -Path "$env:TEMP\*" -WildcardContents | Out-Null
+                Remove-WgoPathSafely -Path "$env:WINDIR\Temp\*" -WildcardContents | Out-Null
                 $cutoff = (Get-Date).AddDays(-30)
                 Get-ChildItem -Path "$env:WINDIR\Prefetch\*.pf" -ErrorAction Ignore |
                     Where-Object { $_.LastWriteTime -lt $cutoff } |
                     Remove-Item -Force -ErrorAction Ignore
-                if (Test-Path "$env:SystemDrive\Windows.old") {
-                    Remove-Item -Path "$env:SystemDrive\Windows.old" -Recurse -Force -ErrorAction Ignore
-                }
+                Remove-WgoPathSafely -Path "$env:SystemDrive\Windows.old" | Out-Null
                 Stop-Service -Name wuauserv -Force -ErrorAction Ignore
-                Remove-Item -Path "$env:WINDIR\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction Ignore
+                Remove-WgoPathSafely -Path "$env:WINDIR\SoftwareDistribution\Download\*" -WildcardContents | Out-Null
                 Start-Service -Name wuauserv -ErrorAction Ignore
                 $shaderCachePaths = @(
                     "$env:LOCALAPPDATA\D3DSCache",
@@ -569,9 +560,7 @@ function Set-WgoMoreOptimizations {
                     "$env:LOCALAPPDATA\Intel\ShaderCache"
                 )
                 foreach ($scPath in $shaderCachePaths) {
-                    if (Test-Path $scPath) {
-                        Remove-Item -Path "$scPath\*" -Recurse -Force -ErrorAction Ignore
-                    }
+                    Remove-WgoPathSafely -Path "$scPath\*" -WildcardContents | Out-Null
                 }
                 Write-Log (T 'LogShaderCacheCleanOk') "OK"
                 Write-Log (T 'LogTempCleanupOk') "OK"
@@ -1276,28 +1265,21 @@ function Set-WgoExtraTweaks2 {
 
     if ($RemoveOnedrive) {
         try {
-            # SAFETY: this must ONLY remove the OneDrive application (binaries, app cache,
-            # app registry keys). It must NEVER touch $env:USERPROFILE\OneDrive itself, because
-            # when "Backup de Pastas" / Known Folder Move is enabled, that path IS the user's
-            # real Desktop/Documents/Pictures/etc. - not a copy. Deleting it deletes their files.
-            $oneDrivePath = "$env:USERPROFILE\OneDrive"
-            $shellFoldersKey     = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
-            $userShellFoldersKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
-            $knownFolderValueNames = @(
-                "Desktop", "Personal", "{F42EE2D3-909F-4907-8871-4C22FC0BF756}",
-                "My Pictures", "My Music", "My Video", "{374DE290-123F-4565-9164-39C4925E467B}"
-            )
-            $isKnownFolderRedirected = $false
-            if (Test-Path $oneDrivePath) {
-                foreach ($valueName in $knownFolderValueNames) {
-                    foreach ($regKey in @($userShellFoldersKey, $shellFoldersKey)) {
-                        try {
-                            $current = (Get-ItemProperty -Path $regKey -Name $valueName -ErrorAction Ignore).$valueName
-                            if ($current -and ($current -like "$oneDrivePath*")) { $isKnownFolderRedirected = $true }
-                        } catch {}
-                    }
-                }
-            }
+            # SAFETY: never delete the OneDrive data folder automatically. If Windows'
+            # "Backup your folders" (Known Folder Move) is active, Desktop, Documents,
+            # and Pictures physically live INSIDE %USERPROFILE%\OneDrive - deleting that
+            # folder would destroy the user's actual Desktop/Documents/Pictures contents.
+            # This only removes the OneDrive application itself; the data folder is left
+            # for the user to move/delete manually once they've confirmed nothing important
+            # is stored there.
+            $desktopPath   = [Environment]::GetFolderPath('Desktop')
+            $documentsPath = [Environment]::GetFolderPath('MyDocuments')
+            $picturesPath  = [Environment]::GetFolderPath('MyPictures')
+            $oneDrivePath  = "$env:USERPROFILE\OneDrive"
+            $knownFoldersRedirected =
+                ($desktopPath   -and $desktopPath.StartsWith($oneDrivePath, [StringComparison]::OrdinalIgnoreCase)) -or
+                ($documentsPath -and $documentsPath.StartsWith($oneDrivePath, [StringComparison]::OrdinalIgnoreCase)) -or
+                ($picturesPath  -and $picturesPath.StartsWith($oneDrivePath, [StringComparison]::OrdinalIgnoreCase))
 
             Stop-Process -Name "OneDrive" -Force -ErrorAction Ignore
             $uninstaller = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
@@ -1306,31 +1288,19 @@ function Set-WgoExtraTweaks2 {
                 Start-Process -FilePath $uninstaller -ArgumentList "/uninstall" -Wait -ErrorAction Stop
             }
 
-            # Only ever delete the OneDrive app's own support/cache directories - never the
-            # user's profile OneDrive folder.
+            # App-only locations: safe to remove, never contain user documents/photos/shortcuts
             foreach ($path in @(
-                "$env:LOCALAPPDATA\Microsoft\OneDrive",
-                "$env:PROGRAMDATA\Microsoft OneDrive", "$env:SYSTEMDRIVE\OneDriveTemp"
+                "$env:LOCALAPPDATA\Microsoft\OneDrive", "$env:PROGRAMDATA\Microsoft OneDrive", "$env:SYSTEMDRIVE\OneDriveTemp"
             )) {
-                if (Test-Path $path) { Remove-Item -Path $path -Recurse -Force -ErrorAction Ignore }
+                Remove-WgoPathSafely -Path $path | Out-Null
             }
-
-            if ($isKnownFolderRedirected) {
-                # Desktop/Documents/etc. live inside \OneDrive\ - it holds real user files.
-                # Leave it completely untouched; only the app itself was removed above.
-                Write-Log "OneDrive app removed. '$oneDrivePath' contains redirected user folders (Desktop/Documents/etc.) and was left untouched to avoid data loss." "WARN"
-            } elseif (Test-Path $oneDrivePath) {
-                # No known folder points inside it - safe to remove only if it's actually empty
-                # (i.e. genuinely just leftover OneDrive scaffolding, not user data).
-                $remaining = @(Get-ChildItem -Path $oneDrivePath -Force -ErrorAction Ignore)
-                if ($remaining.Count -eq 0) {
-                    Remove-Item -Path $oneDrivePath -Recurse -Force -ErrorAction Ignore
-                } else {
-                    Write-Log "OneDrive folder '$oneDrivePath' still contains $($remaining.Count) item(s); left in place to avoid data loss." "WARN"
-                }
-            }
-
             Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\OneDrive" -Recurse -Force -ErrorAction Ignore
+
+            if ($knownFoldersRedirected) {
+                Write-Log (T 'LogRemoveOnedriveKfmWarning') "WARN"
+            } elseif (Test-Path $oneDrivePath) {
+                Write-Log (T 'LogRemoveOnedriveDataKept') "INFO"
+            }
             Write-Log (T 'LogRemoveOnedriveOk') "OK"
         } catch {
             Write-Log (T 'LogExtra2Error' "RemoveOnedrive" $_.Exception.Message) "ERROR"

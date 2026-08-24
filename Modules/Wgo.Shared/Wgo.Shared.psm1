@@ -43,6 +43,55 @@ function Write-Log {
     $Global:WgoLogQueue.Enqueue("[$timestamp][$Level] $Message")
 }
 
+function Remove-WgoPathSafely {
+    # Hard safety gate for every recursive/forced delete in this project. Never trust an
+    # env-var-built path blindly - if the variable is empty, redirected, or unexpectedly
+    # shallow, a wildcard recursive delete can destroy far more than intended (this guard
+    # exists because of a real incident where an empty/redirected path wiped user files).
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [switch]$WildcardContents  # if set, only the CONTENTS of $Path are removed, not $Path itself
+    )
+
+    $checkPath = $Path.TrimEnd('\', '*')
+    if ([string]::IsNullOrWhiteSpace($checkPath)) { return $false }
+    if (-not (Test-Path -LiteralPath $checkPath)) { return $true }  # nothing there, nothing unsafe
+
+    $resolved = (Resolve-Path -LiteralPath $checkPath -ErrorAction Ignore).Path
+    if (-not $resolved) { return $false }
+
+    # Reject drive roots and anything with fewer than 3 path segments after the drive
+    # (e.g. "C:\", "C:\Users", "C:\Windows" are too shallow to ever be a legitimate target)
+    $segments = $resolved.TrimEnd('\') -split '\\' | Where-Object { $_ -ne '' }
+    if ($segments.Count -lt 3) { return $false }
+
+    # Explicit denylist of critical/user-data folders that must never be wiped by this tool,
+    # whether as the direct target or as the folder whose *contents* get wiped
+    $denylist = @(
+        $env:SystemDrive, $env:WINDIR, $env:USERPROFILE, $env:ProgramFiles,
+        ${env:ProgramFiles(x86)}, $env:ProgramData, $env:PUBLIC,
+        [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('MyDocuments'),
+        [Environment]::GetFolderPath('MyPictures'), [Environment]::GetFolderPath('MyMusic'),
+        [Environment]::GetFolderPath('MyVideos')
+    ) | Where-Object { $_ }
+
+    foreach ($deny in $denylist) {
+        $denyResolved = (Resolve-Path -LiteralPath $deny -ErrorAction Ignore).Path
+        if ($denyResolved -and $resolved.Equals($denyResolved, [StringComparison]::OrdinalIgnoreCase)) { return $false }
+    }
+
+    try {
+        if ($WildcardContents) {
+            Get-ChildItem -LiteralPath $resolved -Force -ErrorAction Ignore | Remove-Item -Recurse -Force -ErrorAction Ignore
+        } else {
+            Remove-Item -LiteralPath $resolved -Recurse -Force -ErrorAction Ignore
+        }
+        return $true
+    } catch {
+        return $false
+    }
+}
+
 function Show-WgoFatalError {
     param([string]$Message)
     [System.Windows.Forms.MessageBox]::Show(
@@ -171,4 +220,4 @@ function Start-WgoBackgroundTask {
     $timer.Start()
 }
 
-Export-ModuleMember -Function T, Write-Log, Show-WgoFatalError, Show-WgoConfirm, Start-WgoBackgroundTask, Import-WgoLanguages
+Export-ModuleMember -Function T, Write-Log, Show-WgoFatalError, Show-WgoConfirm, Start-WgoBackgroundTask, Import-WgoLanguages, Remove-WgoPathSafely

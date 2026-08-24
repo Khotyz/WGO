@@ -74,7 +74,6 @@
   "AppOptiscalerClientDesc": "Open-source desktop manager to install and update OptiScaler (DLSS/FSR/XeSS frame generation and upscaling injector) across your game library. Third-party GitHub project, not Microsoft-signed - review it before use.",
   "AppFlowLauncherDesc": "Fast, open-source keyboard launcher (Win key alternative) for apps, files, web search and plugins - a lighter, more extensible take on Windows Search / PowerToys Run.",
   "AppShareXDesc": "Free, open-source screenshot/screen-recording tool with built-in editing, annotation, GIF/video capture and one-click upload to dozens of destinations - a fuller-featured alternative to the built-in Snipping Tool.",
-  "AppDnsJumperDesc": "Free portable utility to quickly switch, test and benchmark DNS servers (Google, Cloudflare, OpenDNS, etc.) for faster and more private browsing.",
   "MsgReady": "Ready.",
   "MsgDone": "Done.",
   "GrpExtraPrivacy": "Additional Telemetry Blocking",
@@ -357,7 +356,7 @@
   "LogNetAdvError": "Error applying network tweak ({0}): {1}",
   "LogNetAdvStart": "Applying advanced network tweaks...",
   "LogNvidiaTelemetryOk": "NVIDIA telemetry disabled ({0} service(s), {1} scheduled task(s)).",
-  "LogRemoveOnedriveOk": "OneDrive uninstalled from the system.",
+  "LogRemoveOnedriveOk": "OneDrive application uninstalled.",
   "LogRiskyDEPOk": "DEP (Data Execution Prevention) disabled system-wide. A restart is required.",
   "LogRiskyFirewallOk": "Windows Firewall disabled on all profiles.",
   "LogRiskyNvidiaPerfNone": "No NVIDIA display adapter registry entries were found to modify.",
@@ -373,5 +372,8 @@
   "ChkDisableXboxServices": "Disable Xbox services (XblAuthManager, XblGameSave, XboxNetApiSvc, XboxGipSvc)",
   "LogXboxStart": "Disabling Xbox services...",
   "LogXboxOk": "{0} Xbox service(s) disabled: {1}",
-  "LogAdvEdgeWidgetsAllFailed": "all sub-settings failed"
+  "LogAdvEdgeWidgetsAllFailed": "all sub-settings failed",
+  "LogRemoveOnedriveKfmWarning": "Your Desktop, Documents, or Pictures folder is stored inside OneDrive (Windows 'Backup your folders' feature). The OneDrive data folder was NOT deleted to avoid losing those files - move what you need out of it, then delete it manually if you want.",
+  "LogRemoveOnedriveDataKept": "The OneDrive data folder (your files) was left untouched - only the app was removed. Delete it manually once you've confirmed nothing important is left inside.",
+  "AppDnsJumperDesc": "Freeware tool to quickly switch your network adapter's DNS servers, test response times, and find the fastest DNS available - useful for lower ping and unblocking sites."
 }

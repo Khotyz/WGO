@@ -74,7 +74,6 @@
   "AppOptiscalerClientDesc": "Gerenciador de código aberto para instalar e atualizar o OptiScaler (injetor de upscaling/geração de frames DLSS/FSR/XeSS) em toda a sua biblioteca de jogos. Projeto de terceiros no GitHub, não assinado pela Microsoft - revise antes de usar.",
   "AppFlowLauncherDesc": "Lançador de teclado rápido e de código aberto (alternativa à tecla Win) para apps, arquivos, busca na web e plugins - uma versão mais leve e extensível do Windows Search / PowerToys Run.",
   "AppShareXDesc": "Ferramenta gratuita e de código aberto para capturas de tela/gravação de tela, com edição embutida, anotações, captura de GIF/vídeo e upload com um clique para dezenas de destinos - uma alternativa mais completa à Ferramenta de Captura nativa do Windows.",
-  "AppDnsJumperDesc": "Utilitário portátil e gratuito para trocar, testar e comparar rapidamente servidores DNS (Google, Cloudflare, OpenDNS, etc.) visando uma navegação mais rápida e privada.",
   "MsgReady": "Pronto.",
   "MsgDone": "Concluído.",
   "GrpExtraPrivacy": "Bloqueio Adicional de Telemetria",
@@ -357,7 +356,7 @@
   "LogNetAdvError": "Erro ao aplicar ajuste de rede ({0}): {1}",
   "LogNetAdvStart": "Aplicando ajustes de rede avançados...",
   "LogNvidiaTelemetryOk": "Telemetria da NVIDIA desativada ({0} serviço(s), {1} tarefa(s) agendada(s)).",
-  "LogRemoveOnedriveOk": "OneDrive desinstalado do sistema.",
+  "LogRemoveOnedriveOk": "Aplicativo do OneDrive desinstalado.",
   "LogRiskyDEPOk": "DEP (Data Execution Prevention) desativado em todo o sistema. É necessário reiniciar.",
   "LogRiskyFirewallOk": "Firewall do Windows desativado em todos os perfis.",
   "LogRiskyNvidiaPerfNone": "Nenhuma entrada de registro de placa NVIDIA foi encontrada para modificar.",
@@ -373,5 +372,8 @@
   "ChkDisableXboxServices": "Desativar serviços do Xbox (XblAuthManager, XblGameSave, XboxNetApiSvc, XboxGipSvc)",
   "LogXboxStart": "Desativando serviços do Xbox...",
   "LogXboxOk": "{0} serviço(s) do Xbox desativado(s): {1}",
-  "LogAdvEdgeWidgetsAllFailed": "todas as sub-configurações falharam"
+  "LogAdvEdgeWidgetsAllFailed": "todas as sub-configurações falharam",
+  "LogRemoveOnedriveKfmWarning": "Sua pasta Área de Trabalho, Documentos ou Imagens está armazenada dentro do OneDrive (recurso 'Fazer backup das suas pastas' do Windows). A pasta de dados do OneDrive NÃO foi apagada para evitar perda desses arquivos - mova o que precisar de lá antes de apagá-la manualmente, se quiser.",
+  "LogRemoveOnedriveDataKept": "A pasta de dados do OneDrive (seus arquivos) foi mantida intacta - só o aplicativo foi removido. Apague-a manualmente depois de confirmar que não sobrou nada importante lá dentro.",
+  "AppDnsJumperDesc": "Ferramenta gratuita para trocar rapidamente os servidores DNS do seu adaptador de rede, testar tempos de resposta e encontrar o DNS mais rápido disponível - útil pra reduzir ping e desbloquear sites."
 }

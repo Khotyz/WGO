@@ -1,4 +1,4 @@
-﻿# Wgo.UI.psm1 - UI initialization, events, themes, language
+# Wgo.UI.psm1 - UI initialization, events, themes, language
 
 $Global:WgoUI_Initialized = $false
 $Global:WgoUI_Window = $null
@@ -278,6 +278,8 @@ function Update-WgoUILanguage {
     $c['txtMemreductDesc'].Text                      = $t.AppMemreductDesc
     $c['chkBleachbit'].Content                       = "BleachBit"
     $c['txtBleachbitDesc'].Text                      = $t.AppBleachbitDesc
+    $c['chkDnsJumper'].Content                       = "DNS Jumper"
+    $c['txtDnsJumperDesc'].Text                      = $t.AppDnsJumperDesc
     $c['grpAppsProductivity'].Header                 = $t.GrpAppsProductivity
     $c['chkNilesoftShell'].Content                   = "Nilesoft Shell"
     $c['txtNilesoftShellDesc'].Text                  = $t.AppNilesoftShellDesc
@@ -287,8 +289,6 @@ function Update-WgoUILanguage {
     $c['txtFlowLauncherDesc'].Text                   = $t.AppFlowLauncherDesc
     $c['chkShareX'].Content                          = "ShareX"
     $c['txtShareXDesc'].Text                         = $t.AppShareXDesc
-    $c['chkDnsJumper'].Content                       = "DNS Jumper"
-    $c['txtDnsJumperDesc'].Text                      = $t.AppDnsJumperDesc
     $c['txtUniGetUITitle'].Text                      = "UniGetUI"
     $c['txtUniGetUIDesc'].Text                       = $t.TxtUniGetUIDesc
     $c['btnRunUniGetUI'].Content                     = $t.BtnRunUniGetUI
@@ -340,31 +340,6 @@ function Set-WgoUIProfilePreset {
         [string]$ProfileLabel
     )
     $c = $Global:WgoUI_Ctrl
-
-    # Presets overwrite EVERY checkbox, including destructive ones (bloatware/app removal,
-    # deep privacy app removal, OneDrive removal). If the user had manually unchecked one of
-    # these, clicking a preset would silently re-check it and remove things they didn't ask
-    # for. Warn and require confirmation before any destructive item gets turned back on.
-    $destructiveNames = @('chkBloat', 'chkPrivacyDeep', 'chkRemoveOnedrive')
-    $aboutToEnable = @($destructiveNames | Where-Object {
-        ($EnabledNames -contains $_) -and $c[$_] -and (-not [bool]$c[$_].IsChecked)
-    })
-    if ($aboutToEnable.Count -gt 0) {
-        $labels = @($aboutToEnable | ForEach-Object {
-            switch ($_) {
-                'chkBloat'         { $c['chkBloat'].Content }
-                'chkPrivacyDeep'   { 'Privacy Deep (removes Xbox app and related components)' }
-                'chkRemoveOnedrive'{ $c['chkRemoveOnedrive'].Content }
-                default { $_ }
-            }
-        }) -join "`n - "
-        $confirmed = Show-WgoConfirm -Title "WGO - $ProfileLabel" -Message "This profile will also re-enable:`n - $labels`n`nContinue?"
-        if (-not $confirmed) {
-            Write-Log "Profile '$ProfileLabel' applied without re-enabling: $($aboutToEnable -join ', ')" "INFO"
-            $EnabledNames = @($EnabledNames | Where-Object { $aboutToEnable -notcontains $_ })
-        }
-    }
-
     foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
         if ($c[$n]) { $c[$n].IsChecked = ($EnabledNames -contains $n) }
     }
@@ -431,12 +406,11 @@ function Initialize-WgoUI {
         'grpAppsGaming','chkSteam','txtSteamDesc','chkEpic','txtEpicDesc','chkGog','txtGogDesc',
         'chkMoonlight','txtMoonlightDesc','chkSunshine','txtSunshineDesc',
         'grpAppsMonitoring','chkCpuz','txtCpuzDesc','chkHwmonitor','txtHwmonitorDesc',
-        'chkMemreduct','txtMemreductDesc','chkBleachbit','txtBleachbitDesc',
+        'chkMemreduct','txtMemreductDesc','chkBleachbit','txtBleachbitDesc','chkDnsJumper','txtDnsJumperDesc',
         'grpAppsProductivity','chkNilesoftShell','txtNilesoftShellDesc',
         'chkOptiscalerClient','txtOptiscalerClientDesc',
         'chkFlowLauncher','txtFlowLauncherDesc',
         'chkShareX','txtShareXDesc',
-        'chkDnsJumper','txtDnsJumperDesc',
         'txtExtScriptsWarning',
         'txtAmdOptimizerTitle','txtAmdOptimizerDesc','btnRunAmdOptimizer',
         'txtMassgraveTitle','txtMassgraveDesc','btnRunMassgrave',
@@ -899,13 +873,13 @@ function Initialize-WgoUI {
                 @{ Chk = $c['chkHwmonitor']; Name = "HWMonitor" },
                 @{ Chk = $c['chkMemreduct']; Name = "Mem Reduct" },
                 @{ Chk = $c['chkBleachbit']; Name = "BleachBit" },
+                @{ Chk = $c['chkDnsJumper']; Name = "DNS Jumper" },
                 @{ Chk = $c['chkMoonlight']; Name = "Moonlight" },
                 @{ Chk = $c['chkSunshine'];  Name = "Sunshine" },
                 @{ Chk = $c['chkNilesoftShell']; Name = "Nilesoft Shell" },
                 @{ Chk = $c['chkOptiscalerClient']; Name = "Optiscaler Client" },
                 @{ Chk = $c['chkFlowLauncher']; Name = "Flow Launcher" },
-                @{ Chk = $c['chkShareX']; Name = "ShareX" },
-                @{ Chk = $c['chkDnsJumper']; Name = "DNS Jumper" }
+                @{ Chk = $c['chkShareX']; Name = "ShareX" }
             )
             $selected = @()
             foreach ($a in $appChecks) {
