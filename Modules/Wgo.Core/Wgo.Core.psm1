@@ -38,7 +38,11 @@ $BloatwareCriticalProtect = @(
     "Microsoft.VCLibs",
     "Microsoft.UI.Xaml",
     "Microsoft.WindowsStore",
-    "Microsoft.NET.Native"
+    "Microsoft.NET.Native",
+    # Apps installable through WGO's own App Installer tab must never be treated as bloatware,
+    # even if a profile preset re-enables "Remove bloatware / AI apps".
+    "MouriNaruto.NanaZip",
+    "40174MouriNaruto.NanaZip"
 )
 
 $BloatwareTargets = @(
@@ -96,15 +100,18 @@ function Remove-WgoBloatware {
     foreach ($appName in $BloatwareTargets) {
         if (Test-WgoProtectedPackage -Name $appName) { continue }
         try {
-            $pkgs = Get-AppxPackage -AllUsers -Name "*$appName*" -ErrorAction Ignore |
-                    Where-Object { -not (Test-WgoProtectedPackage -Name $_.Name) }
+            # Match by exact name or "prefix." (package family convention), not a loose
+            # "*substring*" wildcard - avoids catching unrelated packages that merely happen
+            # to contain the target string somewhere in their name.
+            $pkgs = Get-AppxPackage -AllUsers -ErrorAction Ignore |
+                    Where-Object { ($_.Name -eq $appName -or $_.Name -like "$appName.*") -and -not (Test-WgoProtectedPackage -Name $_.Name) }
             foreach ($p in $pkgs) {
                 Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction Ignore
                 Write-Log (T 'LogBloatUserRemoved' $p.Name) "OK"
             }
 
             $prov = Get-AppxProvisionedPackage -Online -ErrorAction Ignore |
-                    Where-Object { $_.DisplayName -like "*$appName*" -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) }
+                    Where-Object { ($_.DisplayName -eq $appName -or $_.DisplayName -like "$appName.*") -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) }
             foreach ($pp in $prov) {
                 Remove-AppxProvisionedPackage -Online -PackageName $pp.PackageName -ErrorAction Ignore
                 Write-Log (T 'LogBloatProvRemoved' $pp.DisplayName) "OK"
@@ -348,17 +355,28 @@ function Set-WgoAdvancedTweaks {
             $advKey  = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
             if (-not (Test-Path $edgeKey)) { New-Item -Path $edgeKey -Force | Out-Null }
             if (-not (Test-Path $advKey))  { New-Item -Path $advKey -Force | Out-Null }
-            New-ItemProperty -Path $edgeKey -Name "StartupBoostEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $edgeKey -Name "BackgroundModeEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
-            try {
-                New-ItemProperty -Path $advKey -Name "TaskbarDa" -Value 0 -PropertyType DWord -Force | Out-Null
-            } catch {
-                & reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarDa" /t REG_DWORD /d 0 /f 2>$null | Out-Null
-                if ($LASTEXITCODE -ne 0) {
-                    Write-Log (T 'LogAdvError' "EdgeWidgets/TaskbarDa" $_.Exception.Message) "WARN"
+
+            $applied = 0
+            foreach ($prop in @(
+                @{ Path = $edgeKey; Name = "StartupBoostEnabled";   RegPath = "HKLM\SOFTWARE\Policies\Microsoft\Edge" },
+                @{ Path = $edgeKey; Name = "BackgroundModeEnabled"; RegPath = "HKLM\SOFTWARE\Policies\Microsoft\Edge" },
+                @{ Path = $advKey;  Name = "TaskbarDa";             RegPath = "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" }
+            )) {
+                try {
+                    New-ItemProperty -Path $prop.Path -Name $prop.Name -Value 0 -PropertyType DWord -Force -ErrorAction Stop | Out-Null
+                    $applied++
+                } catch {
+                    try {
+                        & reg.exe add $prop.RegPath /v $prop.Name /t REG_DWORD /d 0 /f *>$null
+                        if ($LASTEXITCODE -eq 0) { $applied++ }
+                    } catch { }
                 }
             }
-            Write-Log (T 'LogAdvEdgeWidgetsOk') "OK"
+            if ($applied -gt 0) {
+                Write-Log (T 'LogAdvEdgeWidgetsOk') "OK"
+            } else {
+                Write-Log (T 'LogAdvError' "EdgeWidgets" (T 'LogAdvEdgeWidgetsAllFailed')) "WARN"
+            }
         } catch {
             Write-Log (T 'LogAdvError' "EdgeWidgets" $_.Exception.Message) "ERROR"
         }
@@ -1026,21 +1044,47 @@ function Set-WgoServiceMgmt {
 }
 
 function Remove-WgoWindowsBackupApp {
-    # Removes the "Windows Backup" app that ships with recent Windows updates and
-    # cannot be uninstalled from Settings > Apps - only via package removal.
+    # "Windows Backup" ships bundled inside the "Windows Feature Experience Pack"
+    # (MicrosoftWindows.Client.CBS) since Windows 10/11 23H2+ and is NOT a standalone
+    # app - Microsoft has confirmed it cannot be uninstalled, only disabled/hidden.
+    # This disables the nag notifications, its scheduled tasks, and its service,
+    # and only attempts an AppX removal as a harmless best-effort in case a future
+    # Windows build ever splits it back out into its own package.
     try {
-        $removed = $false
+        $applied = 0
+
+        # Best-effort: only succeeds if a future/different build ships it as a real AppX
         Get-AppxPackage -AllUsers -Name "*WindowsBackup*" -ErrorAction Ignore | ForEach-Object {
-            Remove-AppxPackage -Package $_.PackageFullName -AllUsers -ErrorAction Stop
-            $removed = $true
+            try { Remove-AppxPackage -Package $_.PackageFullName -AllUsers -ErrorAction Stop; $applied++ } catch { }
         }
         Get-AppxProvisionedPackage -Online -ErrorAction Ignore |
             Where-Object { $_.PackageName -like "*WindowsBackup*" } |
             ForEach-Object {
-                Remove-AppxProvisionedPackage -Online -PackageName $_.PackageName -ErrorAction Stop | Out-Null
-                $removed = $true
+                try { Remove-AppxProvisionedPackage -Online -PackageName $_.PackageName -ErrorAction Stop | Out-Null; $applied++ } catch { }
             }
-        if ($removed) {
+
+        # Real, documented mechanism: disables the "Turn on Windows Backup" nag notification
+        $wbKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsBackup"
+        if (-not (Test-Path $wbKey)) { New-Item -Path $wbKey -Force | Out-Null }
+        New-ItemProperty -Path $wbKey -Name "DisableMonitoring" -Value 1 -PropertyType DWord -Force | Out-Null
+        $applied++
+
+        # Disable its scheduled tasks (Task Scheduler Library > Microsoft > Windows > WindowsBackup)
+        Get-ScheduledTask -TaskPath "\Microsoft\Windows\WindowsBackup\" -ErrorAction Ignore | ForEach-Object {
+            try { Disable-ScheduledTask -TaskName $_.TaskName -TaskPath $_.TaskPath -ErrorAction Stop | Out-Null; $applied++ } catch { }
+        }
+
+        # Disable the Windows Backup service, if present on this build
+        $svc = Get-Service -Name "WindowsBackup" -ErrorAction Ignore
+        if ($svc) {
+            try {
+                Stop-Service -Name "WindowsBackup" -Force -ErrorAction Ignore
+                Set-Service -Name "WindowsBackup" -StartupType Disabled -ErrorAction Stop
+                $applied++
+            } catch { }
+        }
+
+        if ($applied -gt 0) {
             Write-Log (T 'LogWinBackupRemoveOk') "OK"
         } else {
             Write-Log (T 'LogWinBackupRemoveNone') "INFO"
@@ -1232,18 +1276,60 @@ function Set-WgoExtraTweaks2 {
 
     if ($RemoveOnedrive) {
         try {
+            # SAFETY: this must ONLY remove the OneDrive application (binaries, app cache,
+            # app registry keys). It must NEVER touch $env:USERPROFILE\OneDrive itself, because
+            # when "Backup de Pastas" / Known Folder Move is enabled, that path IS the user's
+            # real Desktop/Documents/Pictures/etc. - not a copy. Deleting it deletes their files.
+            $oneDrivePath = "$env:USERPROFILE\OneDrive"
+            $shellFoldersKey     = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+            $userShellFoldersKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+            $knownFolderValueNames = @(
+                "Desktop", "Personal", "{F42EE2D3-909F-4907-8871-4C22FC0BF756}",
+                "My Pictures", "My Music", "My Video", "{374DE290-123F-4565-9164-39C4925E467B}"
+            )
+            $isKnownFolderRedirected = $false
+            if (Test-Path $oneDrivePath) {
+                foreach ($valueName in $knownFolderValueNames) {
+                    foreach ($regKey in @($userShellFoldersKey, $shellFoldersKey)) {
+                        try {
+                            $current = (Get-ItemProperty -Path $regKey -Name $valueName -ErrorAction Ignore).$valueName
+                            if ($current -and ($current -like "$oneDrivePath*")) { $isKnownFolderRedirected = $true }
+                        } catch {}
+                    }
+                }
+            }
+
             Stop-Process -Name "OneDrive" -Force -ErrorAction Ignore
             $uninstaller = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
             if (-not (Test-Path $uninstaller)) { $uninstaller = "$env:SYSTEMROOT\System32\OneDriveSetup.exe" }
             if (Test-Path $uninstaller) {
                 Start-Process -FilePath $uninstaller -ArgumentList "/uninstall" -Wait -ErrorAction Stop
             }
+
+            # Only ever delete the OneDrive app's own support/cache directories - never the
+            # user's profile OneDrive folder.
             foreach ($path in @(
-                "$env:USERPROFILE\OneDrive", "$env:LOCALAPPDATA\Microsoft\OneDrive",
+                "$env:LOCALAPPDATA\Microsoft\OneDrive",
                 "$env:PROGRAMDATA\Microsoft OneDrive", "$env:SYSTEMDRIVE\OneDriveTemp"
             )) {
                 if (Test-Path $path) { Remove-Item -Path $path -Recurse -Force -ErrorAction Ignore }
             }
+
+            if ($isKnownFolderRedirected) {
+                # Desktop/Documents/etc. live inside \OneDrive\ - it holds real user files.
+                # Leave it completely untouched; only the app itself was removed above.
+                Write-Log "OneDrive app removed. '$oneDrivePath' contains redirected user folders (Desktop/Documents/etc.) and was left untouched to avoid data loss." "WARN"
+            } elseif (Test-Path $oneDrivePath) {
+                # No known folder points inside it - safe to remove only if it's actually empty
+                # (i.e. genuinely just leftover OneDrive scaffolding, not user data).
+                $remaining = @(Get-ChildItem -Path $oneDrivePath -Force -ErrorAction Ignore)
+                if ($remaining.Count -eq 0) {
+                    Remove-Item -Path $oneDrivePath -Recurse -Force -ErrorAction Ignore
+                } else {
+                    Write-Log "OneDrive folder '$oneDrivePath' still contains $($remaining.Count) item(s); left in place to avoid data loss." "WARN"
+                }
+            }
+
             Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\OneDrive" -Recurse -Force -ErrorAction Ignore
             Write-Log (T 'LogRemoveOnedriveOk') "OK"
         } catch {
@@ -1423,10 +1509,15 @@ function Set-WgoCpuTimerTweaks {
             }
             $plans = powercfg /list | Select-String -Pattern '([0-9a-fA-F-]{36})' | ForEach-Object { $_.Matches[0].Value }
             foreach ($guid in $plans) {
-                & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 2>$null
-                & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 2>$null
+                # Max processor state must be set to 100 BEFORE min-cores, or powercfg rejects
+                # the min-cores value as "out of range" on any plan where max is below 100.
+                & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "bc5038f7-23e0-4960-96da-33abaf5935ec" 100 *>$null
+                & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "bc5038f7-23e0-4960-96da-33abaf5935ec" 100 *>$null
+                & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 *>$null
+                & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 *>$null
             }
-            & powercfg -setactive (powercfg /getactivescheme | Select-String -Pattern '([0-9a-fA-F-]{36})').Matches[0].Value 2>$null
+            $activeGuid = (powercfg /getactivescheme *>&1 | Select-String -Pattern '([0-9a-fA-F-]{36})' | Select-Object -First 1).Matches[0].Value
+            if ($activeGuid) { & powercfg -setactive $activeGuid *>$null }
             Write-Log (T 'LogCoreParkingOk') "OK"
         } catch {
             Write-Log (T 'LogCpuTimerError' "CoreParking" $_.Exception.Message) "ERROR"

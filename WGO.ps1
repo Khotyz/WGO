@@ -132,7 +132,7 @@ $Global:WgoSharedFunctionNames = @(
     'Write-Log', 'T', 'Show-WgoFatalError',
     'New-WgoRestorePoint', 'Remove-WgoBloatware', 'Test-WgoProtectedPackage',
     'Set-WgoLocalSearch', 'Set-WgoVisualEffects', 'Set-WgoPrivacyPolicies',
-    'Set-WgoExtraPrivacy', 'Set-WgoAdvancedTweaks', 'Set-WgoBlockDriverUpdates', 'Set-WgoPagefile',
+    'Set-WgoExtraPrivacy', 'Set-WgoAdvancedTweaks', 'Set-WgoBlockDriverUpdates', 'Set-WgoPagefile', 'Get-WgoOptimizedPagefileSize',
     'Set-WgoMoreOptimizations', 'Restore-WgoDefaults', 'Invoke-WgoStandbyListPurge',
     'Find-WgoChocolatey', 'Update-WgoSessionEnvironment', 'Install-WgoChocolatey',
     'Test-WgoChocolatey', 'Find-WgoWinget', 'Install-ViaWinget',

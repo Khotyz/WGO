@@ -74,6 +74,7 @@
   "AppOptiscalerClientDesc": "Gerenciador de código aberto para instalar e atualizar o OptiScaler (injetor de upscaling/geração de frames DLSS/FSR/XeSS) em toda a sua biblioteca de jogos. Projeto de terceiros no GitHub, não assinado pela Microsoft - revise antes de usar.",
   "AppFlowLauncherDesc": "Lançador de teclado rápido e de código aberto (alternativa à tecla Win) para apps, arquivos, busca na web e plugins - uma versão mais leve e extensível do Windows Search / PowerToys Run.",
   "AppShareXDesc": "Ferramenta gratuita e de código aberto para capturas de tela/gravação de tela, com edição embutida, anotações, captura de GIF/vídeo e upload com um clique para dezenas de destinos - uma alternativa mais completa à Ferramenta de Captura nativa do Windows.",
+  "AppDnsJumperDesc": "Utilitário portátil e gratuito para trocar, testar e comparar rapidamente servidores DNS (Google, Cloudflare, OpenDNS, etc.) visando uma navegação mais rápida e privada.",
   "MsgReady": "Pronto.",
   "MsgDone": "Concluído.",
   "GrpExtraPrivacy": "Bloqueio Adicional de Telemetria",
@@ -291,7 +292,7 @@
   "LogExtra2PrefetchOk": "Prefetch desativado (SSD detectado).",
   "LogExtra2PrefetchSkipped": "Prefetch mantido (nenhum SSD detectado).",
   "LogExtra2Done": "Ajustes adicionais de privacidade e limpeza finalizados.",
-  "LogWinBackupRemoveOk": "App 'Backup do Windows' removido.",
+  "LogWinBackupRemoveOk": "Notificações, tarefas agendadas e serviço do 'Backup do Windows' desativados.",
   "LogWinBackupRemoveNone": "O app 'Backup do Windows' não foi encontrado neste sistema.",
   "LogWinBackupRemoveError": "Erro ao remover o app 'Backup do Windows': {0}",
   "LogRiskyStart": "Aplicando ajustes de risco - eles enfraquecem a segurança do Windows ou os mecanismos de atualização...",
@@ -367,9 +368,10 @@
   "LogTimerResolutionFail": "Não foi possível definir a resolução do timer do sistema.",
   "LogTimerResolutionOk": "Resolução do timer do sistema aumentada para {0}ms.",
   "LogWerOk": "Windows Error Reporting desativado completamente.",
-  "TxtXboxServicesNote": "Serviços do XboX(Só remova se você não joga nada da microsoft)",
+  "TxtXboxServicesNote": "Fica de fora de todos os perfis e do Select All: o Game Pass e as conquistas do Xbox podem depender desses serviços. Só ative se você não usa o app Xbox nem joga nada da Microsoft Store.",
   "GrpXboxServices": "Serviços do Xbox (fora de qualquer perfil)",
   "ChkDisableXboxServices": "Desativar serviços do Xbox (XblAuthManager, XblGameSave, XboxNetApiSvc, XboxGipSvc)",
   "LogXboxStart": "Desativando serviços do Xbox...",
-  "LogXboxOk": "{0} serviço(s) do Xbox desativado(s): {1}"
+  "LogXboxOk": "{0} serviço(s) do Xbox desativado(s): {1}",
+  "LogAdvEdgeWidgetsAllFailed": "todas as sub-configurações falharam"
 }

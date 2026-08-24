@@ -25,6 +25,7 @@ $Global:WgoAppCatalog = @{
     'cpuz'                    = @{ Name = "CPU-Z";                     WingetId = "CPUID.CPU-Z";                          ChocoId = "cpu-z" }
     'hwmonitor'               = @{ Name = "HWMonitor";                 WingetId = "CPUID.HWMonitor";                      ChocoId = "hwmonitor" }
     'brave'                   = @{ Name = "Brave";                     WingetId = "Brave.Brave";                          ChocoId = "brave" }
+    'dnsjumper'               = @{ Name = "DNS Jumper";                WingetId = "sordum.DnsJumper";                     ChocoId = "dnsjumper" }
 }
 
 function Find-WgoChocolatey {

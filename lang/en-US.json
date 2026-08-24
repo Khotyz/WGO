@@ -74,6 +74,7 @@
   "AppOptiscalerClientDesc": "Open-source desktop manager to install and update OptiScaler (DLSS/FSR/XeSS frame generation and upscaling injector) across your game library. Third-party GitHub project, not Microsoft-signed - review it before use.",
   "AppFlowLauncherDesc": "Fast, open-source keyboard launcher (Win key alternative) for apps, files, web search and plugins - a lighter, more extensible take on Windows Search / PowerToys Run.",
   "AppShareXDesc": "Free, open-source screenshot/screen-recording tool with built-in editing, annotation, GIF/video capture and one-click upload to dozens of destinations - a fuller-featured alternative to the built-in Snipping Tool.",
+  "AppDnsJumperDesc": "Free portable utility to quickly switch, test and benchmark DNS servers (Google, Cloudflare, OpenDNS, etc.) for faster and more private browsing.",
   "MsgReady": "Ready.",
   "MsgDone": "Done.",
   "GrpExtraPrivacy": "Additional Telemetry Blocking",
@@ -291,7 +292,7 @@
   "LogExtra2PrefetchOk": "Prefetch disabled (SSD detected).",
   "LogExtra2PrefetchSkipped": "Prefetch left untouched (no SSD detected).",
   "LogExtra2Done": "Additional privacy and cleanup tweaks finished.",
-  "LogWinBackupRemoveOk": "'Windows Backup' app removed.",
+  "LogWinBackupRemoveOk": "'Windows Backup' nag notifications, scheduled tasks and service disabled.",
   "LogWinBackupRemoveNone": "'Windows Backup' app was not found on this system.",
   "LogWinBackupRemoveError": "Error removing the 'Windows Backup' app: {0}",
   "LogRiskyStart": "Applying risky tweaks - these weaken Windows security or update mechanisms...",
@@ -367,9 +368,10 @@
   "LogTimerResolutionFail": "Could not set the system timer resolution.",
   "LogTimerResolutionOk": "System timer resolution increased to {0}ms.",
   "LogWerOk": "Windows Error Reporting disabled completely.",
-  "TxtXboxServicesNote": "Kept separate from every profile and from Select All: Game Pass and Xbox achievements, can depend on these services. Only enable this if you don't use any of that.",
+  "TxtXboxServicesNote": "Kept separate from every profile and from Select All: Game Pass and Xbox achievements can depend on these services. Only enable this if you don't play any Xbox app or Microsoft Store games.",
   "GrpXboxServices": "Xbox Services (not included in any profile)",
   "ChkDisableXboxServices": "Disable Xbox services (XblAuthManager, XblGameSave, XboxNetApiSvc, XboxGipSvc)",
   "LogXboxStart": "Disabling Xbox services...",
-  "LogXboxOk": "{0} Xbox service(s) disabled: {1}"
+  "LogXboxOk": "{0} Xbox service(s) disabled: {1}",
+  "LogAdvEdgeWidgetsAllFailed": "all sub-settings failed"
 }

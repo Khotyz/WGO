@@ -74,6 +74,7 @@
   "AppOptiscalerClientDesc": "开源桌面管理工具,用于在整个游戏库中安装和更新 OptiScaler(DLSS/FSR/XeSS 超分辨率和帧生成注入工具),来自 GitHub 的第三方项目,非微软签名,请在使用前自行审查",
   "AppFlowLauncherDesc": "快速开源的键盘启动器(可替代 Win 键),用于启动应用文件网页搜索和插件,相比 Windows 搜索或 PowerToys Run 更轻量且可扩展",
   "AppShareXDesc": "免费开源的截图/录屏工具,内置编辑标注,支持 GIF/视频捕获,可一键上传到数十种目标服务,比 Windows 自带的截图工具功能更完整",
+  "AppDnsJumperDesc": "免费便携工具,可快速切换、测试和对比 DNS 服务器(Google、Cloudflare、OpenDNS 等),实现更快更私密的上网体验",
   "MsgReady": "就绪",
   "MsgDone": "完成",
   "GrpExtraPrivacy": "附加遥测阻止",
@@ -291,7 +292,7 @@
   "LogExtra2PrefetchOk": "已禁用 Prefetch（检测到 SSD）。",
   "LogExtra2PrefetchSkipped": "未检测到 SSD，Prefetch 保持不变。",
   "LogExtra2Done": "额外隐私与清理调整完成。",
-  "LogWinBackupRemoveOk": "已删除“Windows 备份”应用。",
+  "LogWinBackupRemoveOk": "已禁用“Windows 备份”的提醒通知、计划任务和服务。",
   "LogWinBackupRemoveNone": "本机未找到“Windows 备份”应用。",
   "LogWinBackupRemoveError": "删除“Windows 备份”应用时出错：{0}",
   "LogRiskyStart": "正在应用高风险调整 - 这些会削弱 Windows 安全或更新机制...",
@@ -367,9 +368,10 @@
   "LogTimerResolutionFail": "无法设置系统定时器分辨率。",
   "LogTimerResolutionOk": "系统定时器分辨率已提高到 {0} 毫秒。",
   "LogWerOk": "已完全禁用 Windows 错误报告。",
-  "TxtXboxServicesNote": "不包含在任何预设方案或全选中：Game Pass、Xbox 成就以及内核级反作弊（Vanguard、EAC）可能依赖这些服务。仅在您不使用这些功能时才启用。",
+  "TxtXboxServicesNote": "不包含在任何预设方案或全选中：Game Pass 和 Xbox 成就可能依赖这些服务。仅在您不使用 Xbox 应用或 Microsoft Store 游戏时才启用。",
   "GrpXboxServices": "Xbox 服务（不包含在任何方案中）",
   "ChkDisableXboxServices": "禁用 Xbox 服务（XblAuthManager、XblGameSave、XboxNetApiSvc、XboxGipSvc）",
   "LogXboxStart": "正在禁用 Xbox 服务...",
-  "LogXboxOk": "已禁用 {0} 个 Xbox 服务：{1}"
+  "LogXboxOk": "已禁用 {0} 个 Xbox 服务：{1}",
+  "LogAdvEdgeWidgetsAllFailed": "所有子项设置均失败"
 }

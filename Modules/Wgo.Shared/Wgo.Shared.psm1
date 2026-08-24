@@ -120,6 +120,7 @@ function Start-WgoBackgroundTask {
     $rs.Open()
 
     $rs.SessionStateProxy.SetVariable('WgoLogQueue', $Global:WgoLogQueue)
+    $rs.SessionStateProxy.SetVariable('WgoRootPath', $Global:WgoRootPath)
     $rs.SessionStateProxy.SetVariable('Lang', $global:Lang)
     $rs.SessionStateProxy.SetVariable('CurrentLangCode', $Global:CurrentLangCode)
     $rs.SessionStateProxy.SetVariable('WgoAppCatalog', $Global:WgoAppCatalog)

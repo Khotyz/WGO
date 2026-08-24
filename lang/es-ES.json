@@ -74,6 +74,7 @@
   "AppOptiscalerClientDesc": "Gestor de escritorio de código abierto para instalar y actualizar OptiScaler (inyector de escalado/generación de fotogramas DLSS/FSR/XeSS) en toda tu biblioteca de juegos. Proyecto de terceros en GitHub, no firmado por Microsoft - revísalo antes de usarlo.",
   "AppFlowLauncherDesc": "Lanzador de teclado rápido y de código abierto (alternativa a la tecla Win) para aplicaciones, archivos, búsqueda web y plugins - una versión más ligera y extensible de Windows Search / PowerToys Run.",
   "AppShareXDesc": "Herramienta gratuita y de código abierto para capturas de pantalla/grabación de pantalla, con edición integrada, anotaciones, captura de GIF/vídeo y subida con un clic a decenas de destinos - una alternativa más completa a la Herramienta Recortes nativa de Windows.",
+  "AppDnsJumperDesc": "Utilidad portátil gratuita para cambiar, probar y comparar rápidamente servidores DNS (Google, Cloudflare, OpenDNS, etc.) para una navegación más rápida y privada.",
   "MsgReady": "Listo.",
   "MsgDone": "Completado.",
   "GrpExtraPrivacy": "Bloqueo Adicional de Telemetría",
@@ -291,7 +292,7 @@
   "LogExtra2PrefetchOk": "Prefetch desactivado (SSD detectado).",
   "LogExtra2PrefetchSkipped": "Prefetch sin cambios (no se detectó SSD).",
   "LogExtra2Done": "Ajustes adicionales de privacidad y limpieza finalizados.",
-  "LogWinBackupRemoveOk": "App 'Copia de seguridad de Windows' eliminada.",
+  "LogWinBackupRemoveOk": "Notificaciones, tareas programadas y servicio de 'Copia de seguridad de Windows' desactivados.",
   "LogWinBackupRemoveNone": "No se encontró la app 'Copia de seguridad de Windows' en este sistema.",
   "LogWinBackupRemoveError": "Error al eliminar la app 'Copia de seguridad de Windows': {0}",
   "LogRiskyStart": "Aplicando ajustes de riesgo - debilitan la seguridad de Windows o los mecanismos de actualización...",
@@ -367,9 +368,10 @@
   "LogTimerResolutionFail": "No se pudo establecer la resolución del temporizador del sistema.",
   "LogTimerResolutionOk": "Resolución del temporizador del sistema aumentada a {0}ms.",
   "LogWerOk": "Informe de Errores de Windows desactivado por completo.",
-  "TxtXboxServicesNote": "Se mantiene fuera de todos los perfiles y de Seleccionar todo: Game Pass, pueden depender de estos servicios. Actívelo solo si no usa nada de eso.",
+  "TxtXboxServicesNote": "Se mantiene fuera de todos los perfiles y de Seleccionar todo: Game Pass y los logros de Xbox pueden depender de estos servicios. Actívelo solo si no usa la app Xbox ni juega nada de Microsoft Store.",
   "GrpXboxServices": "Servicios de Xbox (no incluidos en ningún perfil)",
   "ChkDisableXboxServices": "Desactivar servicios de Xbox (XblAuthManager, XblGameSave, XboxNetApiSvc, XboxGipSvc)",
   "LogXboxStart": "Desactivando servicios de Xbox...",
-  "LogXboxOk": "{0} servicio(s) de Xbox desactivado(s): {1}"
+  "LogXboxOk": "{0} servicio(s) de Xbox desactivado(s): {1}",
+  "LogAdvEdgeWidgetsAllFailed": "todas las subconfiguraciones fallaron"
 }
