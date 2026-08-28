@@ -12,12 +12,14 @@ $Global:WgoUI_OptimizationCheckboxNames = @(
     'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
     'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup',
     'chkResidualServices','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
-    'chkDisableCoreParking','chkDisableHPET','chkTimerResolution',
+    'chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkGameBarMicFix',
     'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
     'chkDisableNagle','chkDisableIPv6','chkRssOptimize',
     'chkHostsBlock','chkPrivacyDeep','chkCacheClean','chkUiCleanup','chkTcpAutotuning',
     'chkDoH','chkFastShutdown','chkPrefetchSSD','chkRemoveWinBackup','chkTcpIpReset',
-    'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer'
+    'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer',
+    'chkClearEventLogs','chkDeleteMinidump','chkClearStoreCache',
+    'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight'
 )
 
 # Risky tweaks are intentionally excluded from Select All, profile presets, and
@@ -50,7 +52,7 @@ $Global:WgoUI_Profiles = @{
         'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency','chkHungAppTimeout',
         'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
         'chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
-        'chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
+        'chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
         'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup','chkResidualServices','chkStandbyListClean',
         'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning','chkLargeSystemCache',
         'chkAutoStandbyClean','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle'
@@ -67,7 +69,7 @@ $Global:WgoUI_Profiles = @{
         'chkCopilotBlock',
         'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
         'chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
-        'chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
+        'chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
         'chkGhostAdapters','chkFastStartup','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
         'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning',
         'chkDisableCoreParking','chkTimerResolution','chkHungAppTimeout',
@@ -132,97 +134,171 @@ function Update-WgoUILanguage {
     $c['tabExternalScripts'].Header                  = $t.TabExternalScripts
     $c['tabUtilities'].Header                        = $t.TabUtilities
     $c['chkSelectAll'].Content                       = $t.ChkSelectAll
+    $c['chkSelectAll'].ToolTip                        = $t.TipSelectAll
     $c['grpRestore'].Header                          = $t.GrpRestore
     $c['btnCreateRestore'].Content                   = $t.BtnCreateRestore
     $c['grpBloat'].Header                            = $t.GrpBloat
     $c['chkBloat'].Content                           = $t.ChkBloat
+    $c['chkBloat'].ToolTip                        = $t.TipBloat
     $c['grpSearch'].Header                           = $t.GrpSearch
     $c['chkSearch'].Content                          = $t.ChkSearch
+    $c['chkSearch'].ToolTip                        = $t.TipSearch
     $c['grpVisual'].Header                           = $t.GrpVisual
     $c['chkVisual'].Content                          = $t.ChkVisual
+    $c['chkVisual'].ToolTip                        = $t.TipVisual
     $c['grpPrivacy'].Header                          = $t.GrpPrivacy
     $c['chkPrivacy'].Content                         = $t.ChkPrivacy
+    $c['chkPrivacy'].ToolTip                        = $t.TipPrivacy
     $c['grpDrivers'].Header                          = $t.GrpDrivers
     $c['chkDrivers'].Content                         = $t.ChkDrivers
+    $c['chkDrivers'].ToolTip                        = $t.TipDrivers
     $c['grpPagefile'].Header                         = $t.GrpPagefile
     $c['chkPagefile'].Content                        = $t.ChkPagefile
+    $c['chkPagefile'].ToolTip                        = $t.TipPagefile
     $c['grpExtraPrivacy'].Header                     = $t.GrpExtraPrivacy
     $c['chkAdvertisingId'].Content                   = $t.ChkAdvertisingId
+    $c['chkAdvertisingId'].ToolTip                        = $t.TipAdvertisingId
     $c['chkTailoredExp'].Content                     = $t.ChkTailoredExp
+    $c['chkTailoredExp'].ToolTip                        = $t.TipTailoredExp
     $c['chkDiagTrackSvc'].Content                    = $t.ChkDiagTrackSvc
+    $c['chkDiagTrackSvc'].ToolTip                        = $t.TipDiagTrackSvc
     $c['chkCopilotBlock'].Content                    = $t.ChkCopilotBlock
+    $c['chkCopilotBlock'].ToolTip                        = $t.TipCopilotBlock
     $c['chkInputTelemetry'].Content                  = $t.ChkInputTelemetry
+    $c['chkInputTelemetry'].ToolTip                        = $t.TipInputTelemetry
     $c['grpAdvancedTweaks'].Header                   = $t.GrpAdvancedTweaks
     $c['chkEdgeWidgets'].Content                     = $t.ChkEdgeWidgets
+    $c['chkEdgeWidgets'].ToolTip                        = $t.TipEdgeWidgets
     $c['chkDeliveryOpt'].Content                     = $t.ChkDeliveryOpt
+    $c['chkDeliveryOpt'].ToolTip                        = $t.TipDeliveryOpt
     $c['chkAppsBackground'].Content                  = $t.ChkAppsBackground
+    $c['chkAppsBackground'].ToolTip                        = $t.TipAppsBackground
     $c['chkNetworkLatency'].Content                  = $t.ChkNetworkLatency
+    $c['chkNetworkLatency'].ToolTip                        = $t.TipNetworkLatency
     $c['chkHungAppTimeout'].Content                  = $t.ChkHungAppTimeout
+    $c['chkHungAppTimeout'].ToolTip                        = $t.TipHungAppTimeout
     $c['grpServiceMgmt'].Header                      = $t.GrpServiceMgmt
     $c['chkDisableSysMain'].Content                  = $t.ChkDisableSysMain
+    $c['chkDisableSysMain'].ToolTip                        = $t.TipDisableSysMain
     $c['chkDisableWSearch'].Content                  = $t.ChkDisableWSearch
+    $c['chkDisableWSearch'].ToolTip                        = $t.TipDisableWSearch
     $c['chkDisableSpooler'].Content                  = $t.ChkDisableSpooler
+    $c['chkDisableSpooler'].ToolTip                        = $t.TipDisableSpooler
     $c['chkWinSxSCleanup'].Content                   = $t.ChkWinSxSCleanup
+    $c['chkWinSxSCleanup'].ToolTip                        = $t.TipWinSxSCleanup
     $c['txtXboxServicesNote'].Text                   = $t.TxtXboxServicesNote
     $c['grpXboxServices'].Header                     = $t.GrpXboxServices
     $c['chkDisableXboxServices'].Content              = $t.ChkDisableXboxServices
+    $c['chkDisableXboxServices'].ToolTip                        = $t.TipDisableXboxServices
     $c['grpMoreOptimizations'].Header                = $t.GrpMoreOptimizations
     $c['chkHibernation'].Content                     = $t.ChkHibernation
+    $c['chkHibernation'].ToolTip                        = $t.TipHibernation
     $c['chkPowerPlan'].Content                       = $t.ChkPowerPlan
+    $c['chkPowerPlan'].ToolTip                        = $t.TipPowerPlan
     $c['chkTempCleanup'].Content                     = $t.ChkTempCleanup
+    $c['chkTempCleanup'].ToolTip                        = $t.TipTempCleanup
     $c['chkHotCorners'].Content                      = $t.ChkHotCorners
+    $c['chkHotCorners'].ToolTip                        = $t.TipHotCorners
     $c['chkBootTimeout'].Content                     = $t.ChkBootTimeout
+    $c['chkBootTimeout'].ToolTip                        = $t.TipBootTimeout
     $c['chkOfficeTelemetry'].Content                 = $t.ChkOfficeTelemetry
+    $c['chkOfficeTelemetry'].ToolTip                        = $t.TipOfficeTelemetry
     $c['chkExtraSchedTasks'].Content                 = $t.ChkExtraSchedTasks
+    $c['chkExtraSchedTasks'].ToolTip                        = $t.TipExtraSchedTasks
     $c['chkDiskOptimize'].Content                    = $t.ChkDiskOptimize
+    $c['chkDiskOptimize'].ToolTip                        = $t.TipDiskOptimize
     $c['chkHagsGameMode'].Content                    = $t.ChkHagsGameMode
+    $c['chkHagsGameMode'].ToolTip                        = $t.TipHagsGameMode
     $c['chkUltimatePerf'].Content                    = $t.ChkUltimatePerf
+    $c['chkUltimatePerf'].ToolTip                        = $t.TipUltimatePerf
     $c['chkKernelGamingPriority'].Content            = $t.ChkKernelGamingPriority
+    $c['chkKernelGamingPriority'].ToolTip                        = $t.TipKernelGamingPriority
     $c['chkGameDvrDisable'].Content                  = $t.ChkGameDvrDisable
+    $c['chkGameDvrDisable'].ToolTip                        = $t.TipGameDvrDisable
+    $c['chkGameBarMicFix'].Content                   = $t.ChkGameBarMicFix
+    $c['chkGameBarMicFix'].ToolTip                        = $t.TipGameBarMicFix
     $c['chkInputLagReduction'].Content               = $t.ChkInputLagReduction
+    $c['chkInputLagReduction'].ToolTip                        = $t.TipInputLagReduction
     $c['chkSearchIndexOptimize'].Content             = $t.ChkSearchIndexOptimize
+    $c['chkSearchIndexOptimize'].ToolTip                        = $t.TipSearchIndexOptimize
     $c['chkGhostAdapters'].Content                   = $t.ChkGhostAdapters
+    $c['chkGhostAdapters'].ToolTip                        = $t.TipGhostAdapters
     $c['chkFastStartup'].Content                     = $t.ChkFastStartup
+    $c['chkFastStartup'].ToolTip                        = $t.TipFastStartup
     $c['chkResidualServices'].Content                = $t.ChkResidualServices
+    $c['chkResidualServices'].ToolTip                        = $t.TipResidualServices
     $c['chkStandbyListClean'].Content                = $t.ChkStandbyListClean
+    $c['chkStandbyListClean'].ToolTip                        = $t.TipStandbyListClean
     $c['chkLargeSystemCache'].Content                = $t.ChkLargeSystemCache
+    $c['chkLargeSystemCache'].ToolTip                        = $t.TipLargeSystemCache
     $c['chkAutoStandbyClean'].Content                = $t.ChkAutoStandbyClean
+    $c['chkAutoStandbyClean'].ToolTip                        = $t.TipAutoStandbyClean
     $c['grpCpuTimerTweaks'].Header                   = $t.GrpCpuTimerTweaks
     $c['chkDisableCoreParking'].Content              = $t.ChkDisableCoreParking
+    $c['chkDisableCoreParking'].ToolTip                        = $t.TipDisableCoreParking
     $c['chkDisableHPET'].Content                     = $t.ChkDisableHPET
+    $c['chkDisableHPET'].ToolTip                        = $t.TipDisableHPET
     $c['chkTimerResolution'].Content                 = $t.ChkTimerResolution
+    $c['chkTimerResolution'].ToolTip                        = $t.TipTimerResolution
     $c['grpGpuTweaks'].Header                        = $t.GrpGpuTweaks
     $c['chkIncreaseTdrNvidia'].Content                = $t.ChkIncreaseTdrNvidia
+    $c['chkIncreaseTdrNvidia'].ToolTip                        = $t.TipIncreaseTdrNvidia
     $c['chkDisableNvidiaTelemetry'].Content          = $t.ChkDisableNvidiaTelemetry
+    $c['chkDisableNvidiaTelemetry'].ToolTip                        = $t.TipDisableNvidiaTelemetry
     $c['grpNetworkAdvanced'].Header                  = $t.GrpNetworkAdvanced
     $c['chkDisableNagle'].Content                    = $t.ChkDisableNagle
+    $c['chkDisableNagle'].ToolTip                        = $t.TipDisableNagle
     $c['chkDisableIPv6'].Content                     = $t.ChkDisableIPv6
+    $c['chkDisableIPv6'].ToolTip                      = $t.TipDisableIPv6
     $c['chkRssOptimize'].Content                     = $t.ChkRssOptimize
+    $c['chkRssOptimize'].ToolTip                        = $t.TipRssOptimize
     $c['grpExtraTweaks2'].Header                     = $t.GrpExtraTweaks2
     $c['chkHostsBlock'].Content                      = $t.ChkHostsBlock
+    $c['chkHostsBlock'].ToolTip                        = $t.TipHostsBlock
     $c['chkPrivacyDeep'].Content                     = $t.ChkPrivacyDeep
+    $c['chkPrivacyDeep'].ToolTip                        = $t.TipPrivacyDeep
     $c['chkCacheClean'].Content                      = $t.ChkCacheClean
+    $c['chkCacheClean'].ToolTip                        = $t.TipCacheClean
     $c['chkUiCleanup'].Content                       = $t.ChkUiCleanup
+    $c['chkUiCleanup'].ToolTip                        = $t.TipUiCleanup
     $c['chkTcpAutotuning'].Content                   = $t.ChkTcpAutotuning
+    $c['chkTcpAutotuning'].ToolTip                        = $t.TipTcpAutotuning
     $c['chkDoH'].Content                             = $t.ChkDoH
+    $c['chkDoH'].ToolTip                        = $t.TipDoH
     $c['chkFastShutdown'].Content                    = $t.ChkFastShutdown
+    $c['chkFastShutdown'].ToolTip                        = $t.TipFastShutdown
     $c['chkPrefetchSSD'].Content                     = $t.ChkPrefetchSSD
+    $c['chkPrefetchSSD'].ToolTip                        = $t.TipPrefetchSSD
     $c['chkRemoveWinBackup'].Content                 = $t.ChkRemoveWinBackup
+    $c['chkRemoveWinBackup'].ToolTip                        = $t.TipRemoveWinBackup
     $c['chkTcpIpReset'].Content                      = $t.ChkTcpIpReset
+    $c['chkTcpIpReset'].ToolTip                        = $t.TipTcpIpReset
     $c['chkRemoveOnedrive'].Content                  = $t.ChkRemoveOnedrive
+    $c['chkRemoveOnedrive'].ToolTip                        = $t.TipRemoveOnedrive
     $c['chkDisableGameBar'].Content                  = $t.ChkDisableGameBar
+    $c['chkDisableGameBar'].ToolTip                        = $t.TipDisableGameBar
     $c['chkDisableStore'].Content                    = $t.ChkDisableStore
+    $c['chkDisableStore'].ToolTip                        = $t.TipDisableStore
     $c['chkDisableWer'].Content                      = $t.ChkDisableWer
+    $c['chkDisableWer'].ToolTip                        = $t.TipDisableWer
     $c['txtRiskyWarning'].Text                       = $t.TxtRiskyWarning
     $c['grpRiskyTweaks'].Header                      = $t.GrpRiskyTweaks
     $c['chkRiskyUAC'].Content                        = $t.ChkRiskyUAC
+    $c['chkRiskyUAC'].ToolTip                        = $t.TipRiskyUAC
     $c['chkRiskySmartScreen'].Content                = $t.ChkRiskySmartScreen
+    $c['chkRiskySmartScreen'].ToolTip                        = $t.TipRiskySmartScreen
     $c['chkRiskyDefenderRT'].Content                 = $t.ChkRiskyDefenderRT
+    $c['chkRiskyDefenderRT'].ToolTip                        = $t.TipRiskyDefenderRT
     $c['chkRiskyWinUpdateSvc'].Content                = $t.ChkRiskyWinUpdateSvc
+    $c['chkRiskyWinUpdateSvc'].ToolTip                        = $t.TipRiskyWinUpdateSvc
     $c['chkRiskyBits'].Content                       = $t.ChkRiskyBits
+    $c['chkRiskyBits'].ToolTip                        = $t.TipRiskyBits
     $c['chkRiskyDisableFirewall'].Content            = $t.ChkRiskyDisableFirewall
+    $c['chkRiskyDisableFirewall'].ToolTip                        = $t.TipRiskyDisableFirewall
     $c['chkRiskyDisableDEP'].Content                 = $t.ChkRiskyDisableDEP
+    $c['chkRiskyDisableDEP'].ToolTip                        = $t.TipRiskyDisableDEP
     $c['chkRiskyNvidiaMaxPerf'].Content               = $t.ChkRiskyNvidiaMaxPerf
+    $c['chkRiskyNvidiaMaxPerf'].ToolTip                        = $t.TipRiskyNvidiaMaxPerf
     $c['grpProfiles'].Header                         = $t.GrpProfiles
     $c['btnProfileBasic'].Content                    = $t.BtnProfileBasic
     $c['btnProfileLaptop'].Content                   = $t.BtnProfileLaptop
@@ -231,8 +307,14 @@ function Update-WgoUILanguage {
     $c['btnProfileEsports'].Content                   = $t.BtnProfileEsports
     $c['btnProfileMax'].Content                      = $t.BtnProfileMax
     $c['chkDryRun'].Content                          = $t.ChkDryRun
+    $c['chkDryRun'].ToolTip                        = $t.TipDryRun
     $c['btnRunSelected'].Content                     = $t.BtnRunSelected
     $c['btnRestoreDefaults'].Content                 = $t.BtnRestoreDefaults
+    $c['btnRestoreDefaults'].ToolTip                 = $t.TipRestoreDefaults
+    $c['lblRestoreCategory'].Text                    = $t.LblRestoreCategory
+    $c['cmbRestoreCategory'].ToolTip                 = $t.TipRestoreDefaults
+    $catLabels = @{ All = $t.TxtCatAll; Privacy = $t.TxtCatPrivacy; Network = $t.TxtCatNetwork; Services = $t.TxtCatServices; Visual = $t.TxtCatVisual }
+    foreach ($catItem in $c['cmbRestoreCategory'].Items) { if ($catLabels.ContainsKey($catItem.Tag)) { $catItem.Content = $catLabels[$catItem.Tag] } }
     $c['btnExportProfile'].Content                   = $t.BtnExportProfile
     $c['btnImportProfile'].Content                   = $t.BtnImportProfile
     $c['txtChocoRequired'].Text                      = $t.TxtChocoRequired
@@ -332,6 +414,34 @@ function Update-WgoUILanguage {
     $c['txtFlushDNSTitle'].Text                      = $t.TxtFlushDNSTitle
     $c['txtFlushDNSDesc'].Text                       = $t.TxtFlushDNSDesc
     $c['btnFlushDNS'].Content                        = $t.BtnFlushDNS
+    $c['chkClearEventLogs'].Content                  = $t.ChkClearEventLogs
+    $c['chkClearEventLogs'].ToolTip                        = $t.TipClearEventLogs
+    $c['chkDeleteMinidump'].Content                  = $t.ChkDeleteMinidump
+    $c['chkDeleteMinidump'].ToolTip                        = $t.TipDeleteMinidump
+    $c['chkClearStoreCache'].Content                 = $t.ChkClearStoreCache
+    $c['chkClearStoreCache'].ToolTip                        = $t.TipClearStoreCache
+    $c['chkPauseUpdates'].Content                    = $t.ChkPauseUpdates
+    $c['chkPauseUpdates'].ToolTip                        = $t.TipPauseUpdates
+    $c['chkDisableEdgeTelemetry'].Content             = $t.ChkDisableEdgeTelemetry
+    $c['chkDisableEdgeTelemetry'].ToolTip                        = $t.TipDisableEdgeTelemetry
+    $c['chkDisableSpotlight'].Content                = $t.ChkDisableSpotlight
+    $c['chkDisableSpotlight'].ToolTip                        = $t.TipDisableSpotlight
+    $c['txtReleaseRenewTitle'].Text                  = $t.TxtReleaseRenewTitle
+    $c['txtReleaseRenewDesc'].Text                   = $t.TxtReleaseRenewDesc
+    $c['btnReleaseRenewIP'].Content                  = $t.BtnReleaseRenewIP
+    $c['txtRegisterDNSTitle'].Text                   = $t.TxtRegisterDNSTitle
+    $c['txtRegisterDNSDesc'].Text                    = $t.TxtRegisterDNSDesc
+    $c['btnRegisterDNS'].Content                     = $t.BtnRegisterDNS
+    $c['grpAdvancedUtilities'].Header                = $t.GrpAdvancedUtilities
+    $c['txtSystemInfoTitle'].Text                    = $t.TxtSystemInfoTitle
+    $c['txtSystemInfoDesc'].Text                     = $t.TxtSystemInfoDesc
+    $c['btnSystemInfo'].Content                      = $t.BtnSystemInfo
+    $c['txtStartupManagerTitle'].Text                = $t.TxtStartupManagerTitle
+    $c['txtStartupManagerDesc'].Text                 = $t.TxtStartupManagerDesc
+    $c['btnStartupManager'].Content                  = $t.BtnStartupManager
+    $c['txtScheduledOptTitle'].Text                  = $t.TxtScheduledOptTitle
+    $c['txtScheduledOptDesc'].Text                   = $t.TxtScheduledOptDesc
+    $c['btnScheduledOptimization'].Content           = $t.BtnScheduledOptimization
 }
 
 function Set-WgoUIProfilePreset {
@@ -345,6 +455,180 @@ function Set-WgoUIProfilePreset {
     }
     $c['chkSelectAll'].IsChecked = ($EnabledNames.Count -ge $Global:WgoUI_OptimizationCheckboxNames.Count)
     Write-Log (T 'LogProfileApplied' $ProfileLabel (T 'BtnRunSelected')) "INFO"
+}
+
+function Show-WgoStartupManagerDialog {
+    $items = Get-WgoStartupPrograms
+    [xml]$dialogXaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="$([System.Security.SecurityElement]::Escape((T 'TxtStartupManagerTitle')))" Height="420" Width="520"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource BgDark}" WindowStyle="None" AllowsTransparency="False"
+        BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1">
+    <Border Padding="16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="$([System.Security.SecurityElement]::Escape((T 'TxtStartupManagerTitle')))" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,4"/>
+            <TextBlock Grid.Row="0" Text="$([System.Security.SecurityElement]::Escape((T 'TxtStartupManagerDesc')))" Foreground="{DynamicResource TextSecondary}" FontSize="11" TextWrapping="Wrap" Margin="0,24,0,10" VerticalAlignment="Top"/>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="pnlStartupItems"/>
+            </ScrollViewer>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                <Button x:Name="btnStartupClose" Content="Close" Width="100" Height="32"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
+"@
+    $dlgReader = New-Object System.Xml.XmlNodeReader $dialogXaml
+    $dlg = [Windows.Markup.XamlReader]::Load($dlgReader)
+    # Reuse the main window's live resource dictionary so this dialog picks up
+    # the same button/checkbox styles and follows the current Dark/Light theme.
+    $dlg.Resources = $Global:WgoUI_Window.Resources
+    try { $dlg.Owner = $Global:WgoUI_Window } catch { }
+
+    $pnl = $dlg.FindName('pnlStartupItems')
+    foreach ($item in $items) {
+        $cb = New-Object System.Windows.Controls.CheckBox
+        $cb.Content = "$($item.Name)  -  $($item.Command)"
+        $cb.IsChecked = [bool]$item.Enabled
+        $cb.Margin = "0,4,0,4"
+        $cb.Tag = $item
+        $cb.ToolTip = $item.Command
+        $pnl.Children.Add($cb) | Out-Null
+    }
+    if ($items.Count -eq 0) {
+        $empty = New-Object System.Windows.Controls.TextBlock
+        $empty.Text = (T 'TxtStartupManagerDesc')
+        $empty.TextWrapping = 'Wrap'
+        $empty.Opacity = 0.7
+        $pnl.Children.Add($empty) | Out-Null
+    }
+
+    $btnClose = $dlg.FindName('btnStartupClose')
+    $btnClose.Content = (T 'BtnClose')
+    $btnClose.Add_Click({
+        try {
+            foreach ($child in $pnl.Children) {
+                $entry = $child.Tag
+                if (-not $entry) { continue }
+                $enable = [bool]$child.IsChecked
+                if ($enable -eq [bool]$entry.Enabled) { continue }
+                Set-WgoStartupProgramState -Name $entry.Name -Source $entry.Source -Type $entry.Type -Command $entry.Command -Enable $enable | Out-Null
+            }
+        } catch {
+            Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+        } finally {
+            $dlg.Close()
+        }
+    }.GetNewClosure())
+    $dlg.Add_MouseLeftButtonDown({ if ($_.ChangedButton -eq 'Left') { $dlg.DragMove() } })
+    $dlg.ShowDialog() | Out-Null
+}
+
+function Show-WgoRestartPrompt {
+    [xml]$dialogXaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WGO" Width="420" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource BgDark}" WindowStyle="None" AllowsTransparency="False"
+        BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1">
+    <Border Padding="20">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                <Ellipse Width="10" Height="10" Fill="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="WGO" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="14"/>
+            </StackPanel>
+            <TextBlock Text="$([System.Security.SecurityElement]::Escape((T 'TxtRestartPrompt')))" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" FontSize="13" Margin="0,0,0,18"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="btnRestartLater" Content="$([System.Security.SecurityElement]::Escape((T 'BtnRestartLater')))" MinWidth="100" Height="34" Padding="14,8" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}"/>
+                <Button x:Name="btnRestartNow" Content="$([System.Security.SecurityElement]::Escape((T 'BtnRestartNow')))" MinWidth="100" Height="34" Padding="14,8"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
+"@
+    $dlgReader = New-Object System.Xml.XmlNodeReader $dialogXaml
+    $dlg = [Windows.Markup.XamlReader]::Load($dlgReader)
+    $dlg.Resources = $Global:WgoUI_Window.Resources
+    try { $dlg.Owner = $Global:WgoUI_Window } catch { }
+    $btnNow   = $dlg.FindName('btnRestartNow')
+    $btnLater = $dlg.FindName('btnRestartLater')
+    $btnNow.Add_Click({ & shutdown.exe /r /t 5 | Out-Null; $dlg.Close() }.GetNewClosure())
+    $btnLater.Add_Click({ $dlg.Close() }.GetNewClosure())
+    $dlg.Add_MouseLeftButtonDown({ if ($_.ChangedButton -eq 'Left') { $dlg.DragMove() } })
+    $dlg.ShowDialog() | Out-Null
+}
+
+function Show-WgoScheduledOptimizationDialog {
+    [xml]$dialogXaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="$([System.Security.SecurityElement]::Escape((T 'TxtScheduledOptTitle')))" Width="420" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource BgDark}" WindowStyle="None" AllowsTransparency="False"
+        BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1">
+    <Border Padding="20">
+        <StackPanel>
+            <TextBlock Text="$([System.Security.SecurityElement]::Escape((T 'TxtScheduledOptTitle')))" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,16"/>
+            <RadioButton x:Name="radDaily" Content="$([System.Security.SecurityElement]::Escape((T 'TxtDaily')))" GroupName="freq" Margin="0,0,0,6"/>
+            <RadioButton x:Name="radWeekly" Content="$([System.Security.SecurityElement]::Escape((T 'TxtWeekly')))" GroupName="freq" IsChecked="True" Margin="0,0,0,6"/>
+            <RadioButton x:Name="radCustom" Content="$([System.Security.SecurityElement]::Escape((T 'TxtCustom')))" GroupName="freq" Margin="0,0,0,6"/>
+            <StackPanel x:Name="pnlCustomDays" Orientation="Horizontal" Margin="28,2,0,16" IsEnabled="False">
+                <TextBlock Text="$([System.Security.SecurityElement]::Escape((T 'TxtEveryXDays')))" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBox x:Name="txtCustomDays" Text="3" Width="60" Height="32" TextAlignment="Center" VerticalContentAlignment="Center" ToolTip="$([System.Security.SecurityElement]::Escape((T 'TipCustomDays')))"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+                <Button x:Name="btnSchedCancel" Content="$([System.Security.SecurityElement]::Escape((T 'BtnCancel')))" MinWidth="90" Height="34" Padding="14,8" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}"/>
+                <Button x:Name="btnSchedCreate" Content="$([System.Security.SecurityElement]::Escape((T 'BtnCreate')))" MinWidth="90" Height="34" Padding="14,8"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
+"@
+    $dlgReader = New-Object System.Xml.XmlNodeReader $dialogXaml
+    $dlg = [Windows.Markup.XamlReader]::Load($dlgReader)
+    $dlg.Resources = $Global:WgoUI_Window.Resources
+    try { $dlg.Owner = $Global:WgoUI_Window } catch { }
+    $radDaily      = $dlg.FindName('radDaily')
+    $radWeekly     = $dlg.FindName('radWeekly')
+    $radCustom     = $dlg.FindName('radCustom')
+    $pnlCustomDays = $dlg.FindName('pnlCustomDays')
+    $txtCustomDays = $dlg.FindName('txtCustomDays')
+    $btnCancel     = $dlg.FindName('btnSchedCancel')
+    $btnCreate     = $dlg.FindName('btnSchedCreate')
+
+    $syncCustomState = { $pnlCustomDays.IsEnabled = [bool]$radCustom.IsChecked }.GetNewClosure()
+    $radDaily.Add_Checked($syncCustomState)
+    $radWeekly.Add_Checked($syncCustomState)
+    $radCustom.Add_Checked($syncCustomState)
+
+    $btnCancel.Add_Click({ $dlg.Close() }.GetNewClosure())
+    $btnCreate.Add_Click({
+        $freq = if ($radDaily.IsChecked) { 'Daily' } elseif ($radWeekly.IsChecked) { 'Weekly' } else { 'Custom' }
+        $days = 3
+        if ($freq -eq 'Custom') {
+            $parsed = 0
+            if (-not [int]::TryParse($txtCustomDays.Text, [ref]$parsed) -or $parsed -lt 1) {
+                Write-Log (T 'LogSchedInvalidDays') "ERROR"
+                return
+            }
+            $days = $parsed
+        }
+        Start-WgoBackgroundTask -ScriptBlock {
+            param($freq, $days)
+            try { New-WgoScheduledOptimization -Frequency $freq -IntervalDays $days | Out-Null } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
+        } -ArgumentList @($freq, $days)
+        $dlg.Close()
+    }.GetNewClosure())
+    $dlg.Add_MouseLeftButtonDown({ if ($_.ChangedButton -eq 'Left') { $dlg.DragMove() } })
+    $dlg.ShowDialog() | Out-Null
 }
 
 function Initialize-WgoUI {
@@ -384,7 +668,7 @@ function Initialize-WgoUI {
         'grpServiceMgmt','chkDisableSysMain','chkDisableWSearch','chkDisableSpooler','chkWinSxSCleanup',
         'txtXboxServicesNote','grpXboxServices','chkDisableXboxServices',
         'grpMoreOptimizations','chkHibernation','chkPowerPlan','chkTempCleanup','chkHotCorners',
-        'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkKernelGamingPriority','chkGameDvrDisable','chkInputLagReduction',
+        'chkBootTimeout','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf','chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
         'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup',
         'chkResidualServices','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
         'grpCpuTimerTweaks','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkHungAppTimeout',
@@ -396,7 +680,9 @@ function Initialize-WgoUI {
         'txtRiskyWarning','grpRiskyTweaks','chkRiskyUAC','chkRiskySmartScreen','chkRiskyDefenderRT',
         'chkRiskyWinUpdateSvc','chkRiskyBits','chkRiskyDisableFirewall','chkRiskyDisableDEP','chkRiskyNvidiaMaxPerf',
         'grpProfiles','btnProfileBasic','btnProfileLaptop','btnProfileGamer','btnProfilePrivacy','btnProfileEsports','btnProfileMax',
-        'btnRunSelected','btnRestoreDefaults','btnExportProfile','btnImportProfile',
+        'btnRunSelected','btnRestoreDefaults','lblRestoreCategory','cmbRestoreCategory','btnExportProfile','btnImportProfile',
+        'chkClearEventLogs','chkDeleteMinidump','chkClearStoreCache',
+        'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight',
         'btnInstallApps',
         'txtChocoRequired','txtChocoStatus','btnInstallChoco',
         'grpAppsBrowsers','chkFirefox','txtFirefoxDesc','chkBrave','txtBraveDesc',
@@ -426,6 +712,11 @@ function Initialize-WgoUI {
         'txtMemDiagTitle','txtMemDiagDesc','btnMemDiag',
         'grpSystemDiagnostics','txtSystemIntegrityTitle','txtSystemIntegrityDesc','btnSystemIntegrity',
         'txtFlushDNSTitle','txtFlushDNSDesc','btnFlushDNS',
+        'txtReleaseRenewTitle','txtReleaseRenewDesc','btnReleaseRenewIP',
+        'txtRegisterDNSTitle','txtRegisterDNSDesc','btnRegisterDNS',
+        'grpAdvancedUtilities','txtSystemInfoTitle','txtSystemInfoDesc','btnSystemInfo',
+        'txtStartupManagerTitle','txtStartupManagerDesc','btnStartupManager',
+        'txtScheduledOptTitle','txtScheduledOptDesc','btnScheduledOptimization',
         'pnlOptimizationsActions','pnlInstallerActions','pnlOtherActions',
         'tabMain'
     )
@@ -559,6 +850,7 @@ function Initialize-WgoUI {
         $doUltimatePerf = [bool]$c['chkUltimatePerf'].IsChecked
         $doKernelGamingPriority = [bool]$c['chkKernelGamingPriority'].IsChecked
         $doGameDvrDisable = [bool]$c['chkGameDvrDisable'].IsChecked
+        $doGameBarMicFix = [bool]$c['chkGameBarMicFix'].IsChecked
         $doInputLagReduction = [bool]$c['chkInputLagReduction'].IsChecked
         $doSearchIndexOptimize = [bool]$c['chkSearchIndexOptimize'].IsChecked
         $doGhostAdapters = [bool]$c['chkGhostAdapters'].IsChecked
@@ -581,6 +873,12 @@ function Initialize-WgoUI {
         $doDisableStore = [bool]$c['chkDisableStore'].IsChecked
         $doDisableWer = [bool]$c['chkDisableWer'].IsChecked
         $doAutoStandbyClean = [bool]$c['chkAutoStandbyClean'].IsChecked
+        $doClearEventLogs = [bool]$c['chkClearEventLogs'].IsChecked
+        $doDeleteMinidump = [bool]$c['chkDeleteMinidump'].IsChecked
+        $doClearStoreCache = [bool]$c['chkClearStoreCache'].IsChecked
+        $doPauseUpdates = [bool]$c['chkPauseUpdates'].IsChecked
+        $doDisableEdgeTelemetry = [bool]$c['chkDisableEdgeTelemetry'].IsChecked
+        $doDisableSpotlight = [bool]$c['chkDisableSpotlight'].IsChecked
         $doHungAppTimeout = [bool]$c['chkHungAppTimeout'].IsChecked
         $doDisableCoreParking = [bool]$c['chkDisableCoreParking'].IsChecked
         $doDisableHPET = [bool]$c['chkDisableHPET'].IsChecked
@@ -610,6 +908,12 @@ function Initialize-WgoUI {
             }
         }
 
+        # .GetNewClosure() below detaches the -OnCompleted scriptblock from this
+        # module, so a plain "Show-WgoRestartPrompt" call inside it fails with
+        # CommandNotFoundException; capture the function as data here instead,
+        # where it's still resolvable, and invoke that captured reference.
+        $restartPromptFn = ${function:Show-WgoRestartPrompt}
+
         Start-WgoBackgroundTask -ScriptBlock {
             param($doBloat, $doSearch, $doVisual, $doPrivacy, $doDrivers, $doPagefile,
                   $doAdvertisingId, $doTailoredExp, $doDiagTrackSvc, $doCopilotBlock, $doInputTelemetry,
@@ -617,7 +921,7 @@ function Initialize-WgoUI {
                   $doDisableSysMain, $doDisableWSearch, $doDisableSpooler, $doWinSxSCleanup,
                   $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners,
                   $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf,
-                  $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction,
+                  $doKernelGamingPriority, $doGameDvrDisable, $doGameBarMicFix, $doInputLagReduction,
                   $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup,
                   $doResidualServices, $doStandbyListClean, $doLargeSystemCache,
                   $doHostsBlock, $doPrivacyDeep, $doCacheClean, $doUiCleanup, $doTcpAutotuning,
@@ -629,6 +933,8 @@ function Initialize-WgoUI {
                   $doRiskyUAC, $doRiskySmartScreen, $doRiskyDefenderRT, $doRiskyWinUpdateSvc, $doRiskyBits,
                   $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
                   $doDisableXboxServices,
+                  $doClearEventLogs, $doDeleteMinidump, $doClearStoreCache,
+                  $doPauseUpdates, $doDisableEdgeTelemetry, $doDisableSpotlight,
                   $doDryRun)
             try {
                 Write-Log (T 'LogOptStart') "INFO"
@@ -687,7 +993,10 @@ function Initialize-WgoUI {
                         @{ Flag = $doRiskyDisableFirewall; Key = 'ChkRiskyDisableFirewall' },
                         @{ Flag = $doRiskyDisableDEP;    Key = 'ChkRiskyDisableDEP' },
                         @{ Flag = $doRiskyNvidiaMaxPerf; Key = 'ChkRiskyNvidiaMaxPerf' },
-                        @{ Flag = $doDisableXboxServices; Key = 'ChkDisableXboxServices' }
+                        @{ Flag = $doDisableXboxServices; Key = 'ChkDisableXboxServices' },
+                        @{ Flag = $doPauseUpdates;        Key = 'ChkPauseUpdates' },
+                        @{ Flag = $doDisableEdgeTelemetry; Key = 'ChkDisableEdgeTelemetry' },
+                        @{ Flag = $doDisableSpotlight;     Key = 'ChkDisableSpotlight' }
                     )
                     foreach ($item in $dryItems) {
                         if ($item.Flag) { Write-Log (T 'LogDryRunPrefix' (T $item.Key)) "INFO" }
@@ -697,11 +1006,12 @@ function Initialize-WgoUI {
                         -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
                         -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize `
                         -HagsGameMode $doHagsGameMode -UltimatePerf $doUltimatePerf `
-                        -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
+                        -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable -GameBarMicFix $doGameBarMicFix `
                         -InputLagReduction $doInputLagReduction `
                         -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
                         -ResidualServices $doResidualServices -StandbyListClean $doStandbyListClean -LargeSystemCache $doLargeSystemCache `
                         -AutoStandbyClean $doAutoStandbyClean `
+                        -ClearEventLogs $doClearEventLogs -DeleteMinidump $doDeleteMinidump -ClearStoreCache $doClearStoreCache `
                         -DryRun $true
                 } else {
                     New-WgoRestorePoint | Out-Null
@@ -720,7 +1030,8 @@ function Initialize-WgoUI {
                     Set-WgoExtraTweaks2 -HostsBlock $doHostsBlock -PrivacyDeep $doPrivacyDeep -CacheClean $doCacheClean `
                         -UiCleanup $doUiCleanup -TcpAutotuning $doTcpAutotuning -DoH $doDoH `
                         -FastShutdown $doFastShutdown -PrefetchSSD $doPrefetchSSD -RemoveWinBackup $doRemoveWinBackup -TcpIpReset $doTcpIpReset `
-                        -RemoveOnedrive $doRemoveOnedrive -DisableGameBar $doDisableGameBar -DisableStore $doDisableStore -DisableWer $doDisableWer
+                        -RemoveOnedrive $doRemoveOnedrive -DisableGameBar $doDisableGameBar -DisableStore $doDisableStore -DisableWer $doDisableWer `
+                        -PauseUpdates $doPauseUpdates -DisableEdgeTelemetry $doDisableEdgeTelemetry -DisableSpotlight $doDisableSpotlight
                     Set-WgoCpuTimerTweaks -DisableCoreParking $doDisableCoreParking -DisableHPET $doDisableHPET `
                         -TimerResolution $doTimerResolution -HungAppTimeout $doHungAppTimeout
                     Set-WgoGpuTweaks -IncreaseTdrNvidia $doIncreaseTdrNvidia -DisableNvidiaTelemetry $doDisableNvidiaTelemetry
@@ -734,11 +1045,12 @@ function Initialize-WgoUI {
                         -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
                         -ExtraSchedTasks $doExtraSchedTasks -DiskOptimize $doDiskOptimize `
                         -HagsGameMode $doHagsGameMode -UltimatePerf $doUltimatePerf `
-                        -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable `
+                        -KernelGamingPriority $doKernelGamingPriority -GameDvrDisable $doGameDvrDisable -GameBarMicFix $doGameBarMicFix `
                         -InputLagReduction $doInputLagReduction `
                         -SearchIndexOptimize $doSearchIndexOptimize -GhostAdapters $doGhostAdapters -FastStartup $doFastStartup `
                         -ResidualServices $doResidualServices -StandbyListClean $doStandbyListClean -LargeSystemCache $doLargeSystemCache `
                         -AutoStandbyClean $doAutoStandbyClean `
+                        -ClearEventLogs $doClearEventLogs -DeleteMinidump $doDeleteMinidump -ClearStoreCache $doClearStoreCache `
                         -DryRun $false
                 }
                 Write-Log (T 'LogOptDone') "OK"
@@ -751,7 +1063,7 @@ function Initialize-WgoUI {
                            $doDisableSysMain, $doDisableWSearch, $doDisableSpooler, $doWinSxSCleanup,
                            $doHibernation, $doPowerPlan, $doTempCleanup, $doHotCorners,
                            $doBootTimeout, $doOfficeTelemetry, $doExtraSchedTasks, $doDiskOptimize, $doHagsGameMode, $doUltimatePerf,
-                           $doKernelGamingPriority, $doGameDvrDisable, $doInputLagReduction,
+                           $doKernelGamingPriority, $doGameDvrDisable, $doGameBarMicFix, $doInputLagReduction,
                            $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup,
                            $doResidualServices, $doStandbyListClean, $doLargeSystemCache,
                            $doHostsBlock, $doPrivacyDeep, $doCacheClean, $doUiCleanup, $doTcpAutotuning,
@@ -763,9 +1075,11 @@ function Initialize-WgoUI {
                            $doRiskyUAC, $doRiskySmartScreen, $doRiskyDefenderRT, $doRiskyWinUpdateSvc, $doRiskyBits,
                            $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
                            $doDisableXboxServices,
+                           $doClearEventLogs, $doDeleteMinidump, $doClearStoreCache,
+                           $doPauseUpdates, $doDisableEdgeTelemetry, $doDisableSpotlight,
                            $doDryRun) `
           -OnCompleted {
-            $c['btnRunSelected'].IsEnabled = $true
+            $Global:WgoUI_Ctrl['btnRunSelected'].IsEnabled = $true
             Save-WgoLastRunState
             $restartRequiredFlags = @(
                 $doHibernation, $doFastStartup, $doHagsGameMode, $doDrivers,
@@ -775,20 +1089,21 @@ function Initialize-WgoUI {
                 $doDisableHPET, $doRiskyDisableDEP
             )
             if (-not $doDryRun -and ($restartRequiredFlags -contains $true)) {
-                if (Show-WgoConfirm -Message (T 'LogRestartPrompt') -Title "WGO") {
-                    & shutdown.exe /r /t 5 | Out-Null
-                }
+                & $restartPromptFn
             }
-        }
+        }.GetNewClosure()
     })
 
     # Restore Defaults
     $c['btnRestoreDefaults'].Add_Click({
-        if (-not (Show-WgoConfirm -Message (T 'LogRestoreDefaultsStart') -Title "WGO")) { return }
+        $category = "All"
+        try { $category = $c['cmbRestoreCategory'].SelectedItem.Tag } catch { }
+        if (-not (Show-WgoConfirm -Message (T 'LogRestoreDefaultsStart' $category) -Title "WGO")) { return }
         $c['btnRestoreDefaults'].IsEnabled = $false
         Start-WgoBackgroundTask -ScriptBlock {
-            try { Restore-WgoDefaults } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
-        } -OnCompleted {
+            param($category)
+            try { Restore-WgoDefaults -Category $category } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
+        } -ArgumentList @($category) -OnCompleted {
             $c['btnRestoreDefaults'].IsEnabled = $true
             Remove-Item -Path $Global:WgoLastRunPath -Force -ErrorAction Ignore
         }
@@ -1017,6 +1332,32 @@ function Initialize-WgoUI {
         Start-WgoBackgroundTask -ScriptBlock {
             try { Clear-WgoDNS } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
         } -OnCompleted { $c['btnFlushDNS'].IsEnabled = $true }
+    })
+    $c['btnReleaseRenewIP'].Add_Click({
+        $c['btnReleaseRenewIP'].IsEnabled = $false
+        Start-WgoBackgroundTask -ScriptBlock {
+            try { Invoke-WgoNetworkReleaseRenew | Out-Null } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
+        } -OnCompleted { $c['btnReleaseRenewIP'].IsEnabled = $true }
+    })
+    $c['btnRegisterDNS'].Add_Click({
+        $c['btnRegisterDNS'].IsEnabled = $false
+        Start-WgoBackgroundTask -ScriptBlock {
+            try { Invoke-WgoNetworkRegisterDns | Out-Null } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
+        } -OnCompleted { $c['btnRegisterDNS'].IsEnabled = $true }
+    })
+    $c['btnSystemInfo'].Add_Click({
+        $info = Get-WgoSystemInfo
+        if ($null -eq $info) { return }
+        $msg = (T 'TxtSysInfoCpu' $info.Cpu) + "`n" + (T 'TxtSysInfoRam' $info.RamGb) + "`n" + (T 'TxtSysInfoGpu' $info.Gpu) + "`n" +
+               (T 'TxtSysInfoOs' $info.OsVersion) + "`n" + (T 'TxtSysInfoDisk' $info.DiskType) + "`n" + (T 'TxtSysInfoBattery' $info.Battery)
+        [System.Windows.Forms.MessageBox]::Show($msg, (T 'TxtSystemInfoTitle'), [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+        Write-Log (T 'LogSystemInfoShown') "INFO"
+    })
+    $c['btnStartupManager'].Add_Click({
+        Show-WgoStartupManagerDialog
+    })
+    $c['btnScheduledOptimization'].Add_Click({
+        Show-WgoScheduledOptimizationDialog
     })
 
     # Set initial visibility: default to Optimizations tab

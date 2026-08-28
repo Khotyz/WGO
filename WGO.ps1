@@ -15,6 +15,12 @@
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Windows.Forms
 
 $ErrorActionPreference = 'Stop'
+# Native .exe calls (powercfg, wevtutil, bcdedit, etc.) are checked manually via
+# $LASTEXITCODE/try-catch throughout the codebase; without this, PowerShell 7.4+
+# turns any non-zero exit code into a terminating error even when output is
+# redirected to $null, aborting whole feature blocks on a single unsupported case.
+# Harmless no-op on PowerShell 5.1, which has no such preference.
+$Global:PSNativeCommandUseErrorActionPreference = $false
 
 # ============================================================================
 # ERROR HANDLING HELPER
@@ -140,7 +146,8 @@ $Global:WgoSharedFunctionNames = @(
     'Set-WgoServiceMgmt', 'Clear-WgoWinSxS', 'Invoke-WgoSystemIntegrity', 'Clear-WgoDNS',
     'Test-WgoAppInstalled', 'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp',
     'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoTimerResolutionNative',
-    'Set-WgoXboxServices'
+    'Set-WgoXboxServices', 'Invoke-WgoNetworkReleaseRenew',
+    'Invoke-WgoNetworkRegisterDns', 'New-WgoScheduledOptimization', 'Get-WgoActiveSchemeGuid'
 )
 
 # ============================================================================

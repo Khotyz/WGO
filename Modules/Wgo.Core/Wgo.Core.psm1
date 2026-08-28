@@ -486,6 +486,15 @@ function Set-WgoPagefile {
     }
 }
 
+function Get-WgoActiveSchemeGuid {
+    # Safely extracts the active power scheme GUID; returns $null instead of
+    # throwing "cannot index into a null array" when powercfg's output
+    # doesn't match (e.g. transient failure, unusual locale output).
+    $match = (powercfg /getactivescheme *>&1 | Select-String -Pattern '([0-9a-fA-F-]{36})' | Select-Object -First 1)
+    if ($match -and $match.Matches -and $match.Matches.Count -gt 0) { return $match.Matches[0].Value }
+    return $null
+}
+
 function Set-WgoMoreOptimizations {
     param(
         [bool]$Hibernation     = $false,
@@ -500,6 +509,7 @@ function Set-WgoMoreOptimizations {
         [bool]$UltimatePerf    = $false,
         [bool]$KernelGamingPriority = $false,
         [bool]$GameDvrDisable  = $false,
+        [bool]$GameBarMicFix   = $false,
         [bool]$InputLagReduction = $false,
         [bool]$SearchIndexOptimize = $false,
         [bool]$GhostAdapters   = $false,
@@ -508,14 +518,24 @@ function Set-WgoMoreOptimizations {
         [bool]$StandbyListClean = $false,
         [bool]$LargeSystemCache = $false,
         [bool]$AutoStandbyClean = $false,
+        [bool]$ClearEventLogs  = $false,
+        [bool]$DeleteMinidump  = $false,
+        [bool]$ClearStoreCache = $false,
         [bool]$DryRun          = $false
     )
     if (-not ($Hibernation -or $PowerPlan -or $TempCleanup -or $HotCorners -or
                $BootTimeout -or $OfficeTelemetry -or $ExtraSchedTasks -or $DiskOptimize -or
-               $HagsGameMode -or $UltimatePerf -or $KernelGamingPriority -or $GameDvrDisable -or $InputLagReduction -or
+               $HagsGameMode -or $UltimatePerf -or $KernelGamingPriority -or $GameDvrDisable -or $GameBarMicFix -or $InputLagReduction -or
                $SearchIndexOptimize -or $GhostAdapters -or $FastStartup -or $ResidualServices -or $StandbyListClean -or
-               $LargeSystemCache -or $AutoStandbyClean)) { return }
+               $LargeSystemCache -or $AutoStandbyClean -or $ClearEventLogs -or $DeleteMinidump -or $ClearStoreCache)) { return }
     Write-Log (T 'LogMoreStart') "INFO"
+
+    # Self-heal: an older WGO version could disable Game Bar entirely (screenshots + clips)
+    # via this policy while the user only intended to disable background auto-recording.
+    # Clean it up on every run regardless of which boxes are checked this time.
+    if (-not $DryRun) {
+        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -ErrorAction Ignore
+    }
     if ($DryRun) { Write-Log (T 'LogDryRunNote') "WARN" }
 
     if ($Hibernation) {
@@ -532,7 +552,17 @@ function Set-WgoMoreOptimizations {
         else {
             try {
                 & powercfg.exe /setactive SCHEME_MIN 2>$null | Out-Null
-                Write-Log (T 'LogPowerPlanOk') "OK"
+                Start-Sleep -Milliseconds 300
+                # Some third-party tuning tools (e.g. ExitLag) lock the active
+                # scheme via Group Policy, silently reverting it right after
+                # powercfg changes it; verify the change actually stuck
+                # instead of reporting success unconditionally.
+                $nowActive = Get-WgoActiveSchemeGuid
+                if ($nowActive -and $nowActive -ne "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c") {
+                    Write-Log (T 'LogPowerPlanReverted') "WARN"
+                } else {
+                    Write-Log (T 'LogPowerPlanOk') "OK"
+                }
             } catch { Write-Log (T 'LogMoreError' "PowerPlan" $_.Exception.Message) "ERROR" }
         }
     }
@@ -666,8 +696,21 @@ function Set-WgoMoreOptimizations {
                 if (-not (Test-Path $graphicsKey)) { New-Item -Path $graphicsKey -Force | Out-Null }
                 New-ItemProperty -Path $gameBarKey -Name "AutoGameModeEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
                 New-ItemProperty -Path $gameBarKey -Name "AllowAutoGameMode"   -Value 1 -PropertyType DWord -Force | Out-Null
-                New-ItemProperty -Path $graphicsKey -Name "HwSchMode" -Value 2 -PropertyType DWord -Force | Out-Null
-                Write-Log (T 'LogHagsGameModeOk') "OK"
+
+                # HAGS (HwSchMode) has a long history of causing crashes/instability
+                # with several AMD Adrenalin driver builds. Only enable it on
+                # non-AMD GPUs; Game Mode above is unrelated and always safe.
+                $isAmdGpu = $false
+                try {
+                    $isAmdGpu = [bool](Get-CimInstance -ClassName Win32_VideoController -ErrorAction Stop |
+                        Where-Object { $_.Name -match 'AMD|Radeon' })
+                } catch { }
+                if ($isAmdGpu) {
+                    Write-Log (T 'LogHagsSkippedAmd') "WARN"
+                } else {
+                    New-ItemProperty -Path $graphicsKey -Name "HwSchMode" -Value 2 -PropertyType DWord -Force | Out-Null
+                    Write-Log (T 'LogHagsGameModeOk') "OK"
+                }
             } catch { Write-Log (T 'LogMoreError' "HagsGameMode" $_.Exception.Message) "ERROR" }
         }
     }
@@ -690,7 +733,16 @@ function Set-WgoMoreOptimizations {
                 & powercfg.exe /setacvalueindex $scheme SUB_PROCESSOR PROCTHROTTLEMIN 100 2>$null | Out-Null
                 & powercfg.exe /setdcvalueindex $scheme SUB_PROCESSOR PROCTHROTTLEMIN 100 2>$null | Out-Null
                 & powercfg.exe /setactive $scheme 2>$null | Out-Null
-                Write-Log (T 'LogUltimatePerfOk') "OK"
+                Start-Sleep -Milliseconds 300
+                # Verify the scheme actually stuck; some third-party tuning
+                # tools (e.g. ExitLag) lock the active scheme via Group
+                # Policy and silently revert it right after this call.
+                $nowActive = Get-WgoActiveSchemeGuid
+                if ($nowActive -and $nowActive -ne $scheme) {
+                    Write-Log (T 'LogPowerPlanReverted') "WARN"
+                } else {
+                    Write-Log (T 'LogUltimatePerfOk') "OK"
+                }
             } catch { Write-Log (T 'LogMoreError' "UltimatePerf" $_.Exception.Message) "ERROR" }
         }
     }
@@ -715,14 +767,29 @@ function Set-WgoMoreOptimizations {
         if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkGameDvrDisable')) "INFO" }
         else {
             try {
+                # Only disable BACKGROUND auto-recording (GameDVR_Enabled). The old code also
+                # set the HKLM "AllowGameDVR" policy to 0, which is the full system-wide kill
+                # switch for Game Bar - it silently breaks manual screenshots (Win+Alt+PrtScn)
+                # and manual clip recording too, not just background recording. Removed.
                 $gameConfigKey = "HKCU:\System\GameConfigStore"
-                $gameDvrPolicyKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR"
-                if (-not (Test-Path $gameConfigKey))    { New-Item -Path $gameConfigKey -Force | Out-Null }
-                if (-not (Test-Path $gameDvrPolicyKey)) { New-Item -Path $gameDvrPolicyKey -Force | Out-Null }
+                if (-not (Test-Path $gameConfigKey)) { New-Item -Path $gameConfigKey -Force | Out-Null }
                 New-ItemProperty -Path $gameConfigKey -Name "GameDVR_Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
-                New-ItemProperty -Path $gameDvrPolicyKey -Name "AllowGameDVR" -Value 0 -PropertyType DWord -Force | Out-Null
                 Write-Log (T 'LogGameDvrDisableOk') "OK"
             } catch { Write-Log (T 'LogMoreError' "GameDvrDisable" $_.Exception.Message) "ERROR" }
+        }
+    }
+    if ($GameBarMicFix) {
+        if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkGameBarMicFix')) "INFO" }
+        else {
+            try {
+                # Path is built with the HKCU: PSDrive, never a literal "Computer\..." prefix -
+                # that text only ever appears in regedit.exe's own UI (and is localized per
+                # Windows display language), it's not part of the actual registry path at all.
+                $gameDvrKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR"
+                if (-not (Test-Path $gameDvrKey)) { New-Item -Path $gameDvrKey -Force | Out-Null }
+                New-ItemProperty -Path $gameDvrKey -Name "EchoCancellationEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+                Write-Log (T 'LogGameBarMicFixOk') "OK"
+            } catch { Write-Log (T 'LogMoreError' "GameBarMicFix" $_.Exception.Message) "ERROR" }
         }
     }
     if ($InputLagReduction) {
@@ -864,7 +931,11 @@ function Set-WgoMoreOptimizations {
                 $taskCmd = "Import-Module '$nativeModule' -Force; Invoke-WgoStandbyListPurge | Out-Null"
                 $encodedCmd = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($taskCmd))
                 $action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -EncodedCommand $encodedCmd"
-                $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration ([TimeSpan]::MaxValue)
+                $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5)
+                # Empty string (not TimeSpan]::MaxValue, which serializes to an
+                # out-of-range ISO8601 duration Task Scheduler rejects) means
+                # "repeat indefinitely" in the underlying task XML.
+                $trigger.Repetition.Duration = ""
                 $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
                 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
                 Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction Ignore
@@ -873,107 +944,176 @@ function Set-WgoMoreOptimizations {
             } catch { Write-Log (T 'LogMoreError' "AutoStandbyClean" $_.Exception.Message) "ERROR" }
         }
     }
+    if ($ClearEventLogs) {
+        if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkClearEventLogs')) "INFO" }
+        else {
+            try {
+                $cleared = 0
+                # Analytic/Debug channels are disabled by design and cannot be
+                # cleared without first re-enabling them via wevtutil sl; skip
+                # them rather than reporting them as failures. Each remaining
+                # log is cleared in isolation so one protected/locked log
+                # cannot stop the rest from being cleared.
+                & wevtutil.exe el 2>$null | Where-Object { $_ -notmatch '/(Analytic|Debug)$' } | ForEach-Object {
+                    try {
+                        & wevtutil.exe cl "$_" 2>$null | Out-Null
+                        if ($LASTEXITCODE -eq 0) { $cleared++ }
+                    } catch { }
+                }
+                Write-Log (T 'LogEventLogsOk' $cleared) "OK"
+            } catch { Write-Log (T 'LogMoreError' "ClearEventLogs" $_.Exception.Message) "ERROR" }
+        }
+    }
+    if ($DeleteMinidump) {
+        if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkDeleteMinidump')) "INFO" }
+        else {
+            try {
+                $dumpPath = "$env:SystemRoot\Minidump"
+                $removed = 0
+                if (Test-Path $dumpPath) {
+                    Get-ChildItem -Path $dumpPath -Filter "*.dmp" -Force -ErrorAction Ignore | ForEach-Object {
+                        Remove-Item -LiteralPath $_.FullName -Force -ErrorAction Ignore
+                        $removed++
+                    }
+                }
+                Write-Log (T 'LogMinidumpOk' $removed) "OK"
+            } catch { Write-Log (T 'LogMoreError' "DeleteMinidump" $_.Exception.Message) "ERROR" }
+        }
+    }
+    if ($ClearStoreCache) {
+        if ($DryRun) { Write-Log (T 'LogDryRunPrefix' (T 'ChkClearStoreCache')) "INFO" }
+        else {
+            try {
+                & wsreset.exe -i | Out-Null
+                Write-Log (T 'LogStoreCacheOk') "OK"
+            } catch { Write-Log (T 'LogMoreError' "ClearStoreCache" $_.Exception.Message) "ERROR" }
+        }
+    }
     Write-Log (T 'LogMoreDone') "OK"
 }
 
 function Restore-WgoDefaults {
-    Write-Log (T 'LogRestoreDefaultsStart') "INFO"
+    param(
+        [ValidateSet('All','Privacy','Network','Services','Visual')]
+        [string]$Category = 'All'
+    )
+    Write-Log (T 'LogRestoreDefaultsStart' $Category) "INFO"
     try {
-        $keysToRemove = @(
+        $privacyKeys = @(
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting",
             "HKLM:\SOFTWARE\Policies\Microsoft\SQMClient",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy",
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+        )
+        $networkKeys = @(
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
             "HKLM:\SOFTWARE\Policies\Microsoft\Edge",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization",
             "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive",
-            "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching",
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy",
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+            "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching"
         )
-        foreach ($k in $keysToRemove) {
-            if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore }
+        $visualKeys = @(
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        )
+        if ($Category -in @('All','Privacy')) {
+            foreach ($k in $privacyKeys) { if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore } }
+            Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\Software\Microsoft\InputPersonalization" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\Software\Microsoft\Clipboard" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\common" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\osm" -Recurse -Force -ErrorAction Ignore
+            $hkcuAdvKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+            Remove-ItemProperty -Path $hkcuAdvKey -Name "DisableSearchBoxSuggestions" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "ConfigureTelemetryForDesktop" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338388Enabled" -Force -ErrorAction Ignore
+            try {
+                $pauseKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+                Remove-ItemProperty -Path $pauseKey -Name "PauseUpdates" -Force -ErrorAction Ignore
+                Remove-ItemProperty -Path $pauseKey -Name "PauseUpdatesExpiryTime" -Force -ErrorAction Ignore
+            } catch { }
         }
-        $hkcuAdvKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-        foreach ($name in @("DisableSearchBoxSuggestions","TaskbarDa","EnableSnapAssistFlyout","SnapFill","SnapAssist","DisallowShaking")) {
-            Remove-ItemProperty -Path $hkcuAdvKey -Name $name -Force -ErrorAction Ignore
-        }
-        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Recurse -Force -ErrorAction Ignore
-        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Recurse -Force -ErrorAction Ignore
-        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Recurse -Force -ErrorAction Ignore
-        Remove-Item -Path "HKCU:\Software\Microsoft\InputPersonalization" -Recurse -Force -ErrorAction Ignore
-        Remove-Item -Path "HKCU:\Software\Microsoft\Clipboard" -Recurse -Force -ErrorAction Ignore
-        Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Recurse -Force -ErrorAction Ignore
-        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\common" -Recurse -Force -ErrorAction Ignore
-        Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\osm" -Recurse -Force -ErrorAction Ignore
-        Remove-ItemProperty -Path $hkcuAdvKey -Name "DisableSearchBoxSuggestions" -Force -ErrorAction Ignore
-        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Force -ErrorAction Ignore
-        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Force -ErrorAction Ignore
-        $mmKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
-        if (Test-Path $mmKey) {
-            New-ItemProperty -Path $mmKey -Name "NetworkThrottlingIndex" -Value 10 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $mmKey -Name "SystemResponsiveness" -Value 20 -PropertyType DWord -Force | Out-Null
-        }
-        $ifaceRoot = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
-        if (Test-Path $ifaceRoot) {
-            Get-ChildItem -Path $ifaceRoot -ErrorAction Ignore | ForEach-Object {
-                Remove-ItemProperty -Path $_.PSPath -Name "TCPNoDelay" -Force -ErrorAction Ignore
-                Remove-ItemProperty -Path $_.PSPath -Name "TcpAckFrequency" -Force -ErrorAction Ignore
-            }
-        }
-        & bcdedit.exe /timeout 30 2>$null | Out-Null
-        try {
-            $powerKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
-            if (Test-Path $powerKey) {
-                New-ItemProperty -Path $powerKey -Name "HiberbootEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
-            }
-        } catch { }
-        try {
-            $junkPaths = @(
-                "$env:TEMP", "$env:WINDIR\Temp", "$env:WINDIR\Prefetch",
-                "$env:LOCALAPPDATA\Temp", "$env:LOCALAPPDATA\D3DSCache",
-                "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
-                "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
-                "$env:LOCALAPPDATA\Packages"
-            )
-            foreach ($jp in $junkPaths) {
-                if (Test-Path $jp) {
-                    $folder = Get-Item -Path $jp -Force -ErrorAction Ignore
-                    if ($folder) {
-                        $folder.Attributes = $folder.Attributes -band (-bnot [System.IO.FileAttributes]::NotContentIndexed)
-                    }
+        if ($Category -in @('All','Network')) {
+            foreach ($k in $networkKeys) { if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore } }
+            $ifaceRoot = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
+            if (Test-Path $ifaceRoot) {
+                Get-ChildItem -Path $ifaceRoot -ErrorAction Ignore | ForEach-Object {
+                    Remove-ItemProperty -Path $_.PSPath -Name "TCPNoDelay" -Force -ErrorAction Ignore
+                    Remove-ItemProperty -Path $_.PSPath -Name "TcpAckFrequency" -Force -ErrorAction Ignore
                 }
             }
-        } catch { }
-        foreach ($svcName in @("DiagTrack", "dmwappushservice", "SysMain", "WSearch", "Spooler")) {
-            $svc = Get-Service -Name $svcName -ErrorAction Ignore
-            if ($svc) {
-                Set-Service -Name $svcName -StartupType Automatic -ErrorAction Ignore
-                Start-Service -Name $svcName -ErrorAction Ignore
-            }
+            & bcdedit.exe /timeout 30 2>$null | Out-Null
         }
-        $tasksToReenable = @(
-            "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator",
-            "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip",
-            "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser",
-            "\Microsoft\Windows\Application Experience\ProgramDataUpdater",
-            "\Microsoft\Windows\Autochk\Proxy",
-            "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector",
-            "\Microsoft\Windows\Feedback\Siuf\DmClient",
-            "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload",
-            "\Microsoft\Windows\Windows Error Reporting\QueueReporting",
-            "\Microsoft\Office\OfficeTelemetryAgentFallBack2016",
-            "\Microsoft\Office\OfficeTelemetryAgentLogOn2016"
-        )
-        foreach ($task in $tasksToReenable) {
-            try { Enable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
+        if ($Category -in @('All','Visual')) {
+            foreach ($k in $visualKeys) { if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore } }
+            $hkcuAdvKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+            foreach ($name in @("TaskbarDa","EnableSnapAssistFlyout","SnapFill","SnapAssist","DisallowShaking")) {
+                Remove-ItemProperty -Path $hkcuAdvKey -Name $name -Force -ErrorAction Ignore
+            }
+            try {
+                $powerKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
+                if (Test-Path $powerKey) {
+                    New-ItemProperty -Path $powerKey -Name "HiberbootEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
+                }
+            } catch { }
+        }
+        if ($Category -in @('All','Services')) {
+            $mmKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
+            if (Test-Path $mmKey) {
+                New-ItemProperty -Path $mmKey -Name "NetworkThrottlingIndex" -Value 10 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $mmKey -Name "SystemResponsiveness" -Value 20 -PropertyType DWord -Force | Out-Null
+            }
+            try {
+                $junkPaths = @(
+                    "$env:TEMP", "$env:WINDIR\Temp", "$env:WINDIR\Prefetch",
+                    "$env:LOCALAPPDATA\Temp", "$env:LOCALAPPDATA\D3DSCache",
+                    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
+                    "$env:LOCALAPPDATA\Microsoft\Windows\WebCache",
+                    "$env:LOCALAPPDATA\Packages"
+                )
+                foreach ($jp in $junkPaths) {
+                    if (Test-Path $jp) {
+                        $folder = Get-Item -Path $jp -Force -ErrorAction Ignore
+                        if ($folder) {
+                            $folder.Attributes = $folder.Attributes -band (-bnot [System.IO.FileAttributes]::NotContentIndexed)
+                        }
+                    }
+                }
+            } catch { }
+            foreach ($svcName in @("DiagTrack", "dmwappushservice", "SysMain", "WSearch", "Spooler")) {
+                $svc = Get-Service -Name $svcName -ErrorAction Ignore
+                if ($svc) {
+                    Set-Service -Name $svcName -StartupType Automatic -ErrorAction Ignore
+                    Start-Service -Name $svcName -ErrorAction Ignore
+                }
+            }
+            $tasksToReenable = @(
+                "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator",
+                "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip",
+                "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser",
+                "\Microsoft\Windows\Application Experience\ProgramDataUpdater",
+                "\Microsoft\Windows\Autochk\Proxy",
+                "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector",
+                "\Microsoft\Windows\Feedback\Siuf\DmClient",
+                "\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload",
+                "\Microsoft\Windows\Windows Error Reporting\QueueReporting",
+                "\Microsoft\Office\OfficeTelemetryAgentFallBack2016",
+                "\Microsoft\Office\OfficeTelemetryAgentLogOn2016"
+            )
+            foreach ($task in $tasksToReenable) {
+                try { Enable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
+            }
         }
         Write-Log (T 'LogRestoreDefaultsOk') "OK"
     } catch {
@@ -1034,11 +1174,14 @@ function Set-WgoServiceMgmt {
 
 function Remove-WgoWindowsBackupApp {
     # "Windows Backup" ships bundled inside the "Windows Feature Experience Pack"
-    # (MicrosoftWindows.Client.CBS) since Windows 10/11 23H2+ and is NOT a standalone
-    # app - Microsoft has confirmed it cannot be uninstalled, only disabled/hidden.
-    # This disables the nag notifications, its scheduled tasks, and its service,
-    # and only attempts an AppX removal as a harmless best-effort in case a future
-    # Windows build ever splits it back out into its own package.
+    # (MicrosoftWindows.Client.CBS), which also provides the Emoji Picker and the
+    # Win+Shift+S Snipping Tool integration. Microsoft explicitly documents this
+    # component as non-removable, and community reports confirm forcing its removal
+    # via DISM breaks those other features and is unreliable across Windows builds.
+    # This function does NOT attempt to remove/uninstall it - it only silences the
+    # "Turn on Windows Backup" notifications and prompts via the two registry values
+    # Microsoft documents for exactly this purpose. The entry will still be visible
+    # in Settings > Apps; that part cannot be changed without risking other features.
     try {
         $applied = 0
 
@@ -1052,10 +1195,18 @@ function Remove-WgoWindowsBackupApp {
                 try { Remove-AppxProvisionedPackage -Online -PackageName $_.PackageName -ErrorAction Stop | Out-Null; $applied++ } catch { }
             }
 
-        # Real, documented mechanism: disables the "Turn on Windows Backup" nag notification
+        # Officially documented mechanism: disables the "Turn on Windows Backup" nag notification
+        # https://learn.microsoft.com/windows/win32/backup/registry-keys-for-backup-and-restore
         $wbKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsBackup"
         if (-not (Test-Path $wbKey)) { New-Item -Path $wbKey -Force | Out-Null }
         New-ItemProperty -Path $wbKey -Name "DisableMonitoring" -Value 1 -PropertyType DWord -Force | Out-Null
+        $applied++
+
+        # The specific "Turn on Windows Backup" toast is also tied to the OneDrive/SkyDrive
+        # notification channel - silence that too so the prompt stops appearing on drive plug-in
+        $skyDriveKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings\Microsoft.SkyDrive.Desktop"
+        if (-not (Test-Path $skyDriveKey)) { New-Item -Path $skyDriveKey -Force | Out-Null }
+        New-ItemProperty -Path $skyDriveKey -Name "Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
         $applied++
 
         # Disable its scheduled tasks (Task Scheduler Library > Microsoft > Windows > WindowsBackup)
@@ -1073,11 +1224,7 @@ function Remove-WgoWindowsBackupApp {
             } catch { }
         }
 
-        if ($applied -gt 0) {
-            Write-Log (T 'LogWinBackupRemoveOk') "OK"
-        } else {
-            Write-Log (T 'LogWinBackupRemoveNone') "INFO"
-        }
+        Write-Log (T 'LogWinBackupRemoveOk') "OK"
     } catch {
         Write-Log (T 'LogWinBackupRemoveError' $_.Exception.Message) "ERROR"
     }
@@ -1098,11 +1245,15 @@ function Set-WgoExtraTweaks2 {
         [bool]$RemoveOnedrive   = $false,
         [bool]$DisableGameBar   = $false,
         [bool]$DisableStore     = $false,
-        [bool]$DisableWer       = $false
+        [bool]$DisableWer       = $false,
+        [bool]$PauseUpdates     = $false,
+        [bool]$DisableEdgeTelemetry = $false,
+        [bool]$DisableSpotlight = $false
     )
     if (-not ($HostsBlock -or $PrivacyDeep -or $CacheClean -or $UiCleanup -or $TcpAutotuning -or
               $DoH -or $FastShutdown -or $PrefetchSSD -or $RemoveWinBackup -or $TcpIpReset -or
-              $RemoveOnedrive -or $DisableGameBar -or $DisableStore -or $DisableWer)) { return }
+              $RemoveOnedrive -or $DisableGameBar -or $DisableStore -or $DisableWer -or
+              $PauseUpdates -or $DisableEdgeTelemetry -or $DisableSpotlight)) { return }
     Write-Log (T 'LogExtra2Start') "INFO"
 
     if ($HostsBlock) {
@@ -1350,6 +1501,40 @@ function Set-WgoExtraTweaks2 {
             Write-Log (T 'LogExtra2Error' "DisableWer" $_.Exception.Message) "ERROR"
         }
     }
+    if ($PauseUpdates) {
+        try {
+            $auKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+            if (-not (Test-Path $auKey)) { New-Item -Path $auKey -Force | Out-Null }
+            $expiry = (Get-Date).AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ")
+            New-ItemProperty -Path $auKey -Name "PauseUpdates" -Value 1 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $auKey -Name "PauseUpdatesExpiryTime" -Value $expiry -PropertyType String -Force | Out-Null
+            Write-Log (T 'LogPauseUpdatesOk' $expiry) "OK"
+        } catch {
+            Write-Log (T 'LogExtra2Error' "PauseUpdates" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($DisableEdgeTelemetry) {
+        try {
+            $edgeKey = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
+            if (-not (Test-Path $edgeKey)) { New-Item -Path $edgeKey -Force | Out-Null }
+            New-ItemProperty -Path $edgeKey -Name "ConfigureTelemetryForDesktop" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $edgeKey -Name "MetricsReportingEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogEdgeTelemetryOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtra2Error' "DisableEdgeTelemetry" $_.Exception.Message) "ERROR"
+        }
+    }
+    if ($DisableSpotlight) {
+        try {
+            $cdmKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
+            if (-not (Test-Path $cdmKey)) { New-Item -Path $cdmKey -Force | Out-Null }
+            New-ItemProperty -Path $cdmKey -Name "SubscribedContent-338388Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $cdmKey -Name "RotatingLockScreenEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogSpotlightOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtra2Error' "DisableSpotlight" $_.Exception.Message) "ERROR"
+        }
+    }
 
     Write-Log (T 'LogExtra2Done') "OK"
 }
@@ -1478,17 +1663,36 @@ function Set-WgoCpuTimerTweaks {
                 New-ItemProperty -Path $attrPath -Name "Attributes" -Value 2 -PropertyType DWord -Force | Out-Null
             }
             $plans = powercfg /list | Select-String -Pattern '([0-9a-fA-F-]{36})' | ForEach-Object { $_.Matches[0].Value }
+            $okCount = 0
+            $firstFailureText = $null
             foreach ($guid in $plans) {
-                # Max processor state must be set to 100 BEFORE min-cores, or powercfg rejects
-                # the min-cores value as "out of range" on any plan where max is below 100.
-                & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "bc5038f7-23e0-4960-96da-33abaf5935ec" 100 *>$null
-                & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "bc5038f7-23e0-4960-96da-33abaf5935ec" 100 *>$null
-                & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 *>$null
-                & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 *>$null
+                # Some plans (notably a freshly imported "Ultimate Performance"
+                # scheme, or a scheme locked by third-party tools via Group
+                # Policy) reject this setting even though most plans accept
+                # it, so each plan is isolated: one rejection must not stop
+                # the rest from being configured.
+                try {
+                    $out1 = & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "bc5038f7-23e0-4960-96da-33abaf5935ec" 100 2>&1
+                    if ($LASTEXITCODE -ne 0) { throw ($out1 -join ' ') }
+                    $out2 = & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "bc5038f7-23e0-4960-96da-33abaf5935ec" 100 2>&1
+                    if ($LASTEXITCODE -ne 0) { throw ($out2 -join ' ') }
+                    $out3 = & powercfg -setacvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 2>&1
+                    if ($LASTEXITCODE -ne 0) { throw ($out3 -join ' ') }
+                    $out4 = & powercfg -setdcvalueindex $guid "54533251-82be-4824-96c1-47b60b740d00" "0cc5b647-c1df-4637-891a-dec35c318583" 100 2>&1
+                    if ($LASTEXITCODE -ne 0) { throw ($out4 -join ' ') }
+                    $okCount++
+                } catch {
+                    if (-not $firstFailureText) { $firstFailureText = $_.Exception.Message }
+                }
             }
-            $activeGuid = (powercfg /getactivescheme *>&1 | Select-String -Pattern '([0-9a-fA-F-]{36})' | Select-Object -First 1).Matches[0].Value
+            $activeGuid = Get-WgoActiveSchemeGuid
             if ($activeGuid) { & powercfg -setactive $activeGuid *>$null }
-            Write-Log (T 'LogCoreParkingOk') "OK"
+            if ($okCount -gt 0) {
+                Write-Log (T 'LogCoreParkingOk') "OK"
+            } else {
+                $reason = if ($firstFailureText) { $firstFailureText } else { T 'LogCoreParkingNoPlan' }
+                Write-Log (T 'LogCpuTimerError' "CoreParking" $reason) "ERROR"
+            }
         } catch {
             Write-Log (T 'LogCpuTimerError' "CoreParking" $_.Exception.Message) "ERROR"
         }
@@ -1650,6 +1854,180 @@ function Set-WgoXboxServices {
     }
 }
 
+function Invoke-WgoNetworkReleaseRenew {
+    try {
+        & ipconfig.exe /release 2>$null | Out-Null
+        & ipconfig.exe /renew 2>$null | Out-Null
+        Write-Log (T 'LogReleaseRenewOk') "OK"
+        return $true
+    } catch {
+        Write-Log (T 'LogReleaseRenewFail' $_.Exception.Message) "ERROR"
+        return $false
+    }
+}
+
+function Invoke-WgoNetworkRegisterDns {
+    try {
+        & ipconfig.exe /registerdns 2>$null | Out-Null
+        Write-Log (T 'LogRegisterDnsOk') "OK"
+        return $true
+    } catch {
+        Write-Log (T 'LogRegisterDnsFail' $_.Exception.Message) "ERROR"
+        return $false
+    }
+}
+
+function Get-WgoSystemInfo {
+    try {
+        $cpu = Get-CimInstance -ClassName Win32_Processor -ErrorAction Ignore | Select-Object -First 1
+        $os  = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Ignore
+        $ramBytes = (Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Ignore).TotalPhysicalMemory
+        $gpu = Get-CimInstance -ClassName Win32_VideoController -ErrorAction Ignore | Select-Object -First 1
+        $diskType = "Unknown"
+        try {
+            $physDisk = Get-PhysicalDisk -ErrorAction Stop | Select-Object -First 1
+            if ($physDisk) { $diskType = $physDisk.MediaType }
+        } catch { }
+        $battery = Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore | Select-Object -First 1
+        $batteryInfo = if ($battery) { "$($battery.EstimatedChargeRemaining)%" } else { (T 'TxtNoBattery') }
+        [PSCustomObject]@{
+            Cpu       = if ($cpu) { $cpu.Name.Trim() } else { "Unknown" }
+            RamGb     = [math]::Round($ramBytes / 1GB, 1)
+            Gpu       = if ($gpu) { $gpu.Name } else { "Unknown" }
+            OsVersion = if ($os) { "$($os.Caption) ($($os.Version))" } else { "Unknown" }
+            DiskType  = $diskType
+            Battery   = $batteryInfo
+        }
+    } catch {
+        Write-Log (T 'LogSystemInfoFail' $_.Exception.Message) "ERROR"
+        return $null
+    }
+}
+
+function Get-WgoStartupPrograms {
+    $items = @()
+    $runKeys = @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run",
+        "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
+    )
+    foreach ($rk in $runKeys) {
+        if (Test-Path $rk) {
+            $props = Get-ItemProperty -Path $rk -ErrorAction Ignore
+            if ($props) {
+                foreach ($p in $props.PSObject.Properties) {
+                    if ($p.Name -notmatch '^PS(Path|ParentPath|ChildName|Provider)$') {
+                        $items += [PSCustomObject]@{ Name = $p.Name; Command = [string]$p.Value; Source = $rk; Type = "Registry"; Enabled = $true }
+                    }
+                }
+            }
+        }
+        # Items disabled by Set-WgoStartupProgramState are moved into a
+        # "<Run>\WgoDisabled" subkey, so they must be listed separately.
+        $disabledKey = "$rk\WgoDisabled"
+        if (Test-Path $disabledKey) {
+            $disabledProps = Get-ItemProperty -Path $disabledKey -ErrorAction Ignore
+            if ($disabledProps) {
+                foreach ($p in $disabledProps.PSObject.Properties) {
+                    if ($p.Name -notmatch '^PS(Path|ParentPath|ChildName|Provider)$') {
+                        $items += [PSCustomObject]@{ Name = $p.Name; Command = [string]$p.Value; Source = $rk; Type = "Registry"; Enabled = $false }
+                    }
+                }
+            }
+        }
+    }
+    $startupFolders = @(
+        [Environment]::GetFolderPath('Startup'),
+        [Environment]::GetFolderPath('CommonStartup')
+    )
+    foreach ($sf in $startupFolders) {
+        if (Test-Path $sf) {
+            Get-ChildItem -Path $sf -Filter "*.lnk" -Force -ErrorAction Ignore | ForEach-Object {
+                $items += [PSCustomObject]@{ Name = $_.BaseName; Command = $_.FullName; Source = $sf; Type = "Folder"; Enabled = $true }
+            }
+            # Items disabled by Set-WgoStartupProgramState are renamed with a
+            # ".wgodisabled" suffix so Windows stops launching them.
+            Get-ChildItem -Path $sf -Filter "*.lnk.wgodisabled" -Force -ErrorAction Ignore | ForEach-Object {
+                $items += [PSCustomObject]@{ Name = $_.BaseName; Command = ($_.FullName -replace '\.wgodisabled$', ''); Source = $sf; Type = "Folder"; Enabled = $false }
+            }
+        }
+    }
+    return $items | Group-Object Source, Name | ForEach-Object {
+        # If a stale duplicate exists in both the live key and WgoDisabled
+        # (e.g. from a permission failure before this was fixed), trust the
+        # WgoDisabled copy: the user explicitly turned that item off.
+        if ($_.Count -gt 1) { $_.Group | Where-Object { -not $_.Enabled } | Select-Object -First 1 }
+        else { $_.Group[0] }
+    }
+}
+
+function Set-WgoStartupProgramState {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Type,
+        [AllowEmptyString()][string]$Command = "",
+        [Parameter(Mandatory = $true)][bool]$Enable
+    )
+    try {
+        if ($Type -eq "Registry") {
+            $disabledKey = "$Source\WgoDisabled"
+            if ($Enable) {
+                if (Test-Path $disabledKey) {
+                    $val = (Get-ItemProperty -Path $disabledKey -Name $Name -ErrorAction Ignore).$Name
+                    if ($val) {
+                        New-ItemProperty -Path $Source -Name $Name -Value $val -PropertyType String -Force | Out-Null
+                        Remove-ItemProperty -Path $disabledKey -Name $Name -Force -ErrorAction Ignore
+                    }
+                }
+            } else {
+                if (-not (Test-Path $disabledKey)) { New-Item -Path $disabledKey -Force | Out-Null }
+                New-ItemProperty -Path $disabledKey -Name $Name -Value $Command -PropertyType String -Force | Out-Null
+                Remove-ItemProperty -Path $Source -Name $Name -Force -ErrorAction Stop
+            }
+        } else {
+            $disabledPath = "$Command.wgodisabled"
+            if ($Enable) {
+                if (Test-Path $disabledPath) { Rename-Item -LiteralPath $disabledPath -NewName (Split-Path $Command -Leaf) -Force -ErrorAction Ignore }
+            } else {
+                if (Test-Path $Command) { Rename-Item -LiteralPath $Command -NewName "$(Split-Path $Command -Leaf).wgodisabled" -Force -ErrorAction Ignore }
+            }
+        }
+        Write-Log (T 'LogStartupToggled' $Name ($(if ($Enable) { T 'TxtEnabled' } else { T 'TxtDisabled' }))) "OK"
+        return $true
+    } catch {
+        Write-Log (T 'LogStartupError' $Name $_.Exception.Message) "ERROR"
+        return $false
+    }
+}
+
+function New-WgoScheduledOptimization {
+    param(
+        [ValidateSet('Daily','Weekly','Custom')]
+        [string]$Frequency = 'Weekly',
+        [int]$IntervalDays = 3
+    )
+    try {
+        $taskName = "WGO_ScheduledOptimization"
+        $scriptPath = Join-Path $Global:WgoRootPath "WGO.ps1"
+        $action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$scriptPath`" -ScheduledProfile Basic"
+        $trigger = switch ($Frequency) {
+            'Daily'  { New-ScheduledTaskTrigger -Daily -At "03:00" }
+            'Weekly' { New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At "03:00" }
+            'Custom' { New-ScheduledTaskTrigger -Daily -DaysInterval $IntervalDays -At "03:00" }
+        }
+        $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+        Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction Ignore
+        Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force -ErrorAction Stop | Out-Null
+        $label = if ($Frequency -eq 'Custom') { T 'LogSchedFreqCustom' $IntervalDays } else { $Frequency }
+        Write-Log (T 'LogSchedCreatedOk' $label) "OK"
+        return $true
+    } catch {
+        Write-Log (T 'LogSchedCreatedFail' $_.Exception.Message) "ERROR"
+        return $false
+    }
+}
+
 Export-ModuleMember -Function @(
     'New-WgoRestorePoint', 'Remove-WgoBloatware', 'Test-WgoProtectedPackage',
     'Set-WgoLocalSearch', 'Set-WgoVisualEffects', 'Set-WgoPrivacyPolicies',
@@ -1657,5 +2035,8 @@ Export-ModuleMember -Function @(
     'Set-WgoPagefile', 'Get-WgoOptimizedPagefileSize', 'Set-WgoMoreOptimizations',
     'Restore-WgoDefaults', 'Set-WgoServiceMgmt',
     'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp',
-    'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoXboxServices'
+    'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoXboxServices',
+    'Invoke-WgoNetworkReleaseRenew', 'Invoke-WgoNetworkRegisterDns',
+    'Get-WgoSystemInfo', 'Get-WgoStartupPrograms', 'Set-WgoStartupProgramState', 'New-WgoScheduledOptimization',
+    'Get-WgoActiveSchemeGuid'
 )

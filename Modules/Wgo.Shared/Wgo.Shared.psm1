@@ -112,9 +112,9 @@ function Show-WgoConfirm {
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="$([System.Security.SecurityElement]::Escape($Title))" Height="220" Width="440"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="#FF1A1B1E" WindowStyle="None" AllowsTransparency="False"
-        BorderBrush="#FF4CC2FF" BorderThickness="1">
-    <Border Padding="20" Background="#FF1A1B1E">
+        Background="{DynamicResource BgDark}" WindowStyle="None" AllowsTransparency="False"
+        BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1">
+    <Border Padding="20">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -123,18 +123,16 @@ function Show-WgoConfirm {
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
-                <Ellipse Width="10" Height="10" Fill="#FF4CC2FF" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBlock x:Name="txtDialogTitle" Text="$([System.Security.SecurityElement]::Escape($Title))" Foreground="#FF4CC2FF" FontWeight="SemiBold" FontSize="14"/>
+                <Ellipse Width="10" Height="10" Fill="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="txtDialogTitle" Text="$([System.Security.SecurityElement]::Escape($Title))" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="14"/>
             </StackPanel>
 
             <TextBlock x:Name="txtDialogMessage" Grid.Row="1" Text="$([System.Security.SecurityElement]::Escape($Message))"
-                       Foreground="#FFF3F4F6" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13"/>
+                       Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13"/>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                <Button x:Name="btnDialogNo" Content="No" Width="90" Height="34" Margin="0,0,10,0"
-                        Background="#FF2B2D31" Foreground="#FFF3F4F6" BorderBrush="#FF3A3C41" BorderThickness="1"/>
-                <Button x:Name="btnDialogYes" Content="Yes" Width="90" Height="34"
-                        Background="#FF4CC2FF" Foreground="#FF0B0B0B" BorderBrush="#FF4CC2FF" BorderThickness="1" FontWeight="Bold"/>
+                <Button x:Name="btnDialogNo" Content="$([System.Security.SecurityElement]::Escape((T 'BtnNo')))" Width="90" Height="34" Margin="0,0,10,0" Style="{DynamicResource SecondaryButtonStyle}"/>
+                <Button x:Name="btnDialogYes" Content="$([System.Security.SecurityElement]::Escape((T 'BtnYes')))" Width="90" Height="34"/>
             </StackPanel>
         </Grid>
     </Border>
@@ -143,6 +141,7 @@ function Show-WgoConfirm {
 
     $dlgReader = New-Object System.Xml.XmlNodeReader $dialogXaml
     $dlg = [Windows.Markup.XamlReader]::Load($dlgReader)
+    $dlg.Resources = $Global:WgoUI_Window.Resources
     try { $dlg.Owner = $Global:WgoUI_Window } catch { }
 
     $btnYes = $dlg.FindName('btnDialogYes')
@@ -177,6 +176,7 @@ function Start-WgoBackgroundTask {
     $rs.SessionStateProxy.SetVariable('BloatwareTargets', $BloatwareTargets)
     $rs.SessionStateProxy.SetVariable('BloatwareCriticalProtect', $BloatwareCriticalProtect)
     $rs.SessionStateProxy.SetVariable('ErrorActionPreference', 'Stop')
+    $rs.SessionStateProxy.SetVariable('PSNativeCommandUseErrorActionPreference', $false)
 
     $ps = [powershell]::Create()
     $ps.Runspace = $rs
@@ -212,7 +212,8 @@ function Start-WgoBackgroundTask {
             try { $rs.Dispose() } catch {}
             if ($OnCompleted) {
                 try { & $OnCompleted } catch {
-                    Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
+                    $detail = "$($_.Exception.GetType().FullName): $($_.Exception.Message) | At=$($_.ScriptStackTrace -replace '[\r\n]+',' ')"
+                    Write-Log (T 'LogUnhandledError' $detail) "ERROR"
                 }
             }
         }
