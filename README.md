@@ -1,174 +1,116 @@
 # WGO - Windows General Optimizations
 
-**WGO** is a comprehensive, all-in-one optimization toolkit for Windows 10 and 11. It brings together system tweaks, privacy hardening, bloatware removal, application installation, diagnostics, and recovery utilities into a single, easy-to-use graphical interface.
-
-> **⚠️ Important**  
-> WGO modifies system settings, registry keys, and services. While it creates a System Restore Point before making changes, please review each option carefully. Risky tweaks (which weaken security or update mechanisms) are clearly marked and require explicit confirmation.
-
----
-
-## ✨ Key Features
-
-### 🧹 Optimizations & Privacy
-- **Bloatware Removal** – Uninstall pre-installed apps (AI apps, Copilot, Recall, Paint 3D, Your Phone, Teams, etc.) while keeping essential components like Store, Xbox, Edge/WebView2, and runtimes.
-- **Search & Visuals** – Force 100% local search (disable Bing/Edge web search) and apply a performance-oriented visual effects profile.
-- **Deep Privacy** – Block telemetry, Windows Error Reporting (WER), CEIP, Activity Feed, location services, and advertising ID via Group Policy.
-- **Additional Telemetry Blocking** – Disable DiagTrack/dmwappushservice, Copilot/Recall, input personalization, and clipboard cloud sync.
-- **Driver & Pagefile** – Block automatic driver installation via Windows Update and set an optimized static pagefile size based on installed RAM.
-
-### ⚡ Advanced System Tweaks
-- Disable Edge preload and Widgets.
-- Disable Delivery Optimization (P2P).
-- Suspend UWP background apps.
-- Network latency reduction (TCP/IP tuning).
-
-### 🛠 Service Management & Cleanup
-- Disable SysMain (SuperFetch) – frees RAM/CPU, recommended for SSDs.
-- Disable Windows Search (WSearch) – stops file indexing.
-- Disable Print Spooler (if no printer is used).
-- Clean the WinSxS component store to reclaim disk space.
-
-### 🧼 System Cleanup & Performance
-- Disable Hibernation (frees `hiberfil.sys`).
-- Set power plan to High Performance.
-- Clean temporary files, old Prefetch, Windows.old, and Windows Update cache.
-- Disable Snap Assist / Aero Shake.
-- Reduce boot menu timeout to 5 seconds.
-- Block Office and OneDrive telemetry.
-- Remove additional telemetry scheduled tasks.
-- Auto-configure TRIM for SSDs and scheduled defrag for HDDs.
-- Enable Game Mode and Hardware-Accelerated GPU Scheduling (HAGS).
-- Enable Ultimate Performance power plan (CPU min state at 100%).
-- Prioritize foreground games (kernel + MMCSS).
-- Disable Xbox Game DVR background recording.
-- Reduce input lag (disable mouse acceleration, Sticky/Filter Keys popups, Fullscreen Optimizations).
-- Exclude junk/cache folders from Windows Search indexing.
-- Remove hidden/ghost network adapters from Device Manager.
-- Disable Fast Startup (prevents RAM leaks across reboots).
-- Set low-value background services (PcaSvc, WerSvc, wisvc, RetailDemo) to Manual.
-- Clear Standby List memory cache instantly.
-- Optimise system cache for high-RAM systems (8GB+).
-
-### 🕵️ Additional Privacy & Cleanup
-- Block telemetry domains via the hosts file.
-- Disable Shared Experiences and Cortana completely.
-- Clear icon and font cache.
-- Remove People bar, News & Interests icon, and Ink Workspace.
-- Disable TCP window autotuning.
-- Set Cloudflare DNS and enable DNS over HTTPS (DoH).
-- Skip pagefile clearing on shutdown (faster shutdown).
-- Disable Prefetch on SSDs (auto-detected).
-- Remove the "Windows Backup" app (not removable from Settings).
-- Reset TCP/IP stack (fixes network connectivity issues).
-
-### ⚠️ Risky Tweaks (Advanced)
-These options weaken Windows security or update mechanisms. They are **not** recommended unless you fully understand the consequences.
-- Disable User Account Control (UAC).
-- Disable SmartScreen (Windows and Edge).
-- Disable Windows Defender real-time protection.
-- Disable the Windows Update service.
-- Disable BITS (Background Intelligent Transfer).
-
-### 📦 App Installer
-Install popular applications directly from the UI using **winget** (built into Windows) with automatic fallback to **Chocolatey**.
-- **Browsers:** Firefox, Brave
-- **File & Archive:** NanaZip, 7-Zip, Notepad++, WizTree
-- **Downloads & Torrents:** Free Download Manager, qBittorrent
-- **Gaming & Streaming:** Steam, Epic Games Launcher, GOG Galaxy, Moonlight, Sunshine
-- **System Monitoring & Cleanup:** CPU-Z, HWMonitor, Mem Reduct, BleachBit
-- **Productivity & Customization:** Nilesoft Shell, Optiscaler Client, Flow Launcher, ShareX
-
-> **Note:** If winget fails for any application, WGO automatically falls back to Chocolatey. You can install Chocolatey with one click from the UI.
-
-### 🔧 Utilities & Diagnostics
-- **Restart Utilities:** Safe Mode with Networking, UEFI Firmware Settings, Normal Restart.
-- **Hidden Windows Tools:** Disk Cleanup, Resource Monitor, Optimize Drives, Windows Memory Diagnostic.
-- **System Diagnostics:** Run DISM /RestoreHealth and SFC /scannow to repair system files.
-- **Network Tools:** Flush DNS cache.
-
-### 🧩 External Scripts (Third-Party)
-Launch independent open-source scripts in their own windows (each requests admin rights separately):
-- **AMD Stability Optimizer** – Fixes common AMD Radeon driver crashes, black screens, and stutter.
-- **Microsoft Activation Scripts (MAS)** – Community tool for activating Windows and Office (HWID, KMS38, Online KMS).
-- **UniGetUI** – Opens the official download page for a graphical package manager (supports WinGet, Chocolatey, Scoop, etc.).
-
-### 🌐 Multi-Language Support
-WGO currently supports:
-- English (en-US)
-- Portuguese (pt-BR)
-- Spanish (es-ES)
-- Chinese (zh-CN)
+**WGO** is a free, open‑source all‑in‑one tool that cleans, speeds up, and hardens Windows 10/11 – all from a clean graphical interface.  
+It removes bloatware, blocks telemetry, applies performance tweaks, installs apps, and offers system recovery tools.  
+Just check what you want, click **Run Selected Optimizations**, and WGO handles the rest – while creating a restore point automatically.
 
 ---
 
 ## 🚀 How to Run
 
-### Option 1 – One‑Line Online Install (Recommended)
-
-Open **PowerShell as Administrator** and run:
+### One‑line online (recommended)
+Open **PowerShell as Administrator** and paste:
 
 ```powershell
 irm https://raw.githubusercontent.com/Khotyz/WGO/main/WGO.ps1 | iex
 ```
 
-This command downloads the entire repository into a temporary folder and launches the graphical interface with full administrator privileges. No files are left behind after the script exits (unless you save profiles).
+This downloads the latest version to a temporary folder, starts the UI, and cleans up after itself.
 
-### Option 2 – Download the Latest Release
+### Manual install
+- Download `WGO.zip` from the [Releases](https://github.com/Khotyz/WGO/releases/latest) page.
+- Extract it anywhere.
+- Right‑click `WGO.ps1` → **Run with PowerShell**.
 
-1. Visit the [Releases page](https://github.com/Khotyz/WGO/releases/latest).
-2. Download the `WGO.zip` file (or the source code).
-3. Extract the archive to a folder of your choice.
-4. Right-click `WGO.ps1` and select **Run with PowerShell** (or open PowerShell as Admin, navigate to the folder, and run `.\WGO.ps1`).
+> The script auto‑elevates to Administrator if needed.
+
+---
+
+## ✨ Key Features
+
+### 🧹 Privacy & Bloatware
+- Remove pre‑installed apps (Copilot, Recall, Paint 3D, Your Phone, etc.) while keeping Store, Xbox, Edge/WebView2, and runtimes.
+- Force 100% local search (disable Bing/Edge web results).
+- Block telemetry, WER, CEIP, Activity Feed, and location via Group Policy.
+- Disable advertising ID, tailored experiences, Copilot/Recall, and input personalisation.
+- Block telemetry domains via the `hosts` file.
+- Disable Shared Experiences, Cortana, and Windows Spotlight.
+
+### ⚡ Performance
+- Apply a performance visual‑effects profile (disable animations, shadows, transparency).
+- Set power plan to **High Performance** or **Ultimate Performance** (CPU min state 100%).
+- Disable Hibernation, Fast Startup, SysMain (SuperFetch), and Windows Search indexing.
+- Reduce input lag (mouse acceleration, Sticky Keys, Fullscreen Optimizations).
+- Reduce network latency (TCP/IP tuning, disable Nagle, IPv6, TCP autotuning).
+- Increase timer resolution to 0.5ms.
+- Optimise system cache for 8GB+ RAM.
+
+### 🛠️ Service & Driver Management
+- Block automatic driver updates via Windows Update.
+- Disable unnecessary services: Print Spooler, SysMain, WSearch, Xbox services, BITS, Windows Update, etc.
+- Set low‑value services (PcaSvc, WerSvc, wisvc, RetailDemo) to Manual.
+- Clean the WinSxS component store.
+
+### 💾 Memory & Disk
+- Instantly clear Standby List (frees cached RAM).
+- Auto‑clean Standby List every 5 minutes (scheduled task).
+- Configure TRIM for SSDs and scheduled defrag for HDDs.
+- Clean temporary files, Prefetch, Windows.old, and Windows Update cache.
+- Clear icon/font cache, event logs, minidumps, and Store cache.
+
+### 🔧 AMD Radeon Fixes (dedicated tab)
+- Disable ULPS, MPO, HDCP, AMD Crash Defender, and AMD telemetry.
+- Extend TDR timeout to prevent black screens and crashes.
+- Fix browser/Electron hardware acceleration (crashes/flicker).
+
+### 📦 App Installer
+- Install popular apps via **winget** (built into Windows) with automatic fallback to **Chocolatey**:
+  - Browsers: Firefox, Brave
+  - Files & archives: NanaZip, 7‑Zip, Notepad++, WizTree
+  - Downloads: Free Download Manager, qBittorrent
+  - Gaming: Steam, Epic Games Launcher, GOG Galaxy, Moonlight, Sunshine
+  - Monitoring: CPU‑Z, HWMonitor, Mem Reduct, BleachBit, DNS Jumper
+  - Productivity: Nilesoft Shell, Optiscaler Client, Flow Launcher, ShareX
+
+### 🧰 Utilities & Recovery
+- Create System Restore Points.
+- Restart to Safe Mode with Networking, UEFI firmware, or normally.
+- Run DISM and SFC to repair system files.
+- Flush DNS, release/renew IP, register DNS.
+- Manage startup programs (enable/disable).
+- Schedule automatic optimisations (daily, weekly, or custom).
+- View system info (CPU, RAM, GPU, OS, disk type, battery health).
+
+### 🧾 Profiles & Safety
+- Predefined profiles: Basic, Laptop, Gamer, Privacy, eSports, Maximum.
+- Export/import your own settings as JSON.
+- Last‑run state is saved automatically (`%LOCALAPPDATA%\WGO\last-run.json`).
+- **Dry‑run mode** – see what would be changed without applying anything.
+- **Risky tweaks** (disable UAC, Defender, Firewall, etc.) are clearly marked and require explicit confirmation.
+- Restore defaults per category: All, Privacy, Network, Services, Visual, or AMD.
 
 ---
 
 ## 📋 Requirements
 
-- **Windows 10 / 11** (64-bit recommended).
-- **PowerShell 5.1** or later (built into Windows).
-- **Administrator privileges** – the script will automatically request elevation.
+- Windows 10 / 11 (64‑bit recommended)
+- PowerShell 5.1 or later (built‑in)
+- Administrator privileges (auto‑requested)
 
 ---
 
 ## 🛡️ Safety First
 
-- **System Restore Point** – A restore point is created automatically before applying any changes (unless you disable it).
-- **Dry Run Mode** – Check the *"Dry Run"* box to see what would be changed without actually applying anything.
-- **Profile Export/Import** – Save your current selections as a JSON profile and restore them later.
-- **Restore Defaults** – The *"Restore Defaults"* button reverts all registry and service modifications made by WGO (except for installed applications and manual file deletions).
-
----
-
-## 🧠 How It Works Under the Hood
-
-WGO is modular, consisting of several PowerShell modules:
-
-| Module | Purpose |
-|--------|---------|
-| `Wgo.Core` | Core optimization functions (bloatware removal, privacy, visual effects, pagefile, etc.). |
-| `Wgo.AppInstaller` | Application installation via winget and Chocolatey. |
-| `Wgo.Profile` | Profile import/export and last-run state persistence. |
-| `Wgo.Utilities` | Launch external scripts (MAS, AMD Optimizer). |
-| `Wgo.Shared` | Translation, logging, UI helpers, and background task runner. |
-| `Wgo.Services` | Service management and system integrity (DISM, SFC, DNS flush). |
-| `Wgo.Native` | Native P/Invoke calls (e.g., clearing Standby List). |
-| `Wgo.UI` | WPF interface, themes, language switching, and event handling. |
-
-All modules are loaded dynamically from the `Modules/` folder. The interface is defined in `xaml/MainWindow.xaml` and supports light/dark themes.
+- A **System Restore Point** is created automatically before any change.
+- All actions are logged in real‑time.
+- You can revert changes with the **Restore Defaults** button.
 
 ---
 
 ## 📄 License
 
-This project is open-source (MIT License). Feel free to contribute or adapt it for your own needs.
+MIT – see the [LICENSE](LICENSE) file.
 
 ---
 
-## 🙋 Support & Feedback
-
-- Open an issue on [GitHub Issues](https://github.com/Khotyz/WGO/issues)
-- Pull requests are welcome!
-
----
-
-**Enjoy a cleaner, faster, and more private Windows experience with WGO!**
+**Enjoy a cleaner, faster, and more private Windows!**
