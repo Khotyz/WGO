@@ -486,6 +486,20 @@ function Set-WgoPagefile {
     }
 }
 
+function Get-WgoGpuVendor {
+    # Cached after first call since GPU hardware doesn't change mid-session.
+    if ($Global:WgoGpuVendorCache) { return $Global:WgoGpuVendorCache }
+    $vendor = 'Unknown'
+    try {
+        $names = (Get-CimInstance -ClassName Win32_VideoController -ErrorAction Stop).Name
+        if ($names -match 'AMD|Radeon') { $vendor = 'AMD' }
+        elseif ($names -match 'NVIDIA|GeForce|Quadro') { $vendor = 'NVIDIA' }
+        elseif ($names -match 'Intel') { $vendor = 'Intel' }
+    } catch { }
+    $Global:WgoGpuVendorCache = $vendor
+    return $vendor
+}
+
 function Get-WgoActiveSchemeGuid {
     # Safely extracts the active power scheme GUID; returns $null instead of
     # throwing "cannot index into a null array" when powercfg's output
@@ -700,11 +714,7 @@ function Set-WgoMoreOptimizations {
                 # HAGS (HwSchMode) has a long history of causing crashes/instability
                 # with several AMD Adrenalin driver builds. Only enable it on
                 # non-AMD GPUs; Game Mode above is unrelated and always safe.
-                $isAmdGpu = $false
-                try {
-                    $isAmdGpu = [bool](Get-CimInstance -ClassName Win32_VideoController -ErrorAction Stop |
-                        Where-Object { $_.Name -match 'AMD|Radeon' })
-                } catch { }
+                $isAmdGpu = (Get-WgoGpuVendor) -eq 'AMD'
                 if ($isAmdGpu) {
                     Write-Log (T 'LogHagsSkippedAmd') "WARN"
                 } else {
@@ -994,7 +1004,7 @@ function Set-WgoMoreOptimizations {
 
 function Restore-WgoDefaults {
     param(
-        [ValidateSet('All','Privacy','Network','Services','Visual')]
+        [ValidateSet('All','Privacy','Network','Services','Visual','Amd')]
         [string]$Category = 'All'
     )
     Write-Log (T 'LogRestoreDefaultsStart' $Category) "INFO"
@@ -1114,6 +1124,24 @@ function Restore-WgoDefaults {
             foreach ($task in $tasksToReenable) {
                 try { Enable-ScheduledTask -TaskPath (Split-Path $task) -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
             }
+        }
+        if ($Category -in @('All','Amd')) {
+            $ulpsEntries = Get-ChildItem -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Recurse -ErrorAction Ignore |
+                Get-ItemProperty -Name "EnableUlps" -ErrorAction Ignore
+            foreach ($entry in $ulpsEntries) { Set-ItemProperty -Path $entry.PSPath -Name "EnableUlps" -Value 1 -ErrorAction Ignore }
+            if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\Dwm") { Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Dwm" -Name "OverlayTestMode" -Force -ErrorAction Ignore }
+            $gfxPath = "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers"
+            if (Test-Path $gfxPath) {
+                Remove-ItemProperty -Path $gfxPath -Name "TdrDelay" -Force -ErrorAction Ignore
+                Remove-ItemProperty -Path $gfxPath -Name "TdrDdiDelay" -Force -ErrorAction Ignore
+                New-ItemProperty -Path $gfxPath -Name "HwSchMode" -Value 2 -PropertyType DWord -Force | Out-Null
+            }
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Google\Chrome" -Name "UseAngle" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "UseAngle" -Force -ErrorAction Ignore
+            $crashDefenderSvc = Get-Service -ErrorAction Ignore | Where-Object { $_.Name -match 'Crash\s*Defender' -or $_.DisplayName -match 'Crash\s*Defender' } | Select-Object -First 1
+            if ($crashDefenderSvc) { Set-Service -Name $crashDefenderSvc.Name -StartupType Automatic -ErrorAction Ignore }
+            Get-Service -ErrorAction Ignore | Where-Object { $_.DisplayName -match 'AMD External Events|AMD User Experience' } |
+                ForEach-Object { Set-Service -Name $_.Name -StartupType Automatic -ErrorAction Ignore }
         }
         Write-Log (T 'LogRestoreDefaultsOk') "OK"
     } catch {
@@ -2038,5 +2066,5 @@ Export-ModuleMember -Function @(
     'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoXboxServices',
     'Invoke-WgoNetworkReleaseRenew', 'Invoke-WgoNetworkRegisterDns',
     'Get-WgoSystemInfo', 'Get-WgoStartupPrograms', 'Set-WgoStartupProgramState', 'New-WgoScheduledOptimization',
-    'Get-WgoActiveSchemeGuid'
+    'Get-WgoActiveSchemeGuid', 'Get-WgoGpuVendor'
 )

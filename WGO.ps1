@@ -147,7 +147,10 @@ $Global:WgoSharedFunctionNames = @(
     'Test-WgoAppInstalled', 'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp',
     'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoTimerResolutionNative',
     'Set-WgoXboxServices', 'Invoke-WgoNetworkReleaseRenew',
-    'Invoke-WgoNetworkRegisterDns', 'New-WgoScheduledOptimization', 'Get-WgoActiveSchemeGuid'
+    'Invoke-WgoNetworkRegisterDns', 'New-WgoScheduledOptimization', 'Get-WgoActiveSchemeGuid',
+    'Get-WgoGpuVendor', 'Set-WgoAmdUlps', 'Set-WgoAmdMpo', 'Set-WgoAmdTdr', 'Set-WgoAmdCrashDefender',
+    'Set-WgoAmdHdcp', 'Set-WgoAmdTelemetry', 'Set-WgoAmdHwAccel',
+    'Get-WgoAmdUlpsEntries', 'Get-WgoAmdCrashDefenderService', 'Get-WgoAmdDriverSubkeys', 'Get-WgoAmdTelemetryServices'
 )
 
 # ============================================================================
@@ -167,6 +170,7 @@ try {
         "Wgo.Shared",
         "Wgo.Native",
         "Wgo.Core",
+        "Wgo.Amd",
         "Wgo.Services",
         "Wgo.AppInstaller",
         "Wgo.Utilities",

@@ -19,7 +19,8 @@ $Global:WgoUI_OptimizationCheckboxNames = @(
     'chkDoH','chkFastShutdown','chkPrefetchSSD','chkRemoveWinBackup','chkTcpIpReset',
     'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer',
     'chkClearEventLogs','chkDeleteMinidump','chkClearStoreCache',
-    'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight'
+    'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight',
+    'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel'
 )
 
 # Risky tweaks are intentionally excluded from Select All, profile presets, and
@@ -28,6 +29,12 @@ $Global:WgoUI_RiskyCheckboxNames = @(
     'chkRiskyUAC','chkRiskySmartScreen','chkRiskyDefenderRT','chkRiskyWinUpdateSvc','chkRiskyBits',
     'chkRiskyDisableFirewall','chkRiskyDisableDEP','chkRiskyNvidiaMaxPerf'
 )
+
+# Vendor-specific checkboxes are added/removed from profile presets at runtime
+# based on the detected GPU (see Set-WgoUIProfilePreset), since a static
+# profile list can't know the hardware in advance.
+$Global:WgoUI_NvidiaOnlyCheckboxNames = @('chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry')
+$Global:WgoUI_AmdOnlyCheckboxNames = @('chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel')
 
 $Global:WgoUI_Profiles = @{
     Basic = @(
@@ -55,7 +62,8 @@ $Global:WgoUI_Profiles = @{
         'chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
         'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup','chkResidualServices','chkStandbyListClean',
         'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning','chkLargeSystemCache',
-        'chkAutoStandbyClean','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle'
+        'chkAutoStandbyClean','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle',
+        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel'
     )
     Privacy = @(
         'chkBloat','chkSearch','chkPrivacy',
@@ -74,7 +82,8 @@ $Global:WgoUI_Profiles = @{
         'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning',
         'chkDisableCoreParking','chkTimerResolution','chkHungAppTimeout',
         'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
-        'chkDisableNagle','chkRssOptimize'
+        'chkDisableNagle','chkRssOptimize',
+        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel'
     )
 }
 
@@ -130,6 +139,7 @@ function Update-WgoUILanguage {
     $c['btnThemeToggle'].Content                     = if ($Global:WgoCurrentTheme -eq 'Light') { $t.BtnThemeDark } else { $t.BtnThemeLight }
     $c['txtLogHeader'].Text                          = $t.LogHeader
     $c['tabOptimizations'].Header                    = $t.TabOptimizations
+    $c['tabAmdGpu'].Header                            = $t.TabAmdGpu
     $c['tabInstaller'].Header                        = $t.TabInstaller
     $c['tabExternalScripts'].Header                  = $t.TabExternalScripts
     $c['tabUtilities'].Header                        = $t.TabUtilities
@@ -313,7 +323,7 @@ function Update-WgoUILanguage {
     $c['btnRestoreDefaults'].ToolTip                 = $t.TipRestoreDefaults
     $c['lblRestoreCategory'].Text                    = $t.LblRestoreCategory
     $c['cmbRestoreCategory'].ToolTip                 = $t.TipRestoreDefaults
-    $catLabels = @{ All = $t.TxtCatAll; Privacy = $t.TxtCatPrivacy; Network = $t.TxtCatNetwork; Services = $t.TxtCatServices; Visual = $t.TxtCatVisual }
+    $catLabels = @{ All = $t.TxtCatAll; Privacy = $t.TxtCatPrivacy; Network = $t.TxtCatNetwork; Services = $t.TxtCatServices; Visual = $t.TxtCatVisual; Amd = $t.TxtCatAmd }
     foreach ($catItem in $c['cmbRestoreCategory'].Items) { if ($catLabels.ContainsKey($catItem.Tag)) { $catItem.Content = $catLabels[$catItem.Tag] } }
     $c['btnExportProfile'].Content                   = $t.BtnExportProfile
     $c['btnImportProfile'].Content                   = $t.BtnImportProfile
@@ -375,9 +385,30 @@ function Update-WgoUILanguage {
     $c['txtUniGetUIDesc'].Text                       = $t.TxtUniGetUIDesc
     $c['btnRunUniGetUI'].Content                     = $t.BtnRunUniGetUI
     $c['txtExtScriptsWarning'].Text                  = $t.TxtExtScriptsWarning
-    $c['txtAmdOptimizerTitle'].Text                  = $t.TxtAmdOptimizerTitle
-    $c['txtAmdOptimizerDesc'].Text                   = $t.TxtAmdOptimizerDesc
-    $c['btnRunAmdOptimizer'].Content                 = $t.BtnRunAmdOptimizer
+    $c['txtAmdGpuBanner'].Text                       = $t.TxtAmdGpuBanner
+    $c['grpAmdGpu'].Header                            = $t.GrpAmdGpu
+    $c['chkAmdUlps'].Content                          = $t.ChkAmdUlps
+    $c['chkAmdUlps'].ToolTip                          = $t.TipAmdUlps
+    $c['chkAmdMpo'].Content                           = $t.ChkAmdMpo
+    $c['chkAmdMpo'].ToolTip                           = $t.TipAmdMpo
+    $c['chkAmdTdr'].Content                           = $t.ChkAmdTdr
+    $c['chkAmdTdr'].ToolTip                           = $t.TipAmdTdr
+    $c['chkAmdCrashDefender'].Content                 = $t.ChkAmdCrashDefender
+    $c['chkAmdCrashDefender'].ToolTip                 = $t.TipAmdCrashDefender
+    $c['chkAmdHdcp'].Content                          = $t.ChkAmdHdcp
+    $c['chkAmdHdcp'].ToolTip                          = $t.TipAmdHdcp
+    $c['chkAmdTelemetry'].Content                     = $t.ChkAmdTelemetry
+    $c['chkAmdTelemetry'].ToolTip                     = $t.TipAmdTelemetry
+    $c['chkAmdHwAccel'].Content                       = $t.ChkAmdHwAccel
+    $c['chkAmdHwAccel'].ToolTip                       = $t.TipAmdHwAccel
+    $amdVendor = Get-WgoGpuVendor
+    if ($amdVendor -eq 'AMD') {
+        $c['txtAmdGpuBanner'].Text = $t.TxtAmdGpuBannerDetected
+        $c['grpAmdGpu'].IsEnabled = $true
+    } else {
+        $c['txtAmdGpuBanner'].Text = $t.TxtAmdGpuBanner
+        $c['grpAmdGpu'].IsEnabled = $false
+    }
     $c['txtMassgraveTitle'].Text                     = $t.TxtMassgraveTitle
     $c['txtMassgraveDesc'].Text                      = $t.TxtMassgraveDesc
     $c['btnRunMassgrave'].Content                    = $t.BtnRunMassgrave
@@ -450,10 +481,15 @@ function Set-WgoUIProfilePreset {
         [string]$ProfileLabel
     )
     $c = $Global:WgoUI_Ctrl
-    foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
-        if ($c[$n]) { $c[$n].IsChecked = ($EnabledNames -contains $n) }
+    $vendor = Get-WgoGpuVendor
+    $filtered = $EnabledNames | Where-Object {
+        (-not ($Global:WgoUI_NvidiaOnlyCheckboxNames -contains $_) -or $vendor -eq 'NVIDIA') -and
+        (-not ($Global:WgoUI_AmdOnlyCheckboxNames -contains $_) -or $vendor -eq 'AMD')
     }
-    $c['chkSelectAll'].IsChecked = ($EnabledNames.Count -ge $Global:WgoUI_OptimizationCheckboxNames.Count)
+    foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
+        if ($c[$n]) { $c[$n].IsChecked = ($filtered -contains $n) }
+    }
+    $c['chkSelectAll'].IsChecked = ($filtered.Count -ge $Global:WgoUI_OptimizationCheckboxNames.Count)
     Write-Log (T 'LogProfileApplied' $ProfileLabel (T 'BtnRunSelected')) "INFO"
 }
 
@@ -654,7 +690,7 @@ function Initialize-WgoUI {
     $c = $Global:WgoUI_Ctrl
     $names = @(
         'txtAppTitle','txtLblLanguage','cmbLanguage','btnThemeToggle','txtLogHeader','scrollLog','txtLog',
-        'tabOptimizations','tabInstaller','tabExternalScripts','tabUtilities',
+        'tabOptimizations','tabAmdGpu','tabInstaller','tabExternalScripts','tabUtilities',
         'chkSelectAll','chkDryRun',
         'grpRestore','btnCreateRestore',
         'grpBloat','chkBloat',
@@ -698,7 +734,7 @@ function Initialize-WgoUI {
         'chkFlowLauncher','txtFlowLauncherDesc',
         'chkShareX','txtShareXDesc',
         'txtExtScriptsWarning',
-        'txtAmdOptimizerTitle','txtAmdOptimizerDesc','btnRunAmdOptimizer',
+        'txtAmdGpuBanner','grpAmdGpu','chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel',
         'txtMassgraveTitle','txtMassgraveDesc','btnRunMassgrave',
         'txtUniGetUITitle','txtUniGetUIDesc','btnRunUniGetUI',
         'grpUtilities','txtSafeModeNetTitle','txtSafeModeNetDesc','btnSafeModeNet',
@@ -879,6 +915,13 @@ function Initialize-WgoUI {
         $doPauseUpdates = [bool]$c['chkPauseUpdates'].IsChecked
         $doDisableEdgeTelemetry = [bool]$c['chkDisableEdgeTelemetry'].IsChecked
         $doDisableSpotlight = [bool]$c['chkDisableSpotlight'].IsChecked
+        $doAmdUlps = [bool]$c['chkAmdUlps'].IsChecked
+        $doAmdMpo = [bool]$c['chkAmdMpo'].IsChecked
+        $doAmdTdr = [bool]$c['chkAmdTdr'].IsChecked
+        $doAmdCrashDefender = [bool]$c['chkAmdCrashDefender'].IsChecked
+        $doAmdHdcp = [bool]$c['chkAmdHdcp'].IsChecked
+        $doAmdTelemetry = [bool]$c['chkAmdTelemetry'].IsChecked
+        $doAmdHwAccel = [bool]$c['chkAmdHwAccel'].IsChecked
         $doHungAppTimeout = [bool]$c['chkHungAppTimeout'].IsChecked
         $doDisableCoreParking = [bool]$c['chkDisableCoreParking'].IsChecked
         $doDisableHPET = [bool]$c['chkDisableHPET'].IsChecked
@@ -935,6 +978,7 @@ function Initialize-WgoUI {
                   $doDisableXboxServices,
                   $doClearEventLogs, $doDeleteMinidump, $doClearStoreCache,
                   $doPauseUpdates, $doDisableEdgeTelemetry, $doDisableSpotlight,
+                  $doAmdUlps, $doAmdMpo, $doAmdTdr, $doAmdCrashDefender, $doAmdHdcp, $doAmdTelemetry, $doAmdHwAccel,
                   $doDryRun)
             try {
                 Write-Log (T 'LogOptStart') "INFO"
@@ -996,7 +1040,14 @@ function Initialize-WgoUI {
                         @{ Flag = $doDisableXboxServices; Key = 'ChkDisableXboxServices' },
                         @{ Flag = $doPauseUpdates;        Key = 'ChkPauseUpdates' },
                         @{ Flag = $doDisableEdgeTelemetry; Key = 'ChkDisableEdgeTelemetry' },
-                        @{ Flag = $doDisableSpotlight;     Key = 'ChkDisableSpotlight' }
+                        @{ Flag = $doDisableSpotlight;     Key = 'ChkDisableSpotlight' },
+                        @{ Flag = $doAmdUlps;              Key = 'ChkAmdUlps' },
+                        @{ Flag = $doAmdMpo;               Key = 'ChkAmdMpo' },
+                        @{ Flag = $doAmdTdr;               Key = 'ChkAmdTdr' },
+                        @{ Flag = $doAmdCrashDefender;     Key = 'ChkAmdCrashDefender' },
+                        @{ Flag = $doAmdHdcp;              Key = 'ChkAmdHdcp' },
+                        @{ Flag = $doAmdTelemetry;         Key = 'ChkAmdTelemetry' },
+                        @{ Flag = $doAmdHwAccel;           Key = 'ChkAmdHwAccel' }
                     )
                     foreach ($item in $dryItems) {
                         if ($item.Flag) { Write-Log (T 'LogDryRunPrefix' (T $item.Key)) "INFO" }
@@ -1040,6 +1091,13 @@ function Initialize-WgoUI {
                         -DisableDefenderRT $doRiskyDefenderRT -DisableWinUpdateSvc $doRiskyWinUpdateSvc -DisableBits $doRiskyBits `
                         -DisableFirewall $doRiskyDisableFirewall -DisableDEP $doRiskyDisableDEP -NvidiaMaxPerf $doRiskyNvidiaMaxPerf
                     Set-WgoXboxServices -DisableXboxServices $doDisableXboxServices
+                    if ($doAmdUlps) { Set-WgoAmdUlps }
+                    if ($doAmdMpo) { Set-WgoAmdMpo }
+                    if ($doAmdTdr) { Set-WgoAmdTdr }
+                    if ($doAmdCrashDefender) { Set-WgoAmdCrashDefender }
+                    if ($doAmdHdcp) { Set-WgoAmdHdcp }
+                    if ($doAmdTelemetry) { Set-WgoAmdTelemetry }
+                    if ($doAmdHwAccel) { Set-WgoAmdHwAccel }
                     Set-WgoMoreOptimizations -Hibernation $doHibernation -PowerPlan $doPowerPlan `
                         -TempCleanup $doTempCleanup -HotCorners $doHotCorners `
                         -BootTimeout $doBootTimeout -OfficeTelemetry $doOfficeTelemetry `
@@ -1077,6 +1135,7 @@ function Initialize-WgoUI {
                            $doDisableXboxServices,
                            $doClearEventLogs, $doDeleteMinidump, $doClearStoreCache,
                            $doPauseUpdates, $doDisableEdgeTelemetry, $doDisableSpotlight,
+                           $doAmdUlps, $doAmdMpo, $doAmdTdr, $doAmdCrashDefender, $doAmdHdcp, $doAmdTelemetry, $doAmdHwAccel,
                            $doDryRun) `
           -OnCompleted {
             $Global:WgoUI_Ctrl['btnRunSelected'].IsEnabled = $true
@@ -1086,7 +1145,8 @@ function Initialize-WgoUI {
                 $doVisual, $doPagefile, $doKernelGamingPriority, $doUltimatePerf,
                 $doDisableSysMain, $doDisableWSearch, $doDisableSpooler,
                 $doRiskyUAC, $doRiskyWinUpdateSvc, $doLargeSystemCache,
-                $doDisableHPET, $doRiskyDisableDEP
+                $doDisableHPET, $doRiskyDisableDEP,
+                $doAmdUlps, $doAmdTdr, $doAmdHwAccel
             )
             if (-not $doDryRun -and ($restartRequiredFlags -contains $true)) {
                 & $restartPromptFn
@@ -1228,10 +1288,6 @@ function Initialize-WgoUI {
     })
 
     # External scripts
-    $c['btnRunAmdOptimizer'].Add_Click({
-        Start-WgoExternalScript -Url "https://raw.githubusercontent.com/Khotyz/AMDSTABILITYOPTIMIZER/main/AMD-Stability-Optimizer.ps1" `
-            -Name "AMD Stability Optimizer" -Downloader 'iwr'
-    })
     $c['btnRunMassgrave'].Add_Click({
         Start-WgoExternalScript -Url "https://get.activated.win" `
             -Name "Microsoft Activation Scripts (MASSGRAVE)" -Downloader 'irm'

@@ -483,6 +483,7 @@
                         <ComboBoxItem Content="Network" Tag="Network"/>
                         <ComboBoxItem Content="Services" Tag="Services"/>
                         <ComboBoxItem Content="Visual" Tag="Visual"/>
+                        <ComboBoxItem Content="AMD" Tag="Amd"/>
                     </ComboBox>
                     <Button x:Name="btnExportProfile" Content="Export Profile" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
                     <Button x:Name="btnImportProfile" Content="Import Profile" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
@@ -828,6 +829,25 @@
                 </ScrollViewer>
             </TabItem>
 
+            <TabItem x:Name="tabAmdGpu" Header="AMD Fix">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <TextBlock x:Name="txtAmdGpuBanner" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" FontStyle="Italic" Margin="0,0,0,10" FontSize="12"/>
+                        <GroupBox x:Name="grpAmdGpu" Header="AMD Radeon Stability Fixes">
+                            <StackPanel>
+                                <CheckBox x:Name="chkAmdUlps" Content="Disable ULPS"/>
+                                <CheckBox x:Name="chkAmdMpo" Content="Disable MPO"/>
+                                <CheckBox x:Name="chkAmdTdr" Content="Extend TDR Delay"/>
+                                <CheckBox x:Name="chkAmdCrashDefender" Content="Disable AMD Crash Defender"/>
+                                <CheckBox x:Name="chkAmdHdcp" Content="Disable HDCP"/>
+                                <CheckBox x:Name="chkAmdTelemetry" Content="Disable AMD Telemetry"/>
+                                <CheckBox x:Name="chkAmdHwAccel" Content="Fix Browser/Electron Hardware Acceleration"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <TabItem x:Name="tabInstaller" Header="App Installer">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
@@ -1038,14 +1058,6 @@
                     <StackPanel Margin="10">
 
                         <TextBlock x:Name="txtExtScriptsWarning" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" FontStyle="Italic" Margin="0,0,0,10" FontSize="12"/>
-
-                        <Border Style="{StaticResource CardStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="txtAmdOptimizerTitle" Text="AMD Stability Optimizer" FontWeight="Bold" FontSize="14"/>
-                                <TextBlock x:Name="txtAmdOptimizerDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,10" FontSize="12"/>
-                                <Button x:Name="btnRunAmdOptimizer" Content="Run AMD Stability Optimizer" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
-                            </StackPanel>
-                        </Border>
 
                         <Border Style="{StaticResource CardStyle}">
                             <StackPanel>
