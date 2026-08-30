@@ -25,9 +25,14 @@ function Set-WgoAmdUlps {
 
 function Set-WgoAmdMpo {
     try {
+        # OverlayTestMode is a DWM debug/test switch, not a supported way to
+        # disable Multi-Plane Overlay. Forcing it to 5 is a known cause of
+        # random gray screens (apps needing a minimize/restore to redraw),
+        # so this reverts it instead of setting it.
         $dwmPath = "HKLM:\SOFTWARE\Microsoft\Windows\Dwm"
-        if (-not (Test-Path $dwmPath)) { New-Item -Path $dwmPath -Force | Out-Null }
-        Set-ItemProperty -Path $dwmPath -Name "OverlayTestMode" -Value 5 -Type DWord -Force -ErrorAction Stop
+        if (Test-Path $dwmPath) {
+            Remove-ItemProperty -Path $dwmPath -Name "OverlayTestMode" -Force -ErrorAction SilentlyContinue
+        }
         Write-Log (T 'LogAmdMpoOk') "OK"
         return $true
     } catch { Write-Log (T 'LogMoreError' "AmdMpo" $_.Exception.Message) "ERROR"; return $false }
@@ -113,8 +118,12 @@ function Set-WgoAmdHwAccel {
         $chromePolicyPath = "HKLM:\SOFTWARE\Policies\Google\Chrome"
         $edgePolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
 
-        if (-not (Test-Path $dwmPath)) { New-Item -Path $dwmPath -Force | Out-Null }
-        Set-ItemProperty -Path $dwmPath -Name "OverlayTestMode" -Value 5 -Type DWord -Force -ErrorAction Stop
+        # OverlayTestMode is a DWM debug/test switch and forcing it to 5 is a
+        # known cause of random gray screens, so it's reverted here instead
+        # of being set.
+        if (Test-Path $dwmPath) {
+            Remove-ItemProperty -Path $dwmPath -Name "OverlayTestMode" -Force -ErrorAction SilentlyContinue
+        }
 
         if (-not (Test-Path $gfxPath)) { New-Item -Path $gfxPath -Force | Out-Null }
         Set-ItemProperty -Path $gfxPath -Name "HwSchMode" -Value 1 -Type DWord -Force -ErrorAction Stop
