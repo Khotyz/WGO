@@ -327,9 +327,9 @@ function Update-WgoUILanguage {
     foreach ($catItem in $c['cmbRestoreCategory'].Items) { if ($catLabels.ContainsKey($catItem.Tag)) { $catItem.Content = $catLabels[$catItem.Tag] } }
     $c['btnExportProfile'].Content                   = $t.BtnExportProfile
     $c['btnImportProfile'].Content                   = $t.BtnImportProfile
-    $c['txtScoopRequired'].Text                      = $t.TxtScoopRequired
-    $c['btnInstallScoop'].Content                    = $t.BtnInstallScoop
-    Update-WgoScoopStatus
+    $c['txtChocoRequired'].Text                      = $t.TxtChocoRequired
+    $c['btnInstallChoco'].Content                    = $t.BtnInstallChoco
+    Update-WgoChocoStatus
     $c['btnInstallApps'].Content                     = $t.BtnInstallApps
     $c['grpAppsBrowsers'].Header                     = $t.GrpAppsBrowsers
     $c['chkFirefox'].Content                         = "Mozilla Firefox"
@@ -364,29 +364,19 @@ function Update-WgoUILanguage {
     $c['grpAppsMonitoring'].Header                   = $t.GrpAppsMonitoring
     $c['chkCpuz'].Content                            = "CPU-Z"
     $c['txtCpuzDesc'].Text                           = $t.AppCpuzDesc
-    $c['chkHwinfo'].Content                          = "HWiNFO"
-    $c['txtHwinfoDesc'].Text                          = $t.AppHwinfoDesc
+    $c['chkHwmonitor'].Content                       = "HWMonitor"
+    $c['txtHwmonitorDesc'].Text                      = $t.AppHwmonitorDesc
     $c['chkMemreduct'].Content                       = "Mem Reduct"
     $c['txtMemreductDesc'].Text                      = $t.AppMemreductDesc
     $c['chkBleachbit'].Content                       = "BleachBit"
     $c['txtBleachbitDesc'].Text                      = $t.AppBleachbitDesc
     $c['chkDnsJumper'].Content                       = "DNS Jumper"
     $c['txtDnsJumperDesc'].Text                      = $t.AppDnsJumperDesc
-    $c['chkCapFrameX'].Content                       = "CapFrameX"
-    $c['txtCapFrameXDesc'].Text                      = $t.AppCapFrameXDesc
-    $c['chkMsiAfterburner'].Content                  = "MSI Afterburner"
-    $c['txtMsiAfterburnerDesc'].Text                 = $t.AppMsiAfterburnerDesc
-    $c['chkRtss'].Content                            = "RivaTuner Statistics Server"
-    $c['txtRtssDesc'].Text                           = $t.AppRtssDesc
-    $c['chkDlssSwapper'].Content                     = "DLSS Swapper"
-    $c['txtDlssSwapperDesc'].Text                    = $t.AppDlssSwapperDesc
-    $c['chkDdu'].Content                             = "Display Driver Uninstaller"
-    $c['txtDduDesc'].Text                            = $t.AppDduDesc
-    $c['chkHwMonitor'].Content                       = "HWMonitor"
-    $c['txtHwMonitorDesc'].Text                      = $t.AppHwMonitorDesc
     $c['grpAppsProductivity'].Header                 = $t.GrpAppsProductivity
     $c['chkNilesoftShell'].Content                   = "Nilesoft Shell"
     $c['txtNilesoftShellDesc'].Text                  = $t.AppNilesoftShellDesc
+    $c['chkOptiscalerClient'].Content                = "Optiscaler Client"
+    $c['txtOptiscalerClientDesc'].Text               = $t.AppOptiscalerClientDesc
     $c['chkFlowLauncher'].Content                    = "Flow Launcher"
     $c['txtFlowLauncherDesc'].Text                   = $t.AppFlowLauncherDesc
     $c['chkShareX'].Content                          = "ShareX"
@@ -394,12 +384,6 @@ function Update-WgoUILanguage {
     $c['txtUniGetUITitle'].Text                      = "UniGetUI"
     $c['txtUniGetUIDesc'].Text                       = $t.TxtUniGetUIDesc
     $c['btnRunUniGetUI'].Content                     = $t.BtnRunUniGetUI
-    $c['txtOptiscalerExternalTitle'].Text             = "Optiscaler Client"
-    $c['txtOptiscalerExternalDesc'].Text              = $t.TxtOptiscalerExternalDesc
-    $c['btnOpenOptiscalerClient'].Content              = $t.BtnOpenOptiscalerClient
-    $c['txtOcctExternalTitle'].Text                   = "OCCT"
-    $c['txtOcctExternalDesc'].Text                    = $t.TxtOcctExternalDesc
-    $c['btnOpenOcct'].Content                         = $t.BtnOpenOcct
     $c['txtExtScriptsWarning'].Text                  = $t.TxtExtScriptsWarning
     $c['txtAmdGpuBanner'].Text                       = $t.TxtAmdGpuBanner
     $c['grpAmdGpu'].Header                            = $t.GrpAmdGpu
@@ -736,25 +720,23 @@ function Initialize-WgoUI {
         'chkClearEventLogs','chkDeleteMinidump','chkClearStoreCache',
         'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight',
         'btnInstallApps',
-        'txtScoopRequired','txtScoopStatus','btnInstallScoop',
+        'txtChocoRequired','txtChocoStatus','btnInstallChoco',
         'grpAppsBrowsers','chkFirefox','txtFirefoxDesc','chkBrave','txtBraveDesc',
         'grpAppsFiles','chkNanaZip','txtNanaZipDesc','chkSevenZip','txtSevenZipDesc',
         'chkNpp','txtNppDesc','chkWiztree','txtWiztreeDesc',
         'grpAppsDownloads','chkFdm','txtFdmDesc','chkQbt','txtQbtDesc',
         'grpAppsGaming','chkSteam','txtSteamDesc','chkEpic','txtEpicDesc','chkGog','txtGogDesc',
         'chkMoonlight','txtMoonlightDesc','chkSunshine','txtSunshineDesc',
-        'grpAppsMonitoring','chkCpuz','txtCpuzDesc','chkHwinfo','txtHwinfoDesc',
+        'grpAppsMonitoring','chkCpuz','txtCpuzDesc','chkHwmonitor','txtHwmonitorDesc',
         'chkMemreduct','txtMemreductDesc','chkBleachbit','txtBleachbitDesc','chkDnsJumper','txtDnsJumperDesc',
-        'chkCapFrameX','txtCapFrameXDesc','chkMsiAfterburner','txtMsiAfterburnerDesc','chkRtss','txtRtssDesc','chkDlssSwapper','txtDlssSwapperDesc','chkDdu','txtDduDesc','chkHwMonitor','txtHwMonitorDesc',
         'grpAppsProductivity','chkNilesoftShell','txtNilesoftShellDesc',
+        'chkOptiscalerClient','txtOptiscalerClientDesc',
         'chkFlowLauncher','txtFlowLauncherDesc',
         'chkShareX','txtShareXDesc',
         'txtExtScriptsWarning',
         'txtAmdGpuBanner','grpAmdGpu','chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel',
         'txtMassgraveTitle','txtMassgraveDesc','btnRunMassgrave',
         'txtUniGetUITitle','txtUniGetUIDesc','btnRunUniGetUI',
-        'txtOptiscalerExternalTitle','txtOptiscalerExternalDesc','btnOpenOptiscalerClient',
-        'txtOcctExternalTitle','txtOcctExternalDesc','btnOpenOcct',
         'grpUtilities','txtSafeModeNetTitle','txtSafeModeNetDesc','btnSafeModeNet',
         'txtUefiRestartTitle','txtUefiRestartDesc','btnUefiRestart',
         'txtNormalRestartTitle','txtNormalRestartDesc','btnNormalRestart',
@@ -1230,19 +1212,19 @@ function Initialize-WgoUI {
         }
     })
 
-    # Install Scoop
-    $c['btnInstallScoop'].Add_Click({
+    # Install Chocolatey
+    $c['btnInstallChoco'].Add_Click({
         try {
-            $c['btnInstallScoop'].IsEnabled = $false
+            $c['btnInstallChoco'].IsEnabled = $false
             Start-WgoBackgroundTask -ScriptBlock {
-                try { Install-WgoScoop | Out-Null } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
+                try { Install-WgoChocolatey | Out-Null } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
             } -OnCompleted {
-                Update-WgoScoopStatus
-                $c['btnInstallScoop'].IsEnabled = $true
+                Update-WgoChocoStatus
+                $c['btnInstallChoco'].IsEnabled = $true
             }
         } catch {
-            Show-WgoFatalError "btnInstallScoop click handler failed: $($_.Exception.Message)"
-            $c['btnInstallScoop'].IsEnabled = $true
+            Show-WgoFatalError "btnInstallChoco click handler failed: $($_.Exception.Message)"
+            $c['btnInstallChoco'].IsEnabled = $true
         }
     })
 
@@ -1263,19 +1245,14 @@ function Initialize-WgoUI {
                 @{ Chk = $c['chkSevenZip']; Name = "7-Zip" },
                 @{ Chk = $c['chkWiztree'];  Name = "WizTree" },
                 @{ Chk = $c['chkCpuz'];     Name = "CPU-Z" },
-                @{ Chk = $c['chkHwinfo']; Name = "HWiNFO" },
+                @{ Chk = $c['chkHwmonitor']; Name = "HWMonitor" },
                 @{ Chk = $c['chkMemreduct']; Name = "Mem Reduct" },
                 @{ Chk = $c['chkBleachbit']; Name = "BleachBit" },
                 @{ Chk = $c['chkDnsJumper']; Name = "DNS Jumper" },
-                @{ Chk = $c['chkCapFrameX']; Name = "CapFrameX" },
-                @{ Chk = $c['chkMsiAfterburner']; Name = "MSI Afterburner" },
-                @{ Chk = $c['chkRtss']; Name = "RivaTuner Statistics Server" },
-                @{ Chk = $c['chkDlssSwapper']; Name = "DLSS Swapper" },
-                @{ Chk = $c['chkDdu']; Name = "Display Driver Uninstaller" },
-                @{ Chk = $c['chkHwMonitor']; Name = "HWMonitor" },
                 @{ Chk = $c['chkMoonlight']; Name = "Moonlight" },
                 @{ Chk = $c['chkSunshine'];  Name = "Sunshine" },
                 @{ Chk = $c['chkNilesoftShell']; Name = "Nilesoft Shell" },
+                @{ Chk = $c['chkOptiscalerClient']; Name = "Optiscaler Client" },
                 @{ Chk = $c['chkFlowLauncher']; Name = "Flow Launcher" },
                 @{ Chk = $c['chkShareX']; Name = "ShareX" }
             )
@@ -1317,32 +1294,12 @@ function Initialize-WgoUI {
     })
     $c['btnRunUniGetUI'].Add_Click({
         # Opens the official UniGetUI page instead of a silent install, since the
-        # winget installer can trigger "publisher could not be verified" warnings.
+        # winget/Chocolatey installer can trigger "publisher could not be verified" warnings.
         try {
             Start-Process "https://github.com/Devolutions/UniGetUI/releases/latest"
             Write-Log (T 'LogUniGetUIOpened') "INFO"
         } catch {
             Write-Log (T 'LogToolOpenFail' "UniGetUI" $_.Exception.Message) "ERROR"
-        }
-    })
-    $c['btnOpenOptiscalerClient'].Add_Click({
-        # No winget package exists for this tool; it only ships GitHub release
-        # assets, so point the user at the latest release instead of a script.
-        try {
-            Start-Process "https://github.com/Optiscaler-Client/Optiscaler-Client/releases/latest"
-            Write-Log (T 'LogOptiscalerClientOpened') "INFO"
-        } catch {
-            Write-Log (T 'LogToolOpenFail' "Optiscaler Client" $_.Exception.Message) "ERROR"
-        }
-    })
-    $c['btnOpenOcct'].Add_Click({
-        # OCCT has no winget or Scoop package, so this just opens the official
-        # download page instead of a silent install.
-        try {
-            Start-Process "https://www.ocbase.com/download"
-            Write-Log (T 'LogOcctOpened') "INFO"
-        } catch {
-            Write-Log (T 'LogToolOpenFail' "OCCT" $_.Exception.Message) "ERROR"
         }
     })
 

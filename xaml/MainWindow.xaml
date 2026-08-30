@@ -854,9 +854,9 @@
 
                         <Border Style="{StaticResource CardStyle}">
                             <StackPanel>
-                                <TextBlock x:Name="txtScoopRequired" Text="Apps install via winget, falling back to Scoop when needed." TextWrapping="Wrap" FontWeight="Bold"/>
-                                <TextBlock x:Name="txtScoopStatus" Text="" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,6" FontSize="12"/>
-                                <Button x:Name="btnInstallScoop" Content="Install Scoop" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
+                                <TextBlock x:Name="txtChocoRequired" Text="Installing the apps below requires Chocolatey." TextWrapping="Wrap" FontWeight="Bold"/>
+                                <TextBlock x:Name="txtChocoStatus" Text="" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,6" FontSize="12"/>
+                                <Button x:Name="btnInstallChoco" Content="Install Chocolatey" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
                             </StackPanel>
                         </Border>
 
@@ -987,8 +987,8 @@
 
                                 <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
                                     <StackPanel>
-                                        <CheckBox x:Name="chkHwinfo" Content="HWiNFO" FontWeight="Bold" Tag="hwinfo"/>
-                                        <TextBlock x:Name="txtHwinfoDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                        <CheckBox x:Name="chkHwmonitor" Content="HWMonitor" FontWeight="Bold" Tag="hwmonitor"/>
+                                        <TextBlock x:Name="txtHwmonitorDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
                                     </StackPanel>
                                 </Border>
 
@@ -1013,48 +1013,6 @@
                                     </StackPanel>
                                 </Border>
 
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkCapFrameX" Content="CapFrameX" FontWeight="Bold" Tag="capframex"/>
-                                        <TextBlock x:Name="txtCapFrameXDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkMsiAfterburner" Content="MSI Afterburner" FontWeight="Bold" Tag="msiafterburner"/>
-                                        <TextBlock x:Name="txtMsiAfterburnerDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkRtss" Content="RivaTuner Statistics Server" FontWeight="Bold" Tag="rtss"/>
-                                        <TextBlock x:Name="txtRtssDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkDlssSwapper" Content="DLSS Swapper" FontWeight="Bold" Tag="dlssswapper"/>
-                                        <TextBlock x:Name="txtDlssSwapperDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkDdu" Content="Display Driver Uninstaller" FontWeight="Bold" Tag="ddu"/>
-                                        <TextBlock x:Name="txtDduDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkHwMonitor" Content="HWMonitor" FontWeight="Bold" Tag="hwmonitor"/>
-                                        <TextBlock x:Name="txtHwMonitorDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
                             </WrapPanel>
                         </GroupBox>
 
@@ -1072,6 +1030,13 @@
                                     <StackPanel>
                                         <CheckBox x:Name="chkNilesoftShell" Content="Nilesoft Shell" FontWeight="Bold" Tag="nilesoftshell"/>
                                         <TextBlock x:Name="txtNilesoftShellDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chkOptiscalerClient" Content="Optiscaler Client" FontWeight="Bold" Tag="optiscalerclient"/>
+                                        <TextBlock x:Name="txtOptiscalerClientDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
                                     </StackPanel>
                                 </Border>
 
@@ -1108,22 +1073,6 @@
                                 <TextBlock x:Name="txtUniGetUITitle" Text="UniGetUI" FontWeight="Bold" FontSize="14"/>
                                 <TextBlock x:Name="txtUniGetUIDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,10" FontSize="12"/>
                                 <Button x:Name="btnRunUniGetUI" Content="Open Official Website" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Style="{StaticResource CardStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="txtOptiscalerExternalTitle" Text="Optiscaler Client" FontWeight="Bold" FontSize="14"/>
-                                <TextBlock x:Name="txtOptiscalerExternalDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,10" FontSize="12"/>
-                                <Button x:Name="btnOpenOptiscalerClient" Content="Open Latest Release" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Style="{StaticResource CardStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="txtOcctExternalTitle" Text="OCCT" FontWeight="Bold" FontSize="14"/>
-                                <TextBlock x:Name="txtOcctExternalDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,10" FontSize="12"/>
-                                <Button x:Name="btnOpenOcct" Content="Open Official Website" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
                             </StackPanel>
                         </Border>
 
