@@ -1,6 +1,12 @@
 # Wgo.UI.psm1 - UI initialization, events, themes, language
 
 $Global:WgoUI_Initialized = $false
+$Global:WgoScanResults = @{}
+$Global:WgoHardware = $null
+$Global:WgoPreflight = @()
+$Global:WgoScanBusy = $false
+$Global:WgoScanBox = $null
+$Global:WgoScanStarted = $false
 $Global:WgoUI_Window = $null
 $Global:WgoUI_Ctrl = @{}
 $Global:WgoUI_OptimizationCheckboxNames = @(
@@ -14,17 +20,16 @@ $Global:WgoUI_OptimizationCheckboxNames = @(
     'chkResidualServices','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
     'chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkGameBarMicFix',
     'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
-    'chkDisableNagle','chkDisableIPv6','chkRssOptimize',
+    'chkDisableNagle','chkDisableIPv6','chkRssOptimize','chkSteamBoost',
+    'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast',
     'chkHostsBlock','chkPrivacyDeep','chkCacheClean','chkUiCleanup','chkTcpAutotuning',
-    'chkDoH','chkFastShutdown','chkPrefetchSSD','chkRemoveWinBackup','chkTcpIpReset',
+    'chkDoH','chkFastShutdown','chkPrefetchSSD','chkTcpIpReset',
     'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer',
     'chkClearEventLogs','chkDeleteMinidump','chkClearStoreCache',
     'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight',
     'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel'
 )
 
-# Risky tweaks are intentionally excluded from Select All, profile presets, and
-# last-run persistence - they must be re-confirmed by the user every single time.
 $Global:WgoUI_RiskyCheckboxNames = @(
     'chkRiskyUAC','chkRiskySmartScreen','chkRiskyDefenderRT','chkRiskyWinUpdateSvc','chkRiskyBits',
     'chkRiskyDisableFirewall','chkRiskyDisableDEP','chkRiskyNvidiaMaxPerf'
@@ -33,6 +38,7 @@ $Global:WgoUI_RiskyCheckboxNames = @(
 # Vendor-specific checkboxes are added/removed from profile presets at runtime
 # based on the detected GPU (see Set-WgoUIProfilePreset), since a static
 # profile list can't know the hardware in advance.
+$Global:WgoUI_OptInCheckboxNames = @('chkStandbyListClean','chkAutoStandbyClean')
 $Global:WgoUI_NvidiaOnlyCheckboxNames = @('chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry')
 $Global:WgoUI_AmdOnlyCheckboxNames = @('chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel')
 
@@ -43,15 +49,17 @@ $Global:WgoUI_Profiles = @{
         'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground',
         'chkTempCleanup','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
         'chkSearchIndexOptimize','chkResidualServices',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown'
+        'chkCacheClean','chkPrefetchSSD','chkFastShutdown',
+        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast'
     )
     Laptop = @(
         'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
         'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
         'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground',
         'chkTempCleanup','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
-        'chkSearchIndexOptimize','chkResidualServices','chkStandbyListClean','chkGhostAdapters',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkDoH','chkPrivacyDeep'
+        'chkSearchIndexOptimize','chkResidualServices','chkGhostAdapters',
+        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkDoH','chkPrivacyDeep',
+        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast'
     )
     Gamer = @(
         'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
@@ -60,10 +68,11 @@ $Global:WgoUI_Profiles = @{
         'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
         'chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
         'chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
-        'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup','chkResidualServices','chkStandbyListClean',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning','chkLargeSystemCache',
-        'chkAutoStandbyClean','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle',
-        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel'
+        'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup','chkResidualServices',
+        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkSteamBoost','chkLargeSystemCache',
+        'chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle',
+        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel',
+        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast'
     )
     Privacy = @(
         'chkBloat','chkSearch','chkPrivacy',
@@ -78,8 +87,8 @@ $Global:WgoUI_Profiles = @{
         'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
         'chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
         'chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
-        'chkGhostAdapters','chkFastStartup','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkTcpAutotuning',
+        'chkGhostAdapters','chkFastStartup','chkLargeSystemCache',
+        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkSteamBoost',
         'chkDisableCoreParking','chkTimerResolution','chkHungAppTimeout',
         'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
         'chkDisableNagle','chkRssOptimize',
@@ -255,6 +264,19 @@ function Update-WgoUILanguage {
     $c['chkIncreaseTdrNvidia'].ToolTip                        = $t.TipIncreaseTdrNvidia
     $c['chkDisableNvidiaTelemetry'].Content          = $t.ChkDisableNvidiaTelemetry
     $c['chkDisableNvidiaTelemetry'].ToolTip                        = $t.TipDisableNvidiaTelemetry
+    $c['grpSystemTuning'].Header                     = $t.GrpSystemTuning
+    $c['chkNtfsOptimize'].Content = $t.ChkNtfsOptimize
+    $c['chkNtfsOptimize'].ToolTip = $t.TipNtfsOptimize
+    $c['chkDisableLLMNR'].Content = $t.ChkDisableLLMNR
+    $c['chkDisableLLMNR'].ToolTip = $t.TipDisableLLMNR
+    $c['chkMenuDelay'].Content = $t.ChkMenuDelay
+    $c['chkMenuDelay'].ToolTip = $t.TipMenuDelay
+    $c['chkDnsCacheSize'].Content = $t.ChkDnsCacheSize
+    $c['chkDnsCacheSize'].ToolTip = $t.TipDnsCacheSize
+    $c['chkIndexerThrottle'].Content = $t.ChkIndexerThrottle
+    $c['chkIndexerThrottle'].ToolTip = $t.TipIndexerThrottle
+    $c['chkKeyboardFast'].Content = $t.ChkKeyboardFast
+    $c['chkKeyboardFast'].ToolTip = $t.TipKeyboardFast
     $c['grpNetworkAdvanced'].Header                  = $t.GrpNetworkAdvanced
     $c['chkDisableNagle'].Content                    = $t.ChkDisableNagle
     $c['chkDisableNagle'].ToolTip                        = $t.TipDisableNagle
@@ -262,6 +284,11 @@ function Update-WgoUILanguage {
     $c['chkDisableIPv6'].ToolTip                      = $t.TipDisableIPv6
     $c['chkRssOptimize'].Content                     = $t.ChkRssOptimize
     $c['chkRssOptimize'].ToolTip                        = $t.TipRssOptimize
+    $c['chkSteamBoost'].Content                      = $t.ChkSteamBoost
+    $c['chkSteamBoost'].ToolTip                      = $t.TipSteamBoost
+    $c['btnRescan'].Content                          = $t.ScanBtnRescan
+    $c['chkSkipApplied'].Content                     = $t.ScanChkSkipApplied
+    $c['chkSkipApplied'].ToolTip                     = $t.ScanTipSkipApplied
     $c['grpExtraTweaks2'].Header                     = $t.GrpExtraTweaks2
     $c['chkHostsBlock'].Content                      = $t.ChkHostsBlock
     $c['chkHostsBlock'].ToolTip                        = $t.TipHostsBlock
@@ -279,8 +306,6 @@ function Update-WgoUILanguage {
     $c['chkFastShutdown'].ToolTip                        = $t.TipFastShutdown
     $c['chkPrefetchSSD'].Content                     = $t.ChkPrefetchSSD
     $c['chkPrefetchSSD'].ToolTip                        = $t.TipPrefetchSSD
-    $c['chkRemoveWinBackup'].Content                 = $t.ChkRemoveWinBackup
-    $c['chkRemoveWinBackup'].ToolTip                        = $t.TipRemoveWinBackup
     $c['chkTcpIpReset'].Content                      = $t.ChkTcpIpReset
     $c['chkTcpIpReset'].ToolTip                        = $t.TipTcpIpReset
     $c['chkRemoveOnedrive'].Content                  = $t.ChkRemoveOnedrive
@@ -323,7 +348,7 @@ function Update-WgoUILanguage {
     $c['btnRestoreDefaults'].ToolTip                 = $t.TipRestoreDefaults
     $c['lblRestoreCategory'].Text                    = $t.LblRestoreCategory
     $c['cmbRestoreCategory'].ToolTip                 = $t.TipRestoreDefaults
-    $catLabels = @{ All = $t.TxtCatAll; Privacy = $t.TxtCatPrivacy; Network = $t.TxtCatNetwork; Services = $t.TxtCatServices; Visual = $t.TxtCatVisual; Amd = $t.TxtCatAmd }
+    $catLabels = @{ All = $t.TxtCatAll; Privacy = $t.TxtCatPrivacy; Network = $t.TxtCatNetwork; Services = $t.TxtCatServices; Visual = $t.TxtCatVisual; Amd = $t.TxtCatAmd; Risky = $t.TxtCatRisky; Tuning = $t.TxtCatTuning }
     foreach ($catItem in $c['cmbRestoreCategory'].Items) { if ($catLabels.ContainsKey($catItem.Tag)) { $catItem.Content = $catLabels[$catItem.Tag] } }
     $c['btnExportProfile'].Content                   = $t.BtnExportProfile
     $c['btnImportProfile'].Content                   = $t.BtnImportProfile
@@ -417,14 +442,7 @@ function Update-WgoUILanguage {
     $c['chkAmdTelemetry'].ToolTip                     = $t.TipAmdTelemetry
     $c['chkAmdHwAccel'].Content                       = $t.ChkAmdHwAccel
     $c['chkAmdHwAccel'].ToolTip                       = $t.TipAmdHwAccel
-    $amdVendor = Get-WgoGpuVendor
-    if ($amdVendor -eq 'AMD') {
-        $c['txtAmdGpuBanner'].Text = $t.TxtAmdGpuBannerDetected
-        $c['grpAmdGpu'].IsEnabled = $true
-    } else {
-        $c['txtAmdGpuBanner'].Text = $t.TxtAmdGpuBanner
-        $c['grpAmdGpu'].IsEnabled = $false
-    }
+    Update-WgoVendorAvailability
     $c['txtMassgraveTitle'].Text                     = $t.TxtMassgraveTitle
     $c['txtMassgraveDesc'].Text                      = $t.TxtMassgraveDesc
     $c['btnRunMassgrave'].Content                    = $t.BtnRunMassgrave
@@ -489,6 +507,204 @@ function Update-WgoUILanguage {
     $c['txtScheduledOptTitle'].Text                  = $t.TxtScheduledOptTitle
     $c['txtScheduledOptDesc'].Text                   = $t.TxtScheduledOptDesc
     $c['btnScheduledOptimization'].Content           = $t.BtnScheduledOptimization
+    Update-WgoScanDecorations
+    Update-WgoScanSummary
+}
+
+function Test-WgoLangKey {
+    param([string]$Key)
+    return [bool]($global:Lang['en-US'] -and $global:Lang['en-US'].ContainsKey($Key))
+}
+
+function Test-WgoUISkipOption {
+    param([string]$Name)
+    $st = $Global:WgoScanResults[$Name]
+    if (-not $st) { return $false }
+    if ($st.State -eq 'NotApplicable') { return $true }
+    $skip = $false
+    try { $skip = [bool]$Global:WgoUI_Ctrl['chkSkipApplied'].IsChecked } catch { }
+    return ($skip -and $st.State -eq 'Applied')
+}
+
+function Resolve-WgoUIConflicts {
+    $c = $Global:WgoUI_Ctrl
+    if ($c['chkSteamBoost'] -and $c['chkTcpAutotuning'] -and $c['chkSteamBoost'].IsChecked -and $c['chkTcpAutotuning'].IsChecked) {
+        $c['chkTcpAutotuning'].IsChecked = $false
+    }
+}
+
+function Update-WgoVendorAvailability {
+    $c = $Global:WgoUI_Ctrl
+    $t = $global:Lang[$Global:CurrentLangCode]
+    $hasAmd = $false
+    $hasNvidia = $false
+    if ($Global:WgoHardware) {
+        $hasAmd = [bool]$Global:WgoHardware.HasAmd
+        $hasNvidia = [bool]$Global:WgoHardware.HasNvidia
+    } else {
+        $hasAmd = Test-WgoGpuVendorPresent -Vendor 'AMD'
+        $hasNvidia = Test-WgoGpuVendorPresent -Vendor 'NVIDIA'
+    }
+    if ($hasAmd) {
+        $c['txtAmdGpuBanner'].Text = $t.TxtAmdGpuBannerDetected
+    } else {
+        $c['txtAmdGpuBanner'].Text = $t.TxtAmdGpuBanner
+    }
+    $c['grpAmdGpu'].IsEnabled = $hasAmd
+    $c['grpGpuTweaks'].IsEnabled = $hasNvidia
+    if (-not $hasNvidia -and $c['chkRiskyNvidiaMaxPerf']) {
+        $c['chkRiskyNvidiaMaxPerf'].IsChecked = $false
+        $c['chkRiskyNvidiaMaxPerf'].IsEnabled = $false
+    } elseif ($c['chkRiskyNvidiaMaxPerf']) {
+        $c['chkRiskyNvidiaMaxPerf'].IsEnabled = $true
+    }
+}
+
+function Update-WgoScanDecorations {
+    $c = $Global:WgoUI_Ctrl
+    if (-not $Global:WgoScanResults -or $Global:WgoScanResults.Count -eq 0) { return }
+    $check = [string][char]0x2714
+    $half = [string][char]0x25D0
+    $block = [string][char]0x2298
+    foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
+        $ctrl = $c[$n]
+        if (-not $ctrl) { continue }
+        $suffix = $n.Substring(3)
+        $base = T ("Chk" + $suffix)
+        $tip = ""
+        if (Test-WgoLangKey ("Tip" + $suffix)) { $tip = T ("Tip" + $suffix) }
+        $st = $Global:WgoScanResults[$n]
+        $badge = ""
+        if ($st) {
+            switch ($st.State) {
+                'Applied' { $badge = "  $check " + (T 'ScanBadgeApplied'); $ctrl.IsEnabled = $true }
+                'Partial' { $badge = "  $half " + (T 'ScanBadgePartial'); $ctrl.IsEnabled = $true }
+                'NotApplicable' {
+                    $reasonKey = "ScanReason" + $st.Reason
+                    if (Test-WgoLangKey $reasonKey) { $badge = "  $block " + (T $reasonKey) } else { $badge = "  $block" }
+                    $ctrl.IsEnabled = $false
+                }
+                default { $ctrl.IsEnabled = $true }
+            }
+            if ($st.Reason -and $st.State -in @('Pending', 'Unknown', 'Partial') -and (Test-WgoLangKey ("ScanReason" + $st.Reason))) {
+                $tip += "`n" + (T ("ScanReason" + $st.Reason))
+            }
+            if ($st.Detail) { $tip += "`n" + (T 'ScanDetail' $st.Detail) }
+        }
+        $ctrl.Content = $base + $badge
+        if ($tip) { $ctrl.ToolTip = $tip.Trim() }
+    }
+    Update-WgoVendorAvailability
+}
+
+function Set-WgoScanSelection {
+    $c = $Global:WgoUI_Ctrl
+    foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
+        if ($c[$n] -and (Test-WgoUISkipOption $n)) { $c[$n].IsChecked = $false }
+    }
+    Resolve-WgoUIConflicts
+}
+
+function Update-WgoScanSummary {
+    $c = $Global:WgoUI_Ctrl
+    if (-not $c['txtScanSummary']) { return }
+    if (-not $Global:WgoHardware -or $Global:WgoScanResults.Count -eq 0) { return }
+    $hw = $Global:WgoHardware
+    $applied = 0; $pending = 0; $na = 0
+    foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
+        $st = $Global:WgoScanResults[$n]
+        if (-not $st) { continue }
+        switch ($st.State) {
+            'Applied' { $applied++ }
+            'NotApplicable' { $na++ }
+            'Unknown' { }
+            default { $pending++ }
+        }
+    }
+    $gpu = if ($hw.GpuSummary) { $hw.GpuSummary } else { "-" }
+    $disk = if ($hw.DiskSummary) { $hw.DiskSummary } else { "-" }
+    $c['txtScanSummary'].Text = (T 'ScanSummary' $hw.CpuName $hw.RamGb $gpu $disk) + "`n" + (T 'ScanCounts' $applied $pending $na)
+    $issues = @()
+    foreach ($chk in @($Global:WgoPreflight)) {
+        if ($chk.Status -eq 'OK') { continue }
+        $key = "Preflight" + $chk.Id
+        if ($chk.Id -eq 'Restore') { $key = if ($chk.Status -eq 'FAIL') { "PreflightRestoreDisabled" } else { "PreflightRestoreRecent" } }
+        if (Test-WgoLangKey $key) {
+            $line = T $key
+            if ($chk.Detail) { $line += " (" + $chk.Detail + ")" }
+            $issues += $line
+        }
+    }
+    if ($issues.Count -gt 0) {
+        $c['txtPreflight'].Text = (T 'PreflightHeader') + "`n- " + ($issues -join "`n- ")
+        $c['txtPreflight'].Visibility = 'Visible'
+    } else {
+        $c['txtPreflight'].Text = T 'PreflightAllOk'
+        $c['txtPreflight'].Visibility = 'Visible'
+    }
+}
+
+function Write-WgoScanLog {
+    $applied = 0; $pending = 0; $na = 0
+    foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
+        $st = $Global:WgoScanResults[$n]
+        if (-not $st) { continue }
+        switch ($st.State) {
+            'Applied' { $applied++ }
+            'NotApplicable' { $na++ }
+            'Unknown' { if ($st.Reason -eq 'ProbeFailed') { Write-Log (T 'LogScanUnknown' $n $st.Detail) "WARN" } }
+            default { $pending++ }
+        }
+    }
+    Write-Log (T 'LogScanDone' $applied $pending $na) "OK"
+    foreach ($chk in @($Global:WgoPreflight)) {
+        if ($chk.Status -eq 'OK') { continue }
+        $key = "Preflight" + $chk.Id
+        if ($chk.Id -eq 'Restore') { $key = if ($chk.Status -eq 'FAIL') { "PreflightRestoreDisabled" } else { "PreflightRestoreRecent" } }
+        if (Test-WgoLangKey $key) {
+            $level = if ($chk.Status -eq 'FAIL') { "ERROR" } else { "WARN" }
+            Write-Log (T $key) $level
+        }
+    }
+}
+
+function Invoke-WgoSystemScan {
+    if ($Global:WgoScanBusy) { return }
+    $Global:WgoScanBusy = $true
+    $c = $Global:WgoUI_Ctrl
+    if ($c['btnRescan']) { $c['btnRescan'].IsEnabled = $false }
+    Write-Log (T 'LogScanStart') "INFO"
+    $Global:WgoScanBox = [hashtable]::Synchronized(@{})
+    Start-WgoBackgroundTask -ScriptBlock {
+        param($box)
+        try {
+            $hw = Get-WgoHardwareProfile
+            $box['Hardware'] = $hw
+            $box['Status'] = Get-WgoOptimizationStatus -Hardware $hw
+            $box['Preflight'] = Invoke-WgoPreflightChecks -Hardware $hw
+        } catch {
+            $box['Error'] = $_.Exception.Message
+        }
+    } -ArgumentList @($Global:WgoScanBox) -OnCompleted { Complete-WgoSystemScan }
+}
+
+function Complete-WgoSystemScan {
+    $box = $Global:WgoScanBox
+    $Global:WgoScanBusy = $false
+    $ctrl = $Global:WgoUI_Ctrl
+    if ($ctrl['btnRescan']) { $ctrl['btnRescan'].IsEnabled = $true }
+    if (-not $box -or $box['Error'] -or -not $box['Status']) {
+        $reason = if ($box) { $box['Error'] } else { "" }
+        Write-Log (T 'LogScanFailed' $reason) "ERROR"
+        return
+    }
+    $Global:WgoHardware = $box['Hardware']
+    $Global:WgoScanResults = $box['Status']
+    $Global:WgoPreflight = @($box['Preflight'])
+    Set-WgoScanSelection
+    Update-WgoScanDecorations
+    Update-WgoScanSummary
+    Write-WgoScanLog
 }
 
 function Set-WgoUIProfilePreset {
@@ -497,15 +713,19 @@ function Set-WgoUIProfilePreset {
         [string]$ProfileLabel
     )
     $c = $Global:WgoUI_Ctrl
-    $vendor = Get-WgoGpuVendor
-    $filtered = $EnabledNames | Where-Object {
-        (-not ($Global:WgoUI_NvidiaOnlyCheckboxNames -contains $_) -or $vendor -eq 'NVIDIA') -and
-        (-not ($Global:WgoUI_AmdOnlyCheckboxNames -contains $_) -or $vendor -eq 'AMD')
-    }
+    $hasNvidia = Test-WgoGpuVendorPresent -Vendor 'NVIDIA'
+    $hasAmd = Test-WgoGpuVendorPresent -Vendor 'AMD'
+    $filtered = @($EnabledNames | Where-Object {
+        (-not ($Global:WgoUI_NvidiaOnlyCheckboxNames -contains $_) -or $hasNvidia) -and
+        (-not ($Global:WgoUI_AmdOnlyCheckboxNames -contains $_) -or $hasAmd) -and
+        -not ($Global:WgoUI_OptInCheckboxNames -contains $_) -and
+        -not (Test-WgoUISkipOption $_)
+    })
     foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
         if ($c[$n]) { $c[$n].IsChecked = ($filtered -contains $n) }
     }
-    $c['chkSelectAll'].IsChecked = ($filtered.Count -ge $Global:WgoUI_OptimizationCheckboxNames.Count)
+    Resolve-WgoUIConflicts
+    $c['chkSelectAll'].IsChecked = $false
     Write-Log (T 'LogProfileApplied' $ProfileLabel (T 'BtnRunSelected')) "INFO"
 }
 
@@ -707,7 +927,7 @@ function Initialize-WgoUI {
     $names = @(
         'txtAppTitle','txtLblLanguage','cmbLanguage','btnThemeToggle','txtLogHeader','scrollLog','txtLog',
         'tabOptimizations','tabAmdGpu','tabInstaller','tabExternalScripts','tabUtilities',
-        'chkSelectAll','chkDryRun',
+        'chkSelectAll','chkDryRun','txtScanSummary','txtPreflight','btnRescan','chkSkipApplied',
         'grpRestore','btnCreateRestore',
         'grpBloat','chkBloat',
         'grpSearch','chkSearch',
@@ -725,9 +945,10 @@ function Initialize-WgoUI {
         'chkResidualServices','chkStandbyListClean','chkLargeSystemCache','chkAutoStandbyClean',
         'grpCpuTimerTweaks','chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkHungAppTimeout',
         'grpGpuTweaks','chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
-        'grpNetworkAdvanced','chkDisableNagle','chkDisableIPv6','chkRssOptimize',
+        'grpNetworkAdvanced','chkDisableNagle','chkDisableIPv6','chkRssOptimize','chkSteamBoost',
+        'grpSystemTuning','chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast',
         'grpExtraTweaks2','chkHostsBlock','chkPrivacyDeep','chkCacheClean','chkUiCleanup','chkTcpAutotuning',
-        'chkDoH','chkFastShutdown','chkPrefetchSSD','chkRemoveWinBackup','chkTcpIpReset',
+        'chkDoH','chkFastShutdown','chkPrefetchSSD','chkTcpIpReset',
         'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer',
         'txtRiskyWarning','grpRiskyTweaks','chkRiskyUAC','chkRiskySmartScreen','chkRiskyDefenderRT',
         'chkRiskyWinUpdateSvc','chkRiskyBits','chkRiskyDisableFirewall','chkRiskyDisableDEP','chkRiskyNvidiaMaxPerf',
@@ -838,9 +1059,14 @@ function Initialize-WgoUI {
     $c['chkSelectAll'].Add_Click({
         $isChecked = [bool]$c['chkSelectAll'].IsChecked
         foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
-            if ($c[$n]) { $c[$n].IsChecked = $isChecked }
+            if (-not $c[$n]) { continue }
+            if ($isChecked -and (($Global:WgoUI_OptInCheckboxNames -contains $n) -or (Test-WgoUISkipOption $n))) { $c[$n].IsChecked = $false } else { $c[$n].IsChecked = $isChecked }
         }
+        Resolve-WgoUIConflicts
     })
+    $c['btnRescan'].Add_Click({ Invoke-WgoSystemScan })
+    $c['chkSteamBoost'].Add_Click({ if ($c['chkSteamBoost'].IsChecked) { $c['chkTcpAutotuning'].IsChecked = $false } })
+    $c['chkTcpAutotuning'].Add_Click({ if ($c['chkTcpAutotuning'].IsChecked) { $c['chkSteamBoost'].IsChecked = $false } })
 
     # Profile buttons
     $c['btnProfileBasic'].Add_Click({
@@ -920,7 +1146,6 @@ function Initialize-WgoUI {
         $doDoH = [bool]$c['chkDoH'].IsChecked
         $doFastShutdown = [bool]$c['chkFastShutdown'].IsChecked
         $doPrefetchSSD = [bool]$c['chkPrefetchSSD'].IsChecked
-        $doRemoveWinBackup = [bool]$c['chkRemoveWinBackup'].IsChecked
         $doTcpIpReset = [bool]$c['chkTcpIpReset'].IsChecked
         $doRemoveOnedrive = [bool]$c['chkRemoveOnedrive'].IsChecked
         $doDisableGameBar = [bool]$c['chkDisableGameBar'].IsChecked
@@ -949,6 +1174,13 @@ function Initialize-WgoUI {
         $doDisableNagle = [bool]$c['chkDisableNagle'].IsChecked
         $doDisableIPv6 = [bool]$c['chkDisableIPv6'].IsChecked
         $doRssOptimize = [bool]$c['chkRssOptimize'].IsChecked
+        $doSteamBoost = [bool]$c['chkSteamBoost'].IsChecked
+        $doNtfsOptimize = [bool]$c['chkNtfsOptimize'].IsChecked
+        $doDisableLLMNR = [bool]$c['chkDisableLLMNR'].IsChecked
+        $doMenuDelay = [bool]$c['chkMenuDelay'].IsChecked
+        $doDnsCacheSize = [bool]$c['chkDnsCacheSize'].IsChecked
+        $doIndexerThrottle = [bool]$c['chkIndexerThrottle'].IsChecked
+        $doKeyboardFast = [bool]$c['chkKeyboardFast'].IsChecked
         $doRiskyUAC = [bool]$c['chkRiskyUAC'].IsChecked
         $doRiskySmartScreen = [bool]$c['chkRiskySmartScreen'].IsChecked
         $doRiskyDefenderRT = [bool]$c['chkRiskyDefenderRT'].IsChecked
@@ -986,11 +1218,12 @@ function Initialize-WgoUI {
                   $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup,
                   $doResidualServices, $doStandbyListClean, $doLargeSystemCache,
                   $doHostsBlock, $doPrivacyDeep, $doCacheClean, $doUiCleanup, $doTcpAutotuning,
-                  $doDoH, $doFastShutdown, $doPrefetchSSD, $doRemoveWinBackup, $doTcpIpReset,
+                  $doDoH, $doFastShutdown, $doPrefetchSSD, $doTcpIpReset,
                   $doRemoveOnedrive, $doDisableGameBar, $doDisableStore, $doDisableWer, $doAutoStandbyClean,
                   $doHungAppTimeout, $doDisableCoreParking, $doDisableHPET, $doTimerResolution,
                   $doIncreaseTdrNvidia, $doDisableNvidiaTelemetry,
-                  $doDisableNagle, $doDisableIPv6, $doRssOptimize,
+                  $doDisableNagle, $doDisableIPv6, $doRssOptimize, $doSteamBoost,
+                  $doNtfsOptimize, $doDisableLLMNR, $doMenuDelay, $doDnsCacheSize, $doIndexerThrottle, $doKeyboardFast,
                   $doRiskyUAC, $doRiskySmartScreen, $doRiskyDefenderRT, $doRiskyWinUpdateSvc, $doRiskyBits,
                   $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
                   $doDisableXboxServices,
@@ -1000,6 +1233,10 @@ function Initialize-WgoUI {
                   $doDryRun)
             try {
                 Write-Log (T 'LogOptStart') "INFO"
+                if ($doSteamBoost -and $doTcpAutotuning) {
+                    Write-Log (T 'LogSteamBoostConflict') "WARN"
+                    $doTcpAutotuning = $false
+                }
                 if ($doDryRun) {
                     Write-Log (T 'LogDryRunNote') "WARN"
                     $dryItems = @(
@@ -1031,7 +1268,6 @@ function Initialize-WgoUI {
                         @{ Flag = $doDoH;             Key = 'ChkDoH' },
                         @{ Flag = $doFastShutdown;    Key = 'ChkFastShutdown' },
                         @{ Flag = $doPrefetchSSD;     Key = 'ChkPrefetchSSD' },
-                        @{ Flag = $doRemoveWinBackup; Key = 'ChkRemoveWinBackup' },
                         @{ Flag = $doTcpIpReset;      Key = 'ChkTcpIpReset' },
                         @{ Flag = $doLargeSystemCache; Key = 'ChkLargeSystemCache' },
                         @{ Flag = $doRemoveOnedrive;  Key = 'ChkRemoveOnedrive' },
@@ -1047,6 +1283,13 @@ function Initialize-WgoUI {
                         @{ Flag = $doDisableNagle;    Key = 'ChkDisableNagle' },
                         @{ Flag = $doDisableIPv6;     Key = 'ChkDisableIPv6' },
                         @{ Flag = $doRssOptimize;     Key = 'ChkRssOptimize' },
+                        @{ Flag = $doSteamBoost;      Key = 'ChkSteamBoost' },
+                        @{ Flag = $doNtfsOptimize; Key = 'ChkNtfsOptimize' },
+                        @{ Flag = $doDisableLLMNR; Key = 'ChkDisableLLMNR' },
+                        @{ Flag = $doMenuDelay; Key = 'ChkMenuDelay' },
+                        @{ Flag = $doDnsCacheSize; Key = 'ChkDnsCacheSize' },
+                        @{ Flag = $doIndexerThrottle; Key = 'ChkIndexerThrottle' },
+                        @{ Flag = $doKeyboardFast; Key = 'ChkKeyboardFast' },
                         @{ Flag = $doRiskyUAC;           Key = 'ChkRiskyUAC' },
                         @{ Flag = $doRiskySmartScreen;   Key = 'ChkRiskySmartScreen' },
                         @{ Flag = $doRiskyDefenderRT;    Key = 'ChkRiskyDefenderRT' },
@@ -1098,13 +1341,16 @@ function Initialize-WgoUI {
                     if ($doWinSxSCleanup) { Clear-WgoWinSxS }
                     Set-WgoExtraTweaks2 -HostsBlock $doHostsBlock -PrivacyDeep $doPrivacyDeep -CacheClean $doCacheClean `
                         -UiCleanup $doUiCleanup -TcpAutotuning $doTcpAutotuning -DoH $doDoH `
-                        -FastShutdown $doFastShutdown -PrefetchSSD $doPrefetchSSD -RemoveWinBackup $doRemoveWinBackup -TcpIpReset $doTcpIpReset `
+                        -FastShutdown $doFastShutdown -PrefetchSSD $doPrefetchSSD -TcpIpReset $doTcpIpReset `
                         -RemoveOnedrive $doRemoveOnedrive -DisableGameBar $doDisableGameBar -DisableStore $doDisableStore -DisableWer $doDisableWer `
                         -PauseUpdates $doPauseUpdates -DisableEdgeTelemetry $doDisableEdgeTelemetry -DisableSpotlight $doDisableSpotlight
                     Set-WgoCpuTimerTweaks -DisableCoreParking $doDisableCoreParking -DisableHPET $doDisableHPET `
                         -TimerResolution $doTimerResolution -HungAppTimeout $doHungAppTimeout
                     Set-WgoGpuTweaks -IncreaseTdrNvidia $doIncreaseTdrNvidia -DisableNvidiaTelemetry $doDisableNvidiaTelemetry
                     Set-WgoNetworkAdvanced -DisableNagle $doDisableNagle -DisableIPv6 $doDisableIPv6 -RssOptimize $doRssOptimize
+                    Set-WgoSteamBoost -SteamBoost $doSteamBoost
+                    Set-WgoSystemTuning -NtfsOptimize $doNtfsOptimize -DisableLLMNR $doDisableLLMNR -MenuDelay $doMenuDelay `
+                        -DnsCacheSize $doDnsCacheSize -IndexerThrottle $doIndexerThrottle -KeyboardFast $doKeyboardFast
                     Set-WgoRiskyTweaks -DisableUAC $doRiskyUAC -DisableSmartScreen $doRiskySmartScreen `
                         -DisableDefenderRT $doRiskyDefenderRT -DisableWinUpdateSvc $doRiskyWinUpdateSvc -DisableBits $doRiskyBits `
                         -DisableFirewall $doRiskyDisableFirewall -DisableDEP $doRiskyDisableDEP -NvidiaMaxPerf $doRiskyNvidiaMaxPerf
@@ -1143,11 +1389,12 @@ function Initialize-WgoUI {
                            $doSearchIndexOptimize, $doGhostAdapters, $doFastStartup,
                            $doResidualServices, $doStandbyListClean, $doLargeSystemCache,
                            $doHostsBlock, $doPrivacyDeep, $doCacheClean, $doUiCleanup, $doTcpAutotuning,
-                           $doDoH, $doFastShutdown, $doPrefetchSSD, $doRemoveWinBackup, $doTcpIpReset,
+                           $doDoH, $doFastShutdown, $doPrefetchSSD, $doTcpIpReset,
                            $doRemoveOnedrive, $doDisableGameBar, $doDisableStore, $doDisableWer, $doAutoStandbyClean,
                            $doHungAppTimeout, $doDisableCoreParking, $doDisableHPET, $doTimerResolution,
                            $doIncreaseTdrNvidia, $doDisableNvidiaTelemetry,
-                           $doDisableNagle, $doDisableIPv6, $doRssOptimize,
+                           $doDisableNagle, $doDisableIPv6, $doRssOptimize, $doSteamBoost,
+                  $doNtfsOptimize, $doDisableLLMNR, $doMenuDelay, $doDnsCacheSize, $doIndexerThrottle, $doKeyboardFast,
                            $doRiskyUAC, $doRiskySmartScreen, $doRiskyDefenderRT, $doRiskyWinUpdateSvc, $doRiskyBits,
                            $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
                            $doDisableXboxServices,
@@ -1157,7 +1404,7 @@ function Initialize-WgoUI {
                            $doDryRun) `
           -OnCompleted {
             $Global:WgoUI_Ctrl['btnRunSelected'].IsEnabled = $true
-            Save-WgoLastRunState
+            if (-not $doDryRun) { Invoke-WgoSystemScan }
             $restartRequiredFlags = @(
                 $doHibernation, $doFastStartup, $doHagsGameMode, $doDrivers,
                 $doVisual, $doPagefile, $doKernelGamingPriority, $doUltimatePerf,
@@ -1183,7 +1430,7 @@ function Initialize-WgoUI {
             try { Restore-WgoDefaults -Category $category } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
         } -ArgumentList @($category) -OnCompleted {
             $c['btnRestoreDefaults'].IsEnabled = $true
-            Remove-Item -Path $Global:WgoLastRunPath -Force -ErrorAction Ignore
+            Invoke-WgoSystemScan
         }
     })
 
@@ -1221,6 +1468,7 @@ function Initialize-WgoUI {
                 foreach ($prop in $profile.PSObject.Properties) {
                     if ($c[$prop.Name]) { $c[$prop.Name].IsChecked = [bool]$prop.Value }
                 }
+                Resolve-WgoUIConflicts
                 Write-Log (T 'LogImportOk' $dlg.FileName) "OK"
             } else {
                 Write-Log (T 'LogImportCancelled') "WARN"
@@ -1294,9 +1542,14 @@ function Initialize-WgoUI {
                 param($selected)
                 try {
                     Write-Log (T 'LogInstallBatchStart') "INFO"
+                    $okCount = 0
+                    $failedNames = @()
                     foreach ($app in $selected) {
-                        Install-WgoApp -Key $app.Id -DisplayName $app.Name
+                        $result = @(Install-WgoApp -Key $app.Id -DisplayName $app.Name)
+                        if ($result.Count -gt 0 -and $result[-1] -eq $true) { $okCount++ } else { $failedNames += $app.Name }
                     }
+                    Write-Log (T 'LogInstallBatchSummary' $okCount $failedNames.Count) $(if ($failedNames.Count -gt 0) { "WARN" } else { "OK" })
+                    if ($failedNames.Count -gt 0) { Write-Log (T 'LogInstallBatchFailedList' ($failedNames -join ", ")) "WARN" }
                     Write-Log (T 'LogInstallBatchDone') "OK"
                 } catch {
                     Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR"
@@ -1466,11 +1719,17 @@ function Initialize-WgoUI {
 
     # Initial UI state
     Update-WgoUILanguage -Code $Global:CurrentLangCode
-    Restore-WgoLastRunState
+    Resolve-WgoUIConflicts
     Write-Log $global:Lang[$Global:CurrentLangCode].MsgReady "INFO"
+    $window.Add_ContentRendered({
+        if (-not $Global:WgoScanStarted) {
+            $Global:WgoScanStarted = $true
+            Invoke-WgoSystemScan
+        }
+    })
 
     # Show the window
     $window.ShowDialog() | Out-Null
 }
 
-Export-ModuleMember -Function Initialize-WgoUI, Update-WgoUILanguage, Set-WgoUITheme, Set-WgoUIProfilePreset
+Export-ModuleMember -Function Initialize-WgoUI, Update-WgoUILanguage, Set-WgoUITheme, Set-WgoUIProfilePreset, Invoke-WgoSystemScan, Complete-WgoSystemScan

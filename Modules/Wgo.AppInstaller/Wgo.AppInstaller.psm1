@@ -5,33 +5,33 @@ $Global:WgoScoopPath = $null
 $Global:WgoScoopReadyLogged = $false
 
 $Global:WgoAppCatalog = @{
-    'firefox'                 = @{ Name = "Mozilla Firefox";        WingetId = "Mozilla.Firefox";                      ScoopId = "firefox" }
-    'nanazip'                 = @{ Name = "NanaZip";                 WingetId = "M2Team.NanaZip";                       ScoopId = "nanazip" }
-    'notepadplusplus.install' = @{ Name = "Notepad++";                WingetId = "Notepad++.Notepad++";                  ScoopId = "notepadplusplus" }
-    'freedownloadmanager'     = @{ Name = "Free Download Manager";    WingetId = "FreeDownloadManager.FreeDownloadManager"; ScoopId = "freedownloadmanager" }
-    'qbittorrent'             = @{ Name = "qBittorrent";               WingetId = "qBittorrent.qBittorrent";              ScoopId = "qbittorrent" }
-    'steam'                   = @{ Name = "Steam";                     WingetId = "Valve.Steam";                          ScoopId = "steam" }
-    'epicgameslauncher'       = @{ Name = "Epic Games Launcher";       WingetId = "EpicGames.EpicGamesLauncher";          ScoopId = "epic-games-launcher" }
-    'goggalaxy'               = @{ Name = "GOG Galaxy";                WingetId = "GOG.Galaxy";                           ScoopId = "gog-galaxy" }
-    '7zip'                    = @{ Name = "7-Zip";                     WingetId = "7zip.7zip";                            ScoopId = "7zip" }
-    'wiztree'                 = @{ Name = "WizTree";                   WingetId = "AntibodySoftware.WizTree";             ScoopId = "wiztree" }
-    'memreduct'               = @{ Name = "Mem Reduct";                WingetId = "Henry++.MemReduct";                    ScoopId = "memreduct" }
-    'bleachbit'                = @{ Name = "BleachBit";                 WingetId = "BleachBit.BleachBit";                  ScoopId = "bleachbit" }
-    'moonlight'               = @{ Name = "Moonlight";                 WingetId = "MoonlightGameStreamingProject.Moonlight"; ScoopId = "moonlight" }
-    'sunshine'                = @{ Name = "Sunshine";                  WingetId = "LizardByte.Sunshine";                  ScoopId = "sunshine" }
-    'nilesoftshell'           = @{ Name = "Nilesoft Shell";            WingetId = "Nilesoft.Shell";                       ScoopId = "nilesoft-shell" }
-    'flowlauncher'            = @{ Name = "Flow Launcher";             WingetId = "Flow-Launcher.Flow-Launcher";          ScoopId = "flow-launcher" }
-    'sharex'                  = @{ Name = "ShareX";                    WingetId = "ShareX.ShareX";                        ScoopId = "sharex" }
-    'cpuz'                    = @{ Name = "CPU-Z";                     WingetId = "CPUID.CPU-Z";                          ScoopId = "cpu-z" }
-    'hwinfo'                  = @{ Name = "HWiNFO";                    WingetId = "REALiX.HWiNFO";                        ScoopId = "hwinfo" }
-    'brave'                   = @{ Name = "Brave";                     WingetId = "Brave.Brave";                          ScoopId = "brave" }
-    'dnsjumper'               = @{ Name = "DNS Jumper";                WingetId = "";                                     ScoopId = "dnsjumper" }
-    'capframex'               = @{ Name = "CapFrameX";                 WingetId = "CXWorld.CapFrameX";                    ScoopId = "capframex" }
-    'msiafterburner'          = @{ Name = "MSI Afterburner";           WingetId = "Guru3D.Afterburner";                   ScoopId = "afterburner" }
-    'rtss'                    = @{ Name = "RivaTuner Statistics Server"; WingetId = "Guru3D.RTSS";                        ScoopId = "rtss" }
-    'dlssswapper'             = @{ Name = "DLSS Swapper";               WingetId = "beeradmoore.dlss-swapper";             ScoopId = "dlss-swapper" }
-    'ddu'                     = @{ Name = "Display Driver Uninstaller"; WingetId = "";                                     ScoopId = "ddu" }
-    'hwmonitor'               = @{ Name = "HWMonitor";                 WingetId = "CPUID.HWMonitor";                      ScoopId = "hwmonitor" }
+    'firefox'                 = @{ Name = "Mozilla Firefox";        WingetId = "Mozilla.Firefox";                      ScoopId = "firefox"; Bucket = "extras" }
+    'nanazip'                 = @{ Name = "NanaZip";                 WingetId = "M2Team.NanaZip";                       ScoopId = "nanazip"; Bucket = "main" }
+    'notepadplusplus.install' = @{ Name = "Notepad++";                WingetId = "Notepad++.Notepad++";                  ScoopId = "notepadplusplus"; Bucket = "extras" }
+    'freedownloadmanager'     = @{ Name = "Free Download Manager";    WingetId = "FreeDownloadManager.FreeDownloadManager"; ScoopId = "freedownloadmanager"; Bucket = "extras" }
+    'qbittorrent'             = @{ Name = "qBittorrent";               WingetId = "qBittorrent.qBittorrent";              ScoopId = "qbittorrent"; Bucket = "extras" }
+    'steam'                   = @{ Name = "Steam";                     WingetId = "Valve.Steam";                          ScoopId = "steam"; Bucket = "games" }
+    'epicgameslauncher'       = @{ Name = "Epic Games Launcher";       WingetId = "EpicGames.EpicGamesLauncher";          ScoopId = "epic-games-launcher"; Bucket = "games" }
+    'goggalaxy'               = @{ Name = "GOG Galaxy";                WingetId = "GOG.Galaxy";                           ScoopId = "goggalaxy"; Bucket = "games" }
+    '7zip'                    = @{ Name = "7-Zip";                     WingetId = "7zip.7zip";                            ScoopId = "7zip"; Bucket = "main" }
+    'wiztree'                 = @{ Name = "WizTree";                   WingetId = "AntibodySoftware.WizTree";             ScoopId = "wiztree"; Bucket = "extras" }
+    'memreduct'               = @{ Name = "Mem Reduct";                WingetId = "Henry++.MemReduct";                    ScoopId = "memreduct"; Bucket = "extras" }
+    'bleachbit'                = @{ Name = "BleachBit";                 WingetId = "BleachBit.BleachBit";                  ScoopId = "bleachbit"; Bucket = "extras" }
+    'moonlight'               = @{ Name = "Moonlight";                 WingetId = "MoonlightGameStreamingProject.Moonlight"; ScoopId = "moonlight"; Bucket = "extras" }
+    'sunshine'                = @{ Name = "Sunshine";                  WingetId = "LizardByte.Sunshine";                  ScoopId = "sunshine"; Bucket = "extras" }
+    'nilesoftshell'           = @{ Name = "Nilesoft Shell";            WingetId = "Nilesoft.Shell";                       ScoopId = "nilesoft-shell"; Bucket = "extras" }
+    'flowlauncher'            = @{ Name = "Flow Launcher";             WingetId = "Flow-Launcher.Flow-Launcher";          ScoopId = "flow-launcher"; Bucket = "extras" }
+    'sharex'                  = @{ Name = "ShareX";                    WingetId = "ShareX.ShareX";                        ScoopId = "sharex"; Bucket = "extras" }
+    'cpuz'                    = @{ Name = "CPU-Z";                     WingetId = "CPUID.CPU-Z";                          ScoopId = "cpu-z"; Bucket = "extras" }
+    'hwinfo'                  = @{ Name = "HWiNFO";                    WingetId = "REALiX.HWiNFO";                        ScoopId = "hwinfo"; Bucket = "extras" }
+    'brave'                   = @{ Name = "Brave";                     WingetId = "Brave.Brave";                          ScoopId = "brave"; Bucket = "extras" }
+    'dnsjumper'               = @{ Name = "DNS Jumper";                WingetId = "";                                     ScoopId = "dnsjumper"; Bucket = "extras" }
+    'capframex'               = @{ Name = "CapFrameX";                 WingetId = "CXWorld.CapFrameX";                    ScoopId = "capframex"; Bucket = "extras" }
+    'msiafterburner'          = @{ Name = "MSI Afterburner";           WingetId = "Guru3D.Afterburner";                   ScoopId = "msiafterburner"; Bucket = "extras" }
+    'rtss'                    = @{ Name = "RivaTuner Statistics Server"; WingetId = "Guru3D.RTSS";                        ScoopId = "rtss"; Bucket = "extras" }
+    'dlssswapper'             = @{ Name = "DLSS Swapper";               WingetId = "beeradmoore.dlss-swapper";             ScoopId = "dlss-swapper"; Bucket = "games" }
+    'ddu'                     = @{ Name = "Display Driver Uninstaller"; WingetId = "";                                     ScoopId = "ddu"; Bucket = "extras" }
+    'hwmonitor'               = @{ Name = "HWMonitor";                 WingetId = "CPUID.HWMonitor";                      ScoopId = "hwmonitor"; Bucket = "extras" }
 }
 
 # ============================================================================
@@ -65,6 +65,48 @@ function Find-WgoWinget {
     return $null
 }
 
+function Test-WgoWingetInstalled {
+    param([string]$WingetId)
+    $wingetExe = Find-WgoWinget
+    if (-not $wingetExe -or -not $WingetId) { return $false }
+    try {
+        $out = & $wingetExe list --id $WingetId -e --accept-source-agreements --disable-interactivity 2>$null
+        return ($LASTEXITCODE -eq 0 -and ($out -join "`n") -match [regex]::Escape($WingetId))
+    } catch { return $false }
+}
+
+function Invoke-WgoProcess {
+    param(
+        [Parameter(Mandatory = $true)][string]$FilePath,
+        [string[]]$ArgumentList = @(),
+        [Parameter(Mandatory = $true)][string]$LogFile,
+        [int]$TimeoutSec = 900
+    )
+    $errFile = "$LogFile.err"
+    Remove-Item -Path $LogFile, $errFile -Force -ErrorAction Ignore
+    $proc = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -NoNewWindow -PassThru `
+                -RedirectStandardOutput $LogFile -RedirectStandardError $errFile -ErrorAction Stop
+    $null = $proc.Handle
+    if (-not $proc.WaitForExit($TimeoutSec * 1000)) {
+        try { & taskkill.exe /PID $proc.Id /T /F 2>&1 | Out-Null } catch { }
+        return [pscustomobject]@{ ExitCode = -1; TimedOut = $true }
+    }
+    $proc.WaitForExit()
+    return [pscustomobject]@{ ExitCode = $proc.ExitCode; TimedOut = $false }
+}
+
+function Get-WgoLastLogLine {
+    param([string]$LogFile)
+    foreach ($f in @($LogFile, "$LogFile.err")) {
+        if (-not (Test-Path -LiteralPath $f)) { continue }
+        $lines = @(Get-Content -LiteralPath $f -Tail 8 -ErrorAction Ignore | Where-Object { $_ -and $_.Trim() })
+        $errLine = $lines | Where-Object { $_ -match 'ERROR|error|Couldn|failed|Failed|abort' } | Select-Object -Last 1
+        if ($errLine) { return ([string]$errLine).Trim() }
+        if ($lines.Count -gt 0 -and $f -eq "$LogFile.err") { return ([string]$lines[-1]).Trim() }
+    }
+    return ''
+}
+
 function Install-ViaWinget {
     param([string]$WingetId, [string]$DisplayName)
     if (-not $WingetId) { return $false }
@@ -74,9 +116,7 @@ function Install-ViaWinget {
         return $false
     }
     try {
-        $checkArgs = @("list", "--id", $WingetId, "-e", "--accept-source-agreements", "--disable-interactivity")
-        $checkOutput = & $wingetExe @checkArgs 2>$null
-        if ($LASTEXITCODE -eq 0 -and ($checkOutput -join "`n") -match [regex]::Escape($WingetId)) {
+        if (Test-WgoWingetInstalled -WingetId $WingetId) {
             Write-Log (T 'LogInstallAlready' $DisplayName) "OK"
             return $true
         }
@@ -89,15 +129,17 @@ function Install-ViaWinget {
             "--accept-source-agreements",
             "--disable-interactivity"
         )
-        $proc = Start-Process -FilePath $wingetExe -ArgumentList $installArgs -NoNewWindow -Wait -PassThru `
-                    -RedirectStandardOutput $logFile -ErrorAction Stop
-        if ($proc.ExitCode -eq 0) {
-            Write-Log (T 'LogInstallOk' $DisplayName) "OK"
-            return $true
-        } else {
-            Write-Log (T 'LogWingetFailedFallback' $DisplayName $proc.ExitCode) "WARN"
+        $run = Invoke-WgoProcess -FilePath $wingetExe -ArgumentList $installArgs -LogFile $logFile -TimeoutSec 1200
+        if ($run.TimedOut) {
+            Write-Log (T 'LogInstallTimeout' $DisplayName) "WARN"
             return $false
         }
+        if ($run.ExitCode -eq 0 -or (Test-WgoWingetInstalled -WingetId $WingetId)) {
+            Write-Log (T 'LogInstallOk' $DisplayName) "OK"
+            return $true
+        }
+        Write-Log (T 'LogWingetFailedFallback' $DisplayName $run.ExitCode) "WARN"
+        return $false
     } catch {
         Write-Log (T 'LogWingetFailedFallback' $DisplayName $_.Exception.Message) "WARN"
         return $false
@@ -146,7 +188,6 @@ function Install-WgoScoop {
             Write-Log (T 'LogScoopInstallOk') "OK"
             $Global:WgoScoopReadyLogged = $true
         }
-        try { & $existing bucket add extras 2>$null 6>$null | Out-Null } catch {}
         return $existing
     }
     Write-Log (T 'LogScoopInstalling') "INFO"
@@ -177,7 +218,6 @@ function Install-WgoScoop {
         $Global:WgoScoopPath = $null
         $resolved = Find-WgoScoop
         if ($resolved) {
-            try { & $resolved bucket add extras 2>$null 6>$null | Out-Null } catch {}
             Write-Log (T 'LogScoopInstallOk') "OK"
             $Global:WgoScoopReadyLogged = $true
             return $resolved
@@ -215,27 +255,100 @@ function Update-WgoScoopStatus {
     }
 }
 
+function Get-WgoScoopRoot {
+    param([string]$ScoopExe)
+    if ($ScoopExe) {
+        try { return (Split-Path (Split-Path $ScoopExe -Parent) -Parent) } catch { }
+    }
+    if ($env:SCOOP) { return $env:SCOOP }
+    return "$env:USERPROFILE\scoop"
+}
+
+function Test-WgoScoopBucket {
+    param([string]$Root, [string]$Name)
+    return (Test-Path -LiteralPath (Join-Path $Root "buckets\$Name\bucket"))
+}
+
+function Initialize-WgoScoopBucket {
+    param([Parameter(Mandatory = $true)][string]$ScoopExe, [Parameter(Mandatory = $true)][string]$Name)
+    $root = Get-WgoScoopRoot $ScoopExe
+    if (Test-WgoScoopBucket -Root $root -Name $Name) { return $true }
+    if ($Name -eq 'main') { return $false }
+
+    $gitShim = Join-Path $root "shims\git.exe"
+    if (-not (Get-Command git.exe -ErrorAction Ignore) -and -not (Test-Path -LiteralPath $gitShim)) {
+        Write-Log (T 'LogScoopGitInstalling') "INFO"
+        try {
+            $gitRun = Invoke-WgoProcess -FilePath $ScoopExe -ArgumentList @('install', 'main/git') -LogFile "$env:TEMP\wgo_scoop_git.log" -TimeoutSec 900
+            if ($gitRun.TimedOut) { Write-Log (T 'LogInstallTimeout' 'Git') "WARN" }
+        } catch {
+            Write-Log (T 'LogInstallError' 'Git' $_.Exception.Message) "WARN"
+        }
+    }
+    $shimDir = Join-Path $root "shims"
+    if (($env:Path -split ';') -notcontains $shimDir) { $env:Path = "$shimDir;$env:Path" }
+
+    Write-Log (T 'LogScoopBucketAdding' $Name) "INFO"
+    try {
+        $null = Invoke-WgoProcess -FilePath $ScoopExe -ArgumentList @('bucket', 'add', $Name) -LogFile "$env:TEMP\wgo_scoop_bucket_$Name.log" -TimeoutSec 300
+    } catch { }
+    if (Test-WgoScoopBucket -Root $root -Name $Name) { return $true }
+
+    $repoNames = @{ extras = 'Extras'; games = 'Games'; versions = 'Versions'; nonportable = 'Nonportable' }
+    if (-not $repoNames.ContainsKey($Name)) { return $false }
+    Write-Log (T 'LogScoopBucketZip' $Name) "WARN"
+    try {
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        $zipPath = Join-Path $env:TEMP "wgo_bucket_$Name.zip"
+        $tmpDir = Join-Path $env:TEMP "wgo_bucket_$Name"
+        Remove-Item -Path $tmpDir -Recurse -Force -ErrorAction Ignore
+        Invoke-WebRequest -Uri "https://github.com/ScoopInstaller/$($repoNames[$Name])/archive/refs/heads/master.zip" -OutFile $zipPath -UseBasicParsing -ErrorAction Stop
+        Expand-Archive -Path $zipPath -DestinationPath $tmpDir -Force -ErrorAction Stop
+        $inner = Get-ChildItem -Path $tmpDir -Directory | Select-Object -First 1
+        $target = Join-Path $root "buckets\$Name"
+        Remove-Item -Path $target -Recurse -Force -ErrorAction Ignore
+        New-Item -Path (Split-Path $target -Parent) -ItemType Directory -Force | Out-Null
+        Move-Item -Path $inner.FullName -Destination $target -Force -ErrorAction Stop
+        Remove-Item -Path $zipPath, $tmpDir -Recurse -Force -ErrorAction Ignore
+    } catch {
+        Write-Log (T 'LogScoopBucketFailed' $Name $_.Exception.Message) "ERROR"
+    }
+    return (Test-WgoScoopBucket -Root $root -Name $Name)
+}
+
 function Install-ViaScoop {
-    param([string]$ScoopId, [string]$DisplayName)
+    param([string]$ScoopId, [string]$DisplayName, [string]$Bucket = 'extras')
     if (-not $ScoopId) { return $false }
     $scoopExe = Install-WgoScoop
     if (-not $scoopExe) {
         Write-Log (T 'LogScoopNotFound' $DisplayName) "WARN"
         return $false
     }
+    $root = Get-WgoScoopRoot $scoopExe
+    $appDir = Join-Path $root "apps\$ScoopId\current"
     try {
-        $listOutput = & $scoopExe list $ScoopId 2>$null 6>$null
-        if ($listOutput -and ($listOutput -join "`n") -match [regex]::Escape($ScoopId)) {
+        if (Test-Path -LiteralPath $appDir) {
             Write-Log (T 'LogInstallAlready' $DisplayName) "OK"
             return $true
         }
+        if (-not (Initialize-WgoScoopBucket -ScoopExe $scoopExe -Name $Bucket)) {
+            Write-Log (T 'LogScoopBucketUnavailable' $Bucket $DisplayName) "ERROR"
+            return $false
+        }
         Write-Log (T 'LogTryingScoop' $DisplayName) "INFO"
-        & $scoopExe install $ScoopId 2>$null 6>$null | Out-Null
-        if ($LASTEXITCODE -eq 0) {
+        $logFile = "$env:TEMP\wgo_scoop_$($ScoopId -replace '[^\w\.-]','_').log"
+        $run = Invoke-WgoProcess -FilePath $scoopExe -ArgumentList @('install', "$Bucket/$ScoopId") -LogFile $logFile -TimeoutSec 1200
+        if ($run.TimedOut) {
+            Write-Log (T 'LogInstallTimeout' $DisplayName) "ERROR"
+            return $false
+        }
+        if (Test-Path -LiteralPath $appDir) {
             Write-Log (T 'LogInstallOk' $DisplayName) "OK"
             return $true
         }
-        Write-Log (T 'LogInstallError' $DisplayName 'scoop install failed') "ERROR"
+        $detail = Get-WgoLastLogLine -LogFile $logFile
+        if (-not $detail) { $detail = "scoop exit code $($run.ExitCode)" }
+        Write-Log (T 'LogInstallError' $DisplayName $detail) "ERROR"
         return $false
     } catch {
         Write-Log (T 'LogInstallError' $DisplayName $_.Exception.Message) "ERROR"
@@ -265,13 +378,14 @@ function New-WgoDesktopShortcut {
 function New-WgoScoopAppShortcut {
     param([string]$ScoopId, [string]$DisplayName)
     try {
-        $shimBase = "$env:USERPROFILE\scoop\shims\$ScoopId"
+        $scoopRoot = Get-WgoScoopRoot (Find-WgoScoop)
+        $shimBase = "$scoopRoot\shims\$ScoopId"
         $targetExe = $null
         foreach ($ext in @(".exe", ".cmd", ".bat")) {
             if (Test-Path "$shimBase$ext") { $targetExe = "$shimBase$ext"; break }
         }
         if (-not $targetExe) {
-            $appCurrent = "$env:USERPROFILE\scoop\apps\$ScoopId\current"
+            $appCurrent = "$scoopRoot\apps\$ScoopId\current"
             if (Test-Path $appCurrent) {
                 $exe = Get-ChildItem -Path $appCurrent -Filter "*.exe" -File -Recurse -ErrorAction SilentlyContinue |
                     Sort-Object { $_.Name -notmatch [regex]::Escape($ScoopId) } , Length -Descending |
@@ -294,7 +408,7 @@ function Install-WgoApp {
     $entry = $Global:WgoAppCatalog[$Key]
     if (-not $entry) {
         Write-Log (T 'LogInstallError' $DisplayName "unknown app key: $Key") "ERROR"
-        return
+        return $false
     }
     if ($entry.WingetId) {
         Write-Log (T 'LogInstallStart' $DisplayName $entry.WingetId) "INFO"
@@ -302,17 +416,19 @@ function Install-WgoApp {
         Write-Log (T 'LogInstallStartScoopOnly' $DisplayName) "INFO"
     }
 
-    if (Install-ViaWinget -WingetId $entry.WingetId -DisplayName $DisplayName) { return }
-    if (Install-ViaScoop -ScoopId $entry.ScoopId -DisplayName $DisplayName) {
+    if (Install-ViaWinget -WingetId $entry.WingetId -DisplayName $DisplayName) { return $true }
+    if (Install-ViaScoop -ScoopId $entry.ScoopId -DisplayName $DisplayName -Bucket $entry.Bucket) {
         New-WgoScoopAppShortcut -ScoopId $entry.ScoopId -DisplayName $DisplayName
-        if ($Key -eq 'msiafterburner') { Install-WgoApp -Key 'rtss' -DisplayName $Global:WgoAppCatalog['rtss'].Name }
-        return
+        if ($Key -eq 'msiafterburner') { [void](Install-WgoApp -Key 'rtss' -DisplayName $Global:WgoAppCatalog['rtss'].Name) }
+        return $true
     }
     Write-Log (T 'LogInstallError' $DisplayName 'no source available') "ERROR"
+    return $false
 }
 
 Export-ModuleMember -Function @(
-    'Find-WgoWinget', 'Install-ViaWinget',
+    'Find-WgoWinget', 'Install-ViaWinget', 'Test-WgoWingetInstalled', 'Invoke-WgoProcess', 'Get-WgoLastLogLine',
+    'Get-WgoScoopRoot', 'Test-WgoScoopBucket', 'Initialize-WgoScoopBucket',
     'Find-WgoScoop', 'Test-WgoScoopCore', 'Install-WgoScoop', 'Update-WgoSessionEnvironment', 'Update-WgoScoopStatus', 'Install-ViaScoop',
     'Install-WgoApp', 'New-WgoDesktopShortcut', 'New-WgoScoopAppShortcut'
 )

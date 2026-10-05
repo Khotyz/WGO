@@ -12,6 +12,8 @@
          files that "irm | iex" alone can never fetch.
 #>
 
+param([ValidateSet('Basic','')][string]$ScheduledProfile = '')
+
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Windows.Forms
 
 $ErrorActionPreference = 'Stop'
@@ -131,7 +133,6 @@ if (-not $isAdmin) {
 $Global:WgoLogQueue = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
 $Global:CurrentLangCode = "pt-BR"
 $Global:WgoCurrentTheme = "Dark"
-$Global:WgoLastRunPath = Join-Path $env:LOCALAPPDATA "WGO\last-run.json"
 
 # Functions shared with background-task runspaces (see Start-WgoBackgroundTask)
 $Global:WgoSharedFunctionNames = @(
@@ -145,13 +146,17 @@ $Global:WgoSharedFunctionNames = @(
     'Install-WgoApp', 'New-WgoDesktopShortcut', 'New-WgoScoopAppShortcut',
     'Start-WgoExternalScriptAsCurrentUser',
     'Set-WgoServiceMgmt', 'Clear-WgoWinSxS', 'Invoke-WgoSystemIntegrity', 'Clear-WgoDNS',
-    'Test-WgoAppInstalled', 'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Remove-WgoWindowsBackupApp',
+    'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks', 'Get-WgoDiskKinds', 'Get-WgoDiskSummary', 'Test-WgoSystemDriveIsSsd',
     'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoTimerResolutionNative',
-    'Set-WgoXboxServices', 'Invoke-WgoNetworkReleaseRenew',
+    'Set-WgoSteamBoost', 'Set-WgoSystemTuning', 'Set-WgoXboxServices', 'Invoke-WgoNetworkReleaseRenew',
     'Invoke-WgoNetworkRegisterDns', 'New-WgoScheduledOptimization', 'Get-WgoActiveSchemeGuid',
     'Get-WgoGpuVendor', 'Set-WgoAmdUlps', 'Set-WgoAmdMpo', 'Set-WgoAmdTdr', 'Set-WgoAmdCrashDefender',
     'Set-WgoAmdHdcp', 'Set-WgoAmdTelemetry', 'Set-WgoAmdHwAccel',
-    'Get-WgoAmdUlpsEntries', 'Get-WgoAmdCrashDefenderService', 'Get-WgoAmdDriverSubkeys', 'Get-WgoAmdTelemetryServices'
+    'Get-WgoAmdUlpsEntries', 'Get-WgoAmdCrashDefenderService', 'Get-WgoAmdDriverSubkeys', 'Get-WgoAmdTelemetryServices',
+    'Get-WgoGpuInventory', 'Test-WgoGpuVendorPresent', 'Get-WgoHardwareProfile', 'Get-WgoBloatwareTargets',
+    'Get-WgoOptimizationStatus', 'Invoke-WgoPreflightChecks',
+    'Get-WgoScoopRoot', 'Test-WgoScoopBucket', 'Initialize-WgoScoopBucket', 'Invoke-WgoProcess',
+    'Get-WgoLastLogLine', 'Test-WgoWingetInstalled'
 )
 
 # ============================================================================
@@ -172,10 +177,10 @@ try {
         "Wgo.Native",
         "Wgo.Core",
         "Wgo.Amd",
+        "Wgo.Scanner",
         "Wgo.Services",
         "Wgo.AppInstaller",
         "Wgo.Utilities",
-        "Wgo.Profile",
         "Wgo.UI"
     )
 
@@ -194,6 +199,19 @@ try {
     $xamlPath = Join-Path $scriptRoot "xaml\MainWindow.xaml"
     if (-not (Test-Path $xamlPath)) {
         throw "Arquivo XAML não encontrado em '$xamlPath'.`nVerifique se a pasta 'xaml' existe e contém 'MainWindow.xaml'."
+    }
+
+    if ($ScheduledProfile) {
+        $logDir = Join-Path $env:ProgramData 'WGO'
+        if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+        $diskIsSsd = Test-WgoSystemDriveIsSsd
+        Set-WgoExtraTweaks2 -CacheClean $true -FastShutdown $true -PrefetchSSD $diskIsSsd
+        Set-WgoMoreOptimizations -TempCleanup $true -DiskOptimize $true
+        $lines = @()
+        $line = $null
+        while ($Global:WgoLogQueue.TryDequeue([ref]$line)) { $lines += $line }
+        Add-Content -Path (Join-Path $logDir 'scheduled.log') -Value (@("--- $(Get-Date -Format s) profile=$ScheduledProfile") + $lines) -Encoding UTF8
+        exit 0
     }
 
     Initialize-WgoUI -XamlPath $xamlPath

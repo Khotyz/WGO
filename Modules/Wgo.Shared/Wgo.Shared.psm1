@@ -146,13 +146,13 @@ function Show-WgoConfirm {
 
     $btnYes = $dlg.FindName('btnDialogYes')
     $btnNo  = $dlg.FindName('btnDialogNo')
-    $btnYes.Add_Click({ $script:wgoDialogResult = $true; $dlg.Close() }.GetNewClosure())
-    $btnNo.Add_Click({ $script:wgoDialogResult = $false; $dlg.Close() }.GetNewClosure())
+    $state = @{ Result = $false }
+    $btnYes.Add_Click({ $state.Result = $true; $dlg.Close() }.GetNewClosure())
+    $btnNo.Add_Click({ $state.Result = $false; $dlg.Close() }.GetNewClosure())
     $dlg.Add_MouseLeftButtonDown({ if ($_.ChangedButton -eq 'Left') { $dlg.DragMove() } })
 
-    $script:wgoDialogResult = $false
     $dlg.ShowDialog() | Out-Null
-    return $script:wgoDialogResult
+    return [bool]$state.Result
 }
 
 function Start-WgoBackgroundTask {

@@ -484,6 +484,8 @@
                         <ComboBoxItem Content="Services" Tag="Services"/>
                         <ComboBoxItem Content="Visual" Tag="Visual"/>
                         <ComboBoxItem Content="AMD" Tag="Amd"/>
+                        <ComboBoxItem Content="Risky" Tag="Risky"/>
+                        <ComboBoxItem Content="Tuning" Tag="Tuning"/>
                     </ComboBox>
                     <Button x:Name="btnExportProfile" Content="Export Profile" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
                     <Button x:Name="btnImportProfile" Content="Import Profile" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
@@ -505,6 +507,12 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
 
+                        <TextBlock x:Name="txtScanSummary" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,0,6"/>
+                        <TextBlock x:Name="txtPreflight" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" FontSize="12" Margin="0,0,0,6" Visibility="Collapsed"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button x:Name="btnRescan" Content="Re-scan system" Style="{StaticResource SecondaryButtonStyle}" Padding="14,6" Margin="0,0,14,0"/>
+                            <CheckBox x:Name="chkSkipApplied" Content="Skip options already applied" IsChecked="True" VerticalAlignment="Center"/>
+                        </StackPanel>
                         <CheckBox x:Name="chkSelectAll" Content="Select All / Deselect All" FontWeight="Bold" Margin="0,0,0,4" IsChecked="True"/>
                         <CheckBox x:Name="chkDryRun" Content="Dry Run (only log what would change, apply nothing)" Margin="0,0,0,10" IsChecked="False"/>
 
@@ -732,6 +740,32 @@
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkRssOptimize" Style="{StaticResource WrapCheckBoxStyle}" Content="Optimize Receive Side Scaling (RSS) for lower network latency" IsChecked="False"/>
                                 </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkSteamBoost" Style="{StaticResource WrapCheckBoxStyle}" Content="Steam download boost (TCP autotuning normal + high CPU priority for Steam)" IsChecked="False"/>
+                                </Border>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpSystemTuning" Header="System Tuning (Performance)">
+                            <WrapPanel>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkNtfsOptimize" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable NTFS last-access timestamp updates" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDisableLLMNR" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable LLMNR (legacy name resolution)" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkMenuDelay" Style="{StaticResource WrapCheckBoxStyle}" Content="Remove the menu show delay (400ms to 0)" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkDnsCacheSize" Style="{StaticResource WrapCheckBoxStyle}" Content="Increase DNS cache lifetime" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkIndexerThrottle" Style="{StaticResource WrapCheckBoxStyle}" Content="Stop search indexing on battery and removable drives" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkKeyboardFast" Style="{StaticResource WrapCheckBoxStyle}" Content="Fastest keyboard repeat delay and rate" IsChecked="False"/>
+                                </Border>
                             </WrapPanel>
                         </GroupBox>
 
@@ -760,9 +794,6 @@
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkPrefetchSSD" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Prefetch on SSDs (auto-detected)" IsChecked="False"/>
-                                </Border>
-                                <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkRemoveWinBackup" Style="{StaticResource WrapCheckBoxStyle}" Content="Silence 'Windows Backup' nag notifications (it's a locked system component - Windows won't let it be uninstalled or hidden from Settings)" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkTcpIpReset" Style="{StaticResource WrapCheckBoxStyle}" Content="Reset TCP/IP stack (fixes network connectivity issues)" IsChecked="False"/>
