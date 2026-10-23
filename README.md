@@ -57,6 +57,7 @@ This downloads the latest version to a temporary folder, starts the UI, and clea
 - Disable Shared Experiences, Cortana, and Windows Spotlight.
 - Remove Edge telemetry as a **standalone, opt-in action** that never disables the browser's built-in password manager (`PasswordManagerEnabled=1` is re-asserted and verified after applying).
 - Disable Windows Error Reporting.
+- **Block Office and OneDrive telemetry**, and disable the extra telemetry scheduled tasks Microsoft ships (Customer Experience Improvement Program, Consolidator and similar).
 - Pause Windows Update for 7 days (same registry keys Settings uses).
 - **AI and cloud content blocks** – Settings AI agent, Click to Do, Recall export, Paint AI components, MCP agent connectors, fresh agent-consent windows, Get Started, the Copilot pin screen and the cloud-content surfaces. Written to both the machine and the user scope, with the scanner accepting either one; builds that do not implement a value simply ignore it, so the same switches work on Windows 10 and on every Windows 11 release.
 
@@ -64,12 +65,26 @@ This downloads the latest version to a temporary folder, starts the UI, and clea
 - Apply a performance visual‑effects profile (disable animations, shadows, transparency).
 - Set power plan to **High Performance** or **Ultimate Performance** (CPU min state 100%, AC/DC) – with verification that the change actually stuck.
 - Disable Hibernation, Fast Startup, SysMain (SuperFetch), and Windows Search indexing.
+- **Enable Windows Game Mode and Hardware-Accelerated GPU Scheduling (HAGS)** – automatically skipped on AMD GPUs, where several driver builds are known to be unstable with it. A restart is recommended so HAGS takes effect.
+- **Raise kernel scheduling priority for foreground games** – tunes `Win32PrioritySeparation=38` and the MMCSS *Games* task (GPU Priority=8, Priority=6, High scheduling).
+- **Reduce hung-app timeout** – lowers `HungAppTimeout`/`WaitToKillAppTimeout` so frozen programs are detected and can be closed faster.
+- **Disable Xbox Game DVR background recording** – `GameDVR_Enabled=0` only disables background recording, so manual screenshots (Win+Alt+PrtScn) and manual clip recording keep working.
+- **Fix the Game Bar microphone echo cancellation** that can make voice chat sound robotic, and optionally disable the Game Bar overlay and its Win+G shortcut entirely.
+- **Disable Core Parking** so every CPU core stays active instead of parking idle ones.
+- **Disable HPET** – falls back to the platform clock on systems where it improves FPS (requires a restart).
+- **Disable Snap Assist and Aero Shake** window gestures.
+- **Shorten the boot menu timeout** to 5 seconds.
 - Reduce input lag (mouse acceleration, Sticky Keys, Fullscreen Optimizations).
 - Reduce network latency (TCP/IP tuning, disable Nagle, IPv6, TCP autotuning).
 - Increase timer resolution to 0.5 ms via native `NtSetTimerResolution`.
 - Optimise system cache for 8 GB+ RAM (`LargeSystemCache` + `DisablePagingExecutive`).
 - Instantly clear Standby List (frees cached RAM).
 - Auto‑clean Standby List every 5 minutes (scheduled task).
+- **Skip pagefile clearing on shutdown** (`ClearPageFileAtShutdown=0`) so the shutdown sequence finishes faster.
+- **Disable Prefetch on SSDs** where it brings no benefit (auto‑detected).
+- **Disable Windows Store** via policy while keeping winget fully functional for command-line installs.
+- **Remove ghost / phantom network adapters** left behind by old drivers or VPN software.
+- **Exclude junk and cache folders from Windows Search indexing** so the indexer stops burning CPU and disk on them (also disables indexing of encrypted items and Outlook via policy).
 - Clean temporary files, Prefetch, Windows.old, Windows Update cache, and DirectX / NVIDIA / AMD / Intel shader caches.
 - Clear icon/font cache, event logs, minidumps, and Store cache.
 - **Steam download boost** – resets TCP autotuning to *Normal* and sets `CpuPriorityClass=3` (High) for `steam.exe` under IFEO. Mutually exclusive with *Disable TCP autotuning* (Steam Boost wins, with a log note).
