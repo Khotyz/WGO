@@ -73,12 +73,19 @@ function Get-WgoHardwareProfile {
         $p.IsVirtualMachine = ("$($cs.Manufacturer) $($cs.Model)" -match 'Virtual|VMware|KVM|QEMU|Xen|HVM domU|Bochs|Parallels')
     } catch { }
     try {
-        $p.HasBattery = [bool](Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore)
+        $batteries = @(Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore | Where-Object { $_ })
+        $realBatteries = @($batteries | Where-Object { "$($_.Name) $($_.DeviceID)" -notmatch 'UPS' })
+        $p.HasBattery = ($realBatteries.Count -gt 0)
         $laptopChassis = @(8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32)
-        $chassis = @((Get-CimInstance -ClassName Win32_SystemEnclosure -ErrorAction Ignore).ChassisTypes)
+        $desktopChassis = @(3, 4, 5, 6, 7, 13, 15, 16, 17, 23, 35, 36)
+        $chassis = @((Get-CimInstance -ClassName Win32_SystemEnclosure -ErrorAction Ignore).ChassisTypes | Where-Object { $_ })
         $isLaptopChassis = $false
-        foreach ($t in $chassis) { if ($laptopChassis -contains [int]$t) { $isLaptopChassis = $true } }
-        $p.IsLaptop = ($p.HasBattery -or $isLaptopChassis)
+        $isDesktopChassis = $false
+        foreach ($t in $chassis) {
+            if ($laptopChassis -contains [int]$t) { $isLaptopChassis = $true }
+            if ($desktopChassis -contains [int]$t) { $isDesktopChassis = $true }
+        }
+        $p.IsLaptop = (($isLaptopChassis -and $p.HasBattery) -or (($isLaptopChassis -or $p.HasBattery) -and -not $isDesktopChassis))
     } catch { }
     try {
         $disks = @(Get-WgoDiskKinds)
@@ -122,6 +129,17 @@ function Get-WgoOptimizationStatus {
         if ($ok -eq $Checks.Count) { return (New-Status 'Applied') }
         if ($ok -eq 0)             { return (New-Status 'Pending') }
         return (New-Status 'Partial' '' "$ok/$($Checks.Count)")
+    }
+    function Check-PolicyGroups($Groups) {
+        $ok = 0
+        foreach ($group in $Groups) {
+            $hit = $false
+            foreach ($c in $group) { if (Test-Equal (Read-Reg $c.P $c.N) $c.V) { $hit = $true; break } }
+            if ($hit) { $ok++ }
+        }
+        if ($ok -eq $Groups.Count) { return (New-Status 'Applied') }
+        if ($ok -eq 0)             { return (New-Status 'Pending') }
+        return (New-Status 'Partial' '' "$ok/$($Groups.Count)")
     }
     function Check-Services([string[]]$Names, [string[]]$Accept) {
         $found = 0; $good = 0; $bad = @()
@@ -470,9 +488,11 @@ public static extern int NtQueryTimerResolution(out uint MinimumResolution, out 
     $detectors['chkDisableLLMNR'] = { Check-Reg @(@{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient'; N = 'EnableMulticast'; V = 0 }) }
     $detectors['chkMenuDelay'] = { Check-Reg @(@{ P = 'HKCU:\Control Panel\Desktop'; N = 'MenuShowDelay'; V = '0' }) }
     $detectors['chkDnsCacheSize'] = { Check-Reg @(@{ P = 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters'; N = 'MaxCacheTtl'; V = 86400 }) }
-    $detectors['chkIndexerThrottle'] = { Check-Reg @(
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; N = 'PreventIndexingOnBattery'; V = 1 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; N = 'DisableRemovableDriveIndexing'; V = 1 }) }
+    $detectors['chkIndexerThrottle'] = {
+        if (-not $hw.HasBattery) { return (New-Status 'NotApplicable' 'NoBattery') }
+        Check-Reg @(
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; N = 'PreventIndexingOnBattery'; V = 1 },
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; N = 'DisableRemovableDriveIndexing'; V = 1 }) }
     $detectors['chkKeyboardFast'] = { Check-Reg @(@{ P = 'HKCU:\Control Panel\Keyboard'; N = 'KeyboardDelay'; V = '0' }) }
     $detectors['chkSteamBoost'] = {
         $reg = Check-Reg @(@{ P = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\steam.exe\PerfOptions'; N = 'CpuPriorityClass'; V = 3 })
@@ -523,8 +543,41 @@ public static extern int NtQueryTimerResolution(out uint MinimumResolution, out 
         }
         return (New-Status 'Pending' 'PauseExpired')
     }
-    $detectors['chkDisableEdgeTelemetry'] = { Check-Reg @(
-        @{ P = $edgePolicy; N = 'ConfigureTelemetryForDesktop'; V = 0 }, @{ P = $edgePolicy; N = 'MetricsReportingEnabled'; V = 0 }) }
+    $detectors['chkClipboardHistory'] = { Check-Reg @(
+        @{ P = 'HKCU:\Software\Microsoft\Clipboard'; N = 'EnableClipboardHistory'; V = 0 },
+        @{ P = 'HKCU:\Software\Microsoft\Clipboard'; N = 'CloudClipboardAutomaticUpload'; V = 0 }) }
+    $detectors['chkPaintNoCopilot'] = { Check-Reg @(
+        @{ P = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'; N = 'DisableCocreator'; V = 1 },
+        @{ P = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'; N = 'DisableGenerativeFill'; V = 1 },
+        @{ P = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'; N = 'DisableImageCreator'; V = 1 }) }
+    $detectors['chkClassicPhotoViewer'] = { Check-Reg @(
+        @{ P = 'HKLM:\SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations'; N = '.jpg'; V = 'PhotoViewer.FileAssoc.Tiff' },
+        @{ P = 'HKLM:\SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations'; N = '.png'; V = 'PhotoViewer.FileAssoc.Tiff' }) }
+    $detectors['chkClassicNotepad'] = { Check-Reg @(
+        @{ P = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\notepad.exe'; N = '(default)'; V = "$env:SystemRoot\System32\notepad.exe" }) }
+    $detectors['chkEdgeTelemetryIsolated'] = { Check-Reg @(
+        @{ P = $edgePolicy; N = 'MetricsReportingEnabled'; V = 0 },
+        @{ P = $edgePolicy; N = 'SendSiteInfoToImproveServices'; V = 0 },
+        @{ P = $edgePolicy; N = 'PasswordManagerEnabled'; V = 1 }) }
+    $aiMachine = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
+    $aiUser = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
+    $cloudMachine = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
+    $cloudUser = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
+    $detectors['chkWin11AiAgentBlock'] = {
+        Check-PolicyGroups @(
+            @(@{ P = $aiMachine; N = 'DisableSettingsAgent'; V = 1 }, @{ P = $aiUser; N = 'DisableSettingsAgent'; V = 1 }),
+            @(@{ P = $aiMachine; N = 'DisableClickToDo'; V = 1 }, @{ P = $aiUser; N = 'DisableClickToDo'; V = 1 }),
+            @(@{ P = $aiMachine; N = 'DisableAIDataAnalysis'; V = 1 }, @{ P = $aiUser; N = 'DisableAIDataAnalysis'; V = 1 }),
+            @(@{ P = $aiMachine; N = 'AllowRecallEnablement'; V = 0 }, @{ P = $aiUser; N = 'AllowRecallEnablement'; V = 0 })) }
+    $detectors['chkWin11AgentConnectors'] = {
+        Check-PolicyGroups @(
+            @(@{ P = $aiMachine; N = 'ConfigureAgentConnectors'; V = 2 }, @{ P = $aiUser; N = 'ConfigureAgentConnectors'; V = 2 }),
+            @(@{ P = $aiMachine; N = 'AgentConsentDuration'; V = 1 }, @{ P = $aiUser; N = 'AgentConsentDuration'; V = 1 })) }
+    $detectors['chkWin11CloudContent'] = {
+        Check-PolicyGroups @(
+            @(@{ P = $cloudMachine; N = 'DisableGetStarted'; V = 1 }, @{ P = $cloudUser; N = 'DisableGetStarted'; V = 1 }),
+            @(@{ P = $cloudMachine; N = 'DisableCopilotPinScreen'; V = 1 }, @{ P = $cloudUser; N = 'DisableCopilotPinScreen'; V = 1 }),
+            @(@{ P = $cloudMachine; N = 'DisableCloudOptimizedContent'; V = 1 }, @{ P = $cloudUser; N = 'DisableCloudOptimizedContent'; V = 1 })) }
     $detectors['chkDisableSpotlight'] = { Check-Reg @(
         @{ P = $cdm; N = 'SubscribedContent-338388Enabled'; V = 0 }, @{ P = $cdm; N = 'RotatingLockScreenEnabled'; V = 0 }) }
 

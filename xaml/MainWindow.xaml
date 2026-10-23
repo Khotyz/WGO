@@ -572,7 +572,10 @@
                                     <CheckBox x:Name="chkCopilotBlock" Style="{StaticResource WrapCheckBoxStyle}" Content="Block Copilot / Recall / AI data analysis" IsChecked="True"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkInputTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable input personalization / clipboard cloud sync" IsChecked="True"/>
+                                    <CheckBox x:Name="chkInputTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable input personalization and typing insights" IsChecked="True"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkClipboardHistory" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable clipboard history and cloud clipboard sync (opt-in)" IsChecked="False"/>
                                 </Border>
                             </WrapPanel>
                         </GroupBox>
@@ -814,10 +817,43 @@
                                     <CheckBox x:Name="chkPauseUpdates" Style="{StaticResource WrapCheckBoxStyle}" Content="Pause Updates for 7 Days" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkDisableEdgeTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Edge Telemetry" IsChecked="False"/>
+                                    <CheckBox x:Name="chkDisableSpotlight" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Windows Spotlight" IsChecked="False"/>
+                                </Border>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpEdgeTelemetry" Header="Microsoft Edge (isolated)">
+                            <WrapPanel>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkEdgeTelemetryIsolated" Style="{StaticResource WrapCheckBoxStyle}" Content="Remove Edge telemetry only (keeps the built-in password manager)" IsChecked="False"/>
+                                </Border>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpAiCloud" Header="AI and cloud content">
+                            <WrapPanel>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkWin11AiAgentBlock" Style="{StaticResource WrapCheckBoxStyle}" Content="Block the Settings AI agent, Click to Do and Recall/Copilot AI components" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkDisableSpotlight" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Windows Spotlight" IsChecked="False"/>
+                                    <CheckBox x:Name="chkWin11AgentConnectors" Style="{StaticResource WrapCheckBoxStyle}" Content="Block AI agent connectors (MCP) and reset agent consent to 1 hour" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkWin11CloudContent" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Get Started, Copilot pin screen and cloud suggestions" IsChecked="False"/>
+                                </Border>
+                            </WrapPanel>
+                        </GroupBox>
+
+                        <GroupBox x:Name="grpClassicApps" Header="Classic Apps (opt-in)">
+                            <WrapPanel>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkPaintNoCopilot" Style="{StaticResource WrapCheckBoxStyle}" Content="Remove Copilot and AI features from Paint" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkClassicPhotoViewer" Style="{StaticResource WrapCheckBoxStyle}" Content="Restore the classic Windows Photo Viewer" IsChecked="False"/>
+                                </Border>
+                                <Border Style="{StaticResource GridOptionCardStyle}">
+                                    <CheckBox x:Name="chkClassicNotepad" Style="{StaticResource WrapCheckBoxStyle}" Content="Restore classic Notepad (Notepad (system) + no Store alias)" IsChecked="False"/>
                                 </Border>
                             </WrapPanel>
                         </GroupBox>
@@ -890,6 +926,16 @@
                                 <Button x:Name="btnInstallScoop" Content="Install Scoop" HorizontalAlignment="Left" Padding="16,8" FontSize="13"/>
                             </StackPanel>
                         </Border>
+
+                        <GroupBox x:Name="grpLtscComponents" Header="Windows LTSC components">
+                            <StackPanel>
+                                <TextBlock x:Name="txtLtscComponentsDesc" Text="Windows LTSC and IoT builds ship without the Microsoft Store. Use these buttons to add the Store and App Installer, then point winget at the official sources." TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,0,8"/>
+                                <WrapPanel>
+                                    <Button x:Name="btnInstallStore" Content="Install Microsoft Store" Padding="16,8" FontSize="13" Margin="0,0,10,0"/>
+                                    <Button x:Name="btnInstallAppInstaller" Content="Install App Installer (winget)" Padding="16,8" FontSize="13"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
 
                         <GroupBox x:Name="grpAppsBrowsers" Header="Web Browsers">
                             <WrapPanel>
@@ -1069,13 +1115,6 @@
                                     <StackPanel>
                                         <CheckBox x:Name="chkDlssSwapper" Content="DLSS Swapper" FontWeight="Bold" Tag="dlssswapper"/>
                                         <TextBlock x:Name="txtDlssSwapperDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource CardStyle}" Width="300" Margin="0,0,10,10">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkDdu" Content="Display Driver Uninstaller" FontWeight="Bold" Tag="ddu"/>
-                                        <TextBlock x:Name="txtDduDesc" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}" Margin="24,2,0,0" FontSize="12"/>
                                     </StackPanel>
                                 </Border>
 

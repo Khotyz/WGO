@@ -41,6 +41,15 @@ $BloatwareCriticalProtect = @(
     "Microsoft.NET.Native"
 )
 
+$BloatwareIgnoreUserInstall = @(
+    "Microsoft.Copilot",
+    "Microsoft.Windows.Ai.Copilot.Provider",
+    "MicrosoftWindows.Client.CoPilot",
+    "Microsoft.WindowsRecall",
+    "Microsoft.Windows.Recall",
+    "Microsoft.549981C3F5F10"
+)
+
 $BloatwareTargets = @(
     "Microsoft.Copilot",
     "Microsoft.Windows.Ai.Copilot.Provider",
@@ -79,7 +88,23 @@ $BloatwareTargets = @(
     "Microsoft.549981C3F5F10",
     "Microsoft.3DBuilder",
     "Microsoft.Wallet",
-    "Microsoft.Advertising.Xaml"
+    "Microsoft.Advertising.Xaml",
+    "Microsoft.BingSearch",
+    "Microsoft.BingTranslator",
+    "Microsoft.BingTravel",
+    "Microsoft.BingHealthAndFitness",
+    "Microsoft.BingFoodAndDrink",
+    "Microsoft.Microsoft3DViewer",
+    "Microsoft.Print3D",
+    "Microsoft.MicrosoftJournal",
+    "Microsoft.GetHelp",
+    "Microsoft.Messaging",
+    "Microsoft.OneConnect",
+    "Microsoft.Office.Sway",
+    "Microsoft.Windows.DevHome",
+    "Microsoft.Windows.DevHomeGitHubExtension",
+    "MicrosoftCorporationII.MicrosoftFamily",
+    "MicrosoftWindows.CrossDevice"
 )
 
 function Get-WgoBloatwareTargets {
@@ -95,20 +120,128 @@ function Test-WgoProtectedPackage {
     return ($BloatwareWhitelist -contains $Name)
 }
 
+function Test-WgoBloatwareMatch {
+    param([string]$Name, [string]$Target)
+    if ([string]::IsNullOrEmpty($Name) -or [string]::IsNullOrEmpty($Target)) { return $false }
+    if ($Name -eq $Target) { return $true }
+    if ($Name -like "$Target.*") { return $true }
+    if ($Name -like "$Target-*") { return $true }
+    if ($Name -like "$Target_*") { return $true }
+    return $false
+}
+
+function Get-WgoOsInstallDate {
+    try {
+        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
+        if ($os -and $os.InstallDate) { return [datetime]$os.InstallDate }
+    } catch { }
+    try {
+        $cv = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'InstallDate' -ErrorAction Stop
+        if ($cv -and $cv.InstallDate) { return [datetimeoffset]::FromUnixTimeSeconds([int64]$cv.InstallDate).LocalDateTime }
+    } catch { }
+    return [datetime]::MinValue
+}
+
+function Get-WgoProvisionedPackageNames {
+    try {
+        return @(Get-AppxProvisionedPackage -Online -ErrorAction Stop | ForEach-Object { [string]$_.DisplayName })
+    } catch {
+        return @()
+    }
+}
+
+function Get-WgoProvisionedPackageTable {
+    $table = @{}
+    try {
+        foreach ($prov in @(Get-AppxProvisionedPackage -Online -ErrorAction Stop)) {
+            $provName = [string]$prov.DisplayName
+            if (-not $provName) { continue }
+            $table[$provName] = [string]$prov.Version
+        }
+    } catch { }
+    return $table
+}
+
+function Get-WgoPackageInstallTime {
+    param([Parameter(Mandatory = $true)]$Package)
+    $candidates = New-Object System.Collections.Generic.List[string]
+    if ($Package.InstallLocation) { $candidates.Add([string]$Package.InstallLocation) }
+    if ($Package.PackageFullName -and $env:ProgramFiles) {
+        $candidates.Add((Join-Path (Join-Path $env:ProgramFiles 'WindowsApps') ([string]$Package.PackageFullName)))
+    }
+    foreach ($path in $candidates) {
+        try {
+            if ($path -and (Test-Path -LiteralPath $path)) {
+                $item = Get-Item -LiteralPath $path -ErrorAction Stop
+                if ($item.CreationTime -gt [datetime]::MinValue) { return $item.CreationTime }
+            }
+        } catch { }
+    }
+    return [datetime]::MinValue
+}
+
+function Test-WgoUserInstalledPackage {
+    param(
+        [Parameter(Mandatory = $true)]$Package,
+        [datetime]$OsInstallDate = [datetime]::MinValue,
+        [hashtable]$ProvisionedPackages = $null
+    )
+    if (-not $Package) { return $false }
+    $name = [string]$Package.Name
+    $signature = [string]$Package.SignatureKind
+    if ($signature -eq 'Developer') { return $true }
+    $isProvisioned = $false
+    $provisionedVersion = ''
+    if ($ProvisionedPackages -and $ProvisionedPackages.ContainsKey($name)) {
+        $isProvisioned = $true
+        $provisionedVersion = [string]$ProvisionedPackages[$name]
+    }
+    $installedVersion = [string]$Package.Version
+    if ($isProvisioned -and $provisionedVersion -and $installedVersion -and ($provisionedVersion -ne $installedVersion)) {
+        return $true
+    }
+    if ($isProvisioned) { return $false }
+    $installTime = Get-WgoPackageInstallTime -Package $Package
+    if ($installTime -eq [datetime]::MinValue) { return $true }
+    if ($OsInstallDate -eq [datetime]::MinValue) { return $true }
+    if ($installTime -gt $OsInstallDate.AddDays(2)) { return $true }
+    if ($signature -and $signature -ne 'Store' -and $signature -ne 'System') { return $true }
+    return $false
+}
+
 function Remove-WgoBloatware {
+    param([bool]$IncludeUserInstalled = $false)
     Write-Log (T 'LogBloatStart') "INFO"
+    $osInstallDate = Get-WgoOsInstallDate
+    $provisionedPackages = Get-WgoProvisionedPackageTable
+    $removedCount = 0
+    $skippedUser = 0
+    $skippedProtected = 0
     foreach ($appName in $BloatwareTargets) {
         if (Test-WgoProtectedPackage -Name $appName) { continue }
+        $neverSkipUser = @($BloatwareIgnoreUserInstall | Where-Object { Test-WgoBloatwareMatch -Name $appName -Target $_ }).Count -gt 0
         try {
-            $pkgs = Get-AppxPackage -AllUsers -Name "*$appName*" -ErrorAction Ignore |
-                    Where-Object { -not (Test-WgoProtectedPackage -Name $_.Name) }
+            $pkgs = @(Get-AppxPackage -AllUsers -ErrorAction Ignore | Where-Object { Test-WgoBloatwareMatch -Name $_.Name -Target $appName })
             foreach ($p in $pkgs) {
+                if (Test-WgoProtectedPackage -Name $p.Name) { continue }
+                if ($p.NonRemovable) {
+                    $skippedProtected++
+                    Write-Log (T 'LogBloatSkippedProtected' $p.Name) "WARN"
+                    continue
+                }
+                if (-not $IncludeUserInstalled -and -not $neverSkipUser -and (Test-WgoUserInstalledPackage -Package $p -OsInstallDate $osInstallDate -ProvisionedPackages $provisionedPackages)) {
+                    $skippedUser++
+                    Write-Log (T 'LogBloatSkippedUser' $p.Name) "INFO"
+                    continue
+                }
+                Write-Log (T 'LogBloatRemoving' $p.Name) "INFO"
                 Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction Ignore
+                if (-not (Get-AppxPackage -Name $p.Name -ErrorAction Ignore)) { $removedCount++ }
                 Write-Log (T 'LogBloatUserRemoved' $p.Name) "OK"
             }
 
-            $prov = Get-AppxProvisionedPackage -Online -ErrorAction Ignore |
-                    Where-Object { $_.DisplayName -like "*$appName*" -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) }
+            $prov = @(Get-AppxProvisionedPackage -Online -ErrorAction Ignore |
+                    Where-Object { (Test-WgoBloatwareMatch -Name $_.DisplayName -Target $appName) -and -not (Test-WgoProtectedPackage -Name $_.DisplayName) })
             foreach ($pp in $prov) {
                 Remove-AppxProvisionedPackage -Online -PackageName $pp.PackageName -ErrorAction Ignore
                 Write-Log (T 'LogBloatProvRemoved' $pp.DisplayName) "OK"
@@ -117,6 +250,7 @@ function Remove-WgoBloatware {
             Write-Log (T 'LogBloatError' $appName $_.Exception.Message) "ERROR"
         }
     }
+    Write-Log (T 'LogBloatUserInstallSummary' $removedCount $skippedUser) "INFO"
     Write-Log (T 'LogBloatDone') "OK"
 }
 
@@ -238,9 +372,10 @@ function Set-WgoExtraPrivacy {
         [bool]$TailoredExp     = $false,
         [bool]$DiagTrackSvc    = $false,
         [bool]$CopilotBlock    = $false,
-        [bool]$InputTelemetry  = $false
+        [bool]$InputTelemetry  = $false,
+        [bool]$ClipboardHistory = $false
     )
-    if (-not ($AdvertisingId -or $TailoredExp -or $DiagTrackSvc -or $CopilotBlock -or $InputTelemetry)) { return }
+    if (-not ($AdvertisingId -or $TailoredExp -or $DiagTrackSvc -or $CopilotBlock -or $InputTelemetry -or $ClipboardHistory)) { return }
     Write-Log (T 'LogExtraStart') "INFO"
     if ($AdvertisingId) {
         try {
@@ -320,21 +455,275 @@ function Set-WgoExtraPrivacy {
         try {
             $inputKey  = "HKCU:\SOFTWARE\Microsoft\InputPersonalization"
             $trainKey  = "HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore"
-            $clipKey   = "HKCU:\SOFTWARE\Microsoft\Clipboard"
             if (-not (Test-Path $inputKey)) { New-Item -Path $inputKey -Force | Out-Null }
             if (-not (Test-Path $trainKey)) { New-Item -Path $trainKey -Force | Out-Null }
-            if (-not (Test-Path $clipKey))  { New-Item -Path $clipKey -Force | Out-Null }
             New-ItemProperty -Path $inputKey -Name "RestrictImplicitInkCollection" -Value 1 -PropertyType DWord -Force | Out-Null
             New-ItemProperty -Path $inputKey -Name "RestrictImplicitTextCollection" -Value 1 -PropertyType DWord -Force | Out-Null
             New-ItemProperty -Path $trainKey -Name "HarvestContacts" -Value 0 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $clipKey -Name "EnableClipboardHistory" -Value 0 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $clipKey -Name "CloudClipboardAutomaticUpload" -Value 0 -PropertyType DWord -Force | Out-Null
             Write-Log (T 'LogExtraInputOk') "OK"
         } catch {
             Write-Log (T 'LogExtraError' "InputTelemetry" $_.Exception.Message) "ERROR"
         }
     }
+    if ($ClipboardHistory) {
+        try {
+            $clipKey = "HKCU:\Software\Microsoft\Clipboard"
+            if (-not (Test-Path $clipKey)) { New-Item -Path $clipKey -Force | Out-Null }
+            New-ItemProperty -Path $clipKey -Name "EnableClipboardHistory" -Value 0 -PropertyType DWord -Force | Out-Null
+            New-ItemProperty -Path $clipKey -Name "CloudClipboardAutomaticUpload" -Value 0 -PropertyType DWord -Force | Out-Null
+            Write-Log (T 'LogClipboardOk') "OK"
+        } catch {
+            Write-Log (T 'LogExtraError' "ClipboardHistory" $_.Exception.Message) "ERROR"
+        }
+    }
     Write-Log (T 'LogExtraDone') "OK"
+}
+
+function Set-WgoPaintWithoutCopilot {
+    param([bool]$RemoveCopilot = $false)
+    if (-not $RemoveCopilot) { return }
+    Write-Log (T 'LogPaintStart') "INFO"
+    try {
+        $paintKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint"
+        if (-not (Test-Path $paintKey)) { New-Item -Path $paintKey -Force | Out-Null }
+        $paintPolicies = [ordered]@{
+            DisableCocreator      = 1
+            DisableGenerativeFill = 1
+            DisableImageCreator   = 1
+        }
+        foreach ($policyName in $paintPolicies.Keys) {
+            New-ItemProperty -Path $paintKey -Name $policyName -Value $paintPolicies[$policyName] -PropertyType DWord -Force | Out-Null
+        }
+        Write-Log (T 'LogPaintCopilotOk') "OK"
+    } catch {
+        Write-Log (T 'LogPaintError' $_.Exception.Message) "ERROR"
+    }
+    try {
+        $classicCandidates = @(
+            (Join-Path $env:ProgramFiles 'Classic Apps\Microsoft Paint\Program\mspaint.exe'),
+            (Join-Path ${env:ProgramFiles(x86)} 'Classic Apps\Microsoft Paint\Program\mspaint.exe')
+        )
+        $classicExe = $null
+        foreach ($candidate in $classicCandidates) {
+            if ($candidate -and (Test-Path -LiteralPath $candidate)) { $classicExe = $candidate; break }
+        }
+        if (-not $classicExe) {
+            Write-Log (T 'LogPaintClassicNotFound') "WARN"
+            return
+        }
+        $appPathKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\mspaint.exe"
+        if (-not (Test-Path $appPathKey)) { New-Item -Path $appPathKey -Force | Out-Null }
+        Set-ItemProperty -Path $appPathKey -Name "(default)" -Value $classicExe -Force | Out-Null
+        New-ItemProperty -Path $appPathKey -Name "Path" -Value (Split-Path $classicExe -Parent) -PropertyType String -Force | Out-Null
+        $startMenu = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'
+        $lnkPath = Join-Path $startMenu 'Classic Paint.lnk'
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($lnkPath)
+        $shortcut.TargetPath = $classicExe
+        $shortcut.WorkingDirectory = Split-Path $classicExe -Parent
+        $shortcut.Save()
+        Write-Log (T 'LogPaintClassicOk') "OK"
+    } catch {
+        Write-Log (T 'LogPaintClassicError' $_.Exception.Message) "WARN"
+    }
+}
+
+function Set-WgoClassicPhotoViewer {
+    param([bool]$Register = $false)
+    if (-not $Register) { return }
+    Write-Log (T 'LogPhotoViewerStart') "INFO"
+    try {
+        $viewerDll = Join-Path $env:ProgramFiles 'Windows Photo Viewer\PhotoViewer.dll'
+        if (-not (Test-Path -LiteralPath $viewerDll)) {
+            Write-Log (T 'LogPhotoViewerDllMissing') "WARN"
+            return
+        }
+        $capabilities = "HKLM:\SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities"
+        $assocKey = Join-Path $capabilities 'FileAssociations'
+        foreach ($key in @($capabilities, $assocKey)) {
+            if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+        }
+        New-ItemProperty -Path $capabilities -Name "ApplicationName" -Value "@%ProgramFiles%\Windows Photo Viewer\photoviewer.dll,-3009" -PropertyType String -Force | Out-Null
+        New-ItemProperty -Path $capabilities -Name "ApplicationDescription" -Value "@%ProgramFiles%\Windows Photo Viewer\photoviewer.dll,-3069" -PropertyType String -Force | Out-Null
+        $extensions = @(".bmp", ".dib", ".gif", ".ico", ".jfif", ".jpe", ".jpeg", ".jpg", ".jxr", ".png", ".tif", ".tiff", ".wdp")
+        foreach ($ext in $extensions) {
+            New-ItemProperty -Path $assocKey -Name $ext -Value "PhotoViewer.FileAssoc.Tiff" -PropertyType String -Force | Out-Null
+        }
+        $progId = "HKLM:\SOFTWARE\Classes\PhotoViewer.FileAssoc.Tiff"
+        $commandKey = Join-Path $progId 'shell\open\command'
+        foreach ($key in @($progId, (Join-Path $progId 'shell'), (Join-Path $progId 'shell\open'), $commandKey)) {
+            if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+        }
+        Set-ItemProperty -Path $progId -Name "(default)" -Value "Windows Photo Viewer" -Force | Out-Null
+        $viewerCommand = "%SystemRoot%\System32\rundll32.exe `"%ProgramFiles%\Windows Photo Viewer\PhotoViewer.dll`", ImageView_Fullscreen %1"
+        Set-ItemProperty -Path $commandKey -Name "(default)" -Value $viewerCommand -Force | Out-Null
+        New-ItemProperty -Path "HKLM:\SOFTWARE\RegisteredApplications" -Name "Windows Photo Viewer" -Value "Software\Microsoft\Windows Photo Viewer\Capabilities" -PropertyType String -Force | Out-Null
+        foreach ($ext in $extensions) {
+            $openWith = "HKCU:\SOFTWARE\Classes\$ext\OpenWithProgids"
+            if (-not (Test-Path $openWith)) { New-Item -Path $openWith -Force | Out-Null }
+            New-ItemProperty -Path $openWith -Name "PhotoViewer.FileAssoc.Tiff" -Value ([byte[]]@()) -PropertyType Binary -Force | Out-Null
+        }
+        Write-Log (T 'LogPhotoViewerOk') "OK"
+    } catch {
+        Write-Log (T 'LogPhotoViewerError' $_.Exception.Message) "ERROR"
+    }
+}
+
+function Set-WgoClassicNotepad {
+    param([bool]$Restore = $false)
+    if (-not $Restore) { return }
+    Write-Log (T 'LogNotepadStart') "INFO"
+    $capability = 'Microsoft.Windows.Notepad.System~~~~0.0.1.0'
+    try {
+        $state = $null
+        $cap = Get-WindowsCapability -Online -Name $capability -ErrorAction Stop
+        if ($cap) { $state = [string]$cap.State }
+        if ($state -ne 'Installed') {
+            Write-Log (T 'LogNotepadCapability') "INFO"
+            $null = Add-WindowsCapability -Online -Name $capability -ErrorAction Stop
+        }
+    } catch {
+        Write-Log (T 'LogNotepadCapabilityFail' $_.Exception.Message) "WARN"
+    }
+    $classicExe = Join-Path $env:SystemRoot 'System32\notepad.exe'
+    if (-not (Test-Path -LiteralPath $classicExe)) {
+        Write-Log (T 'LogNotepadBinaryMissing') "WARN"
+        return
+    }
+    try {
+        $appPathKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\notepad.exe"
+        if (-not (Test-Path $appPathKey)) { New-Item -Path $appPathKey -Force | Out-Null }
+        Set-ItemProperty -Path $appPathKey -Name "(default)" -Value $classicExe -Force | Out-Null
+        Set-ItemProperty -Path $appPathKey -Name "Path" -Value (Join-Path $env:SystemRoot 'System32') -Force | Out-Null
+        $aliasPath = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\notepad.exe'
+        $aliasBackup = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\notepad.exe.wgoalias'
+        if (Test-Path -LiteralPath $aliasBackup) { Remove-Item -LiteralPath $aliasBackup -Force -ErrorAction Ignore }
+        if (Test-Path -LiteralPath $aliasPath) {
+            Rename-Item -LiteralPath $aliasPath -NewName 'notepad.exe.wgoalias' -Force -ErrorAction Stop
+            Write-Log (T 'LogNotepadAliasOff') "OK"
+        }
+        $startMenu = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'
+        $lnkPath = Join-Path $startMenu 'Notepad (classic).lnk'
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($lnkPath)
+        $shortcut.TargetPath = $classicExe
+        $shortcut.WorkingDirectory = Join-Path $env:SystemRoot 'System32'
+        $shortcut.Save()
+        Write-Log (T 'LogNotepadOk') "OK"
+    } catch {
+        Write-Log (T 'LogNotepadError' $_.Exception.Message) "ERROR"
+    }
+}
+
+function Set-WgoEdgeTelemetryIsolation {
+    param([bool]$EdgeTelemetryOnly = $false)
+    if (-not $EdgeTelemetryOnly) { return }
+    Write-Log (T 'LogEdgeIsolationStart') "INFO"
+    try {
+        $edgeKey = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
+        if (-not (Test-Path $edgeKey)) { New-Item -Path $edgeKey -Force | Out-Null }
+        Remove-ItemProperty -Path $edgeKey -Name "ConfigureTelemetryForDesktop" -Force -ErrorAction Ignore
+        $telemetryPolicies = [ordered]@{
+            MetricsReportingEnabled                       = 0
+            SendSiteInfoToImproveServices                 = 0
+            PersonalizationReportingEnabled               = 0
+            ExperimentationAndConfigurationServiceControl = 2
+            UserFeedbackAllowed                           = 0
+            SearchSuggestEnabled                          = 0
+            EdgeFollowEnabled                             = 0
+            WebWidgetAllowed                              = 0
+        }
+        foreach ($policyName in $telemetryPolicies.Keys) {
+            New-ItemProperty -Path $edgeKey -Name $policyName -Value $telemetryPolicies[$policyName] -PropertyType DWord -Force | Out-Null
+        }
+        New-ItemProperty -Path $edgeKey -Name "PasswordManagerEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
+        Remove-ItemProperty -Path $edgeKey -Name "DisableSavedPasswords" -Force -ErrorAction Ignore
+        $passwordManager = Get-ItemProperty -Path $edgeKey -Name "PasswordManagerEnabled" -ErrorAction Ignore
+        if (-not $passwordManager -or [int]$passwordManager.PasswordManagerEnabled -ne 1) {
+            Write-Log (T 'LogEdgePasswordManagerWarn') "WARN"
+        }
+        Write-Log (T 'LogEdgeIsolationOk') "OK"
+    } catch {
+        Write-Log (T 'LogEdgeIsolationError' $_.Exception.Message) "ERROR"
+    }
+}
+
+function Set-WgoAiCloudPrivacy {
+    param(
+        [bool]$AiAgentBlock    = $false,
+        [bool]$AgentConnectors = $false,
+        [bool]$CloudContent    = $false
+    )
+    if (-not ($AiAgentBlock -or $AgentConnectors -or $CloudContent)) { return }
+    Write-Log (T 'LogAiCloudStart') "INFO"
+    $aiKey       = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"
+    $aiUserKey   = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"
+    $cloudKey    = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+    $cloudUserKey = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+    $paintKey    = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint"
+
+    if ($AiAgentBlock) {
+        try {
+            foreach ($key in @($aiKey, $aiUserKey, $paintKey)) {
+                if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+            }
+            $agentPolicies = [ordered]@{
+                DisableSettingsAgent     = 1
+                DisableClickToDo         = 1
+                DisableAIDataAnalysis    = 1
+                AllowRecallEnablement    = 0
+                DisableRecallDataProviders = 1
+                AllowRecallExport        = 0
+                DisableCocreator         = 1
+                DisableGenerativeFill    = 1
+                DisableImageCreator      = 1
+            }
+            foreach ($policyName in $agentPolicies.Keys) {
+                New-ItemProperty -Path $aiKey -Name $policyName -Value $agentPolicies[$policyName] -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $aiUserKey -Name $policyName -Value $agentPolicies[$policyName] -PropertyType DWord -Force | Out-Null
+            }
+            foreach ($policyName in @("DisableCocreator", "DisableGenerativeFill", "DisableImageCreator")) {
+                New-ItemProperty -Path $paintKey -Name $policyName -Value 1 -PropertyType DWord -Force | Out-Null
+            }
+            Write-Log (T 'LogAiCloudComponentsOk') "OK"
+        } catch {
+            Write-Log (T 'LogAiCloudError' "AiAgentBlock" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($AgentConnectors) {
+        try {
+            foreach ($key in @($aiKey, $aiUserKey)) {
+                if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+                New-ItemProperty -Path $key -Name "ConfigureAgentConnectors" -Value 2 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $key -Name "DisableAgentConnectors" -Value 2 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $key -Name "AgentConsentDuration" -Value 1 -PropertyType DWord -Force | Out-Null
+            }
+            Write-Log (T 'LogAiCloudAgentsOk') "OK"
+        } catch {
+            Write-Log (T 'LogAiCloudError' "AgentConnectors" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    if ($CloudContent) {
+        try {
+            foreach ($key in @($cloudKey, $cloudUserKey)) {
+                if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+            }
+            foreach ($policyName in @("DisableGetStarted", "DisableCopilotPinScreen", "DisableCloudOptimizedContent", "DisableConsumerAccountStateContent")) {
+                New-ItemProperty -Path $cloudKey -Name $policyName -Value 1 -PropertyType DWord -Force | Out-Null
+                New-ItemProperty -Path $cloudUserKey -Name $policyName -Value 1 -PropertyType DWord -Force | Out-Null
+            }
+            foreach ($policyName in @("DisableSpotlightCollectionOnDesktop", "DisableThirdPartySuggestions", "DisableWindowsSpotlightOnSettings", "DisableWindowsSpotlightOnActionCenter", "DisableWindowsSpotlightWindowsWelcomeExperience")) {
+                New-ItemProperty -Path $cloudUserKey -Name $policyName -Value 1 -PropertyType DWord -Force | Out-Null
+            }
+            Write-Log (T 'LogAiCloudContentOk') "OK"
+        } catch {
+            Write-Log (T 'LogAiCloudError' "CloudContent" $_.Exception.Message) "ERROR"
+        }
+    }
+
+    Write-Log (T 'LogAiCloudDone') "OK"
 }
 
 function Set-WgoAdvancedTweaks {
@@ -1038,15 +1427,32 @@ function Restore-WgoDefaults {
             Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Microsoft\InputPersonalization" -Recurse -Force -ErrorAction Ignore
-            Remove-Item -Path "HKCU:\Software\Microsoft\Clipboard" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\common" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\osm" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Recurse -Force -ErrorAction Ignore
+            foreach ($paintValue in @("DisableCocreator", "DisableGenerativeFill", "DisableImageCreator")) {
+                Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name $paintValue -Force -ErrorAction Ignore
+            }
+            Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "EnableClipboardHistory" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "CloudClipboardAutomaticUpload" -Force -ErrorAction Ignore
+            Remove-Item -Path "HKLM:\SOFTWARE\Classes\PhotoViewer.FileAssoc.Tiff" -Recurse -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\RegisteredApplications" -Name "Windows Photo Viewer" -Force -ErrorAction Ignore
+            $photoAssocKey = "HKLM:\SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations"
+            foreach ($photoExt in @(".bmp", ".dib", ".gif", ".ico", ".jfif", ".jpe", ".jpeg", ".jpg", ".jxr", ".png", ".wdp")) {
+                Remove-ItemProperty -Path $photoAssocKey -Name $photoExt -Force -ErrorAction Ignore
+                Remove-ItemProperty -Path "HKCU:\SOFTWARE\Classes\$photoExt\OpenWithProgids" -Name "PhotoViewer.FileAssoc.Tiff" -Force -ErrorAction Ignore
+            }
+            Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\mspaint.exe" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path (Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\Classic Paint.lnk") -Force -ErrorAction Ignore
             $hkcuAdvKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
             Remove-ItemProperty -Path $hkcuAdvKey -Name "DisableSearchBoxSuggestions" -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "ConfigureTelemetryForDesktop" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "PasswordManagerEnabled" -Force -ErrorAction Ignore
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "DisableSavedPasswords" -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338388Enabled" -Force -ErrorAction Ignore
             try {
                 $pauseKey = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"
@@ -1088,6 +1494,12 @@ function Restore-WgoDefaults {
         }
         if ($Category -in @('All','Visual')) {
             foreach ($k in $visualKeys) { if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore } }
+            Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\notepad.exe" -Recurse -Force -ErrorAction Ignore
+            Remove-Item -Path (Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\Notepad (classic).lnk") -Force -ErrorAction Ignore
+            $notepadAliasBackup = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\notepad.exe.wgoalias"
+            if (Test-Path -LiteralPath $notepadAliasBackup) {
+                Rename-Item -LiteralPath $notepadAliasBackup -NewName "notepad.exe" -Force -ErrorAction Ignore
+            }
             $hkcuAdvKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
             foreach ($name in @("TaskbarDa","EnableSnapAssistFlyout","SnapFill","SnapAssist","DisallowShaking")) {
                 Remove-ItemProperty -Path $hkcuAdvKey -Name $name -Force -ErrorAction Ignore
@@ -1257,13 +1669,12 @@ function Set-WgoExtraTweaks2 {
         [bool]$DisableStore     = $false,
         [bool]$DisableWer       = $false,
         [bool]$PauseUpdates     = $false,
-        [bool]$DisableEdgeTelemetry = $false,
         [bool]$DisableSpotlight = $false
     )
     if (-not ($HostsBlock -or $PrivacyDeep -or $CacheClean -or $UiCleanup -or $TcpAutotuning -or
               $DoH -or $FastShutdown -or $PrefetchSSD -or $TcpIpReset -or
               $RemoveOnedrive -or $DisableGameBar -or $DisableStore -or $DisableWer -or
-              $PauseUpdates -or $DisableEdgeTelemetry -or $DisableSpotlight)) { return }
+              $PauseUpdates -or $DisableSpotlight)) { return }
     Write-Log (T 'LogExtra2Start') "INFO"
 
     if ($HostsBlock) {
@@ -1525,17 +1936,6 @@ function Set-WgoExtraTweaks2 {
             Write-Log (T 'LogPauseUpdatesOk' $endText) "OK"
         } catch {
             Write-Log (T 'LogExtra2Error' "PauseUpdates" $_.Exception.Message) "ERROR"
-        }
-    }
-    if ($DisableEdgeTelemetry) {
-        try {
-            $edgeKey = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
-            if (-not (Test-Path $edgeKey)) { New-Item -Path $edgeKey -Force | Out-Null }
-            New-ItemProperty -Path $edgeKey -Name "ConfigureTelemetryForDesktop" -Value 0 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $edgeKey -Name "MetricsReportingEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
-            Write-Log (T 'LogEdgeTelemetryOk') "OK"
-        } catch {
-            Write-Log (T 'LogExtra2Error' "DisableEdgeTelemetry" $_.Exception.Message) "ERROR"
         }
     }
     if ($DisableSpotlight) {
@@ -2000,7 +2400,8 @@ function Get-WgoSystemInfo {
         $gpuNames = @(Get-WgoGpuInventory | ForEach-Object { $_.Name })
         $diskType = Get-WgoDiskSummary
         if (-not $diskType) { $diskType = "Unknown" }
-        $battery = Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore | Select-Object -First 1
+        $battery = Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore |
+            Where-Object { $_ -and "$($_.Name) $($_.DeviceID)" -notmatch 'UPS' } | Select-Object -First 1
         $batteryInfo = if ($battery) { "$($battery.EstimatedChargeRemaining)%" } else { (T 'TxtNoBattery') }
         [PSCustomObject]@{
             Cpu       = if ($cpu) { $cpu.Name.Trim() } else { "Unknown" }
@@ -2195,9 +2596,13 @@ function Set-WgoSystemTuning {
         try {
             $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
             if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
-            New-ItemProperty -Path $path -Name "PreventIndexingOnBattery" -Value 1 -PropertyType DWord -Force | Out-Null
+            $hasBattery = [bool](@(Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore |
+                Where-Object { $_ -and "$($_.Name) $($_.DeviceID)" -notmatch 'UPS' }).Count)
+            if ($hasBattery) {
+                New-ItemProperty -Path $path -Name "PreventIndexingOnBattery" -Value 1 -PropertyType DWord -Force | Out-Null
+            }
             New-ItemProperty -Path $path -Name "DisableRemovableDriveIndexing" -Value 1 -PropertyType DWord -Force | Out-Null
-            Write-Log (T 'LogIndexerThrottleOk') "OK"
+            if ($hasBattery) { Write-Log (T 'LogIndexerThrottleOk') "OK" } else { Write-Log (T 'LogIndexerThrottleNoBattery') "INFO" }
         } catch {
             Write-Log (T 'LogSystemTuningError' "Indexer" $_.Exception.Message) "ERROR"
         }
@@ -2219,9 +2624,13 @@ Export-ModuleMember -Function @(
     'Set-WgoSystemTuning',
     'New-WgoRestorePoint', 'Remove-WgoBloatware', 'Test-WgoProtectedPackage',
     'Set-WgoLocalSearch', 'Set-WgoVisualEffects', 'Set-WgoPrivacyPolicies',
-    'Set-WgoExtraPrivacy', 'Set-WgoAdvancedTweaks', 'Set-WgoBlockDriverUpdates',
+    'Set-WgoExtraPrivacy', 'Set-WgoPaintWithoutCopilot', 'Set-WgoClassicPhotoViewer', 'Set-WgoClassicNotepad',
+    'Set-WgoEdgeTelemetryIsolation', 'Set-WgoAiCloudPrivacy',
+    'Set-WgoAdvancedTweaks', 'Set-WgoBlockDriverUpdates',
     'Set-WgoPagefile', 'Get-WgoOptimizedPagefileSize', 'Set-WgoMoreOptimizations',
     'Restore-WgoDefaults', 'Set-WgoServiceMgmt',
+    'Test-WgoBloatwareMatch', 'Test-WgoUserInstalledPackage', 'Get-WgoOsInstallDate', 'Get-WgoProvisionedPackageNames',
+    'Get-WgoProvisionedPackageTable', 'Get-WgoPackageInstallTime',
     'Set-WgoExtraTweaks2', 'Set-WgoRiskyTweaks',
     'Set-WgoCpuTimerTweaks', 'Set-WgoGpuTweaks', 'Set-WgoNetworkAdvanced', 'Set-WgoSteamBoost', 'Set-WgoXboxServices',
     'Invoke-WgoNetworkReleaseRenew', 'Invoke-WgoNetworkRegisterDns',

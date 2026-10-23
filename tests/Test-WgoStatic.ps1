@@ -162,9 +162,12 @@ if ($optNames -and $langs.ContainsKey('en-US')) {
 }
 $catText = [IO.File]::ReadAllText((Join-Path $Root 'Modules/Wgo.AppInstaller/Wgo.AppInstaller.psm1'))
 $entries = [regex]::Matches($catText, "ScoopId = `"([^`"]*)`"(?:; Bucket = `"([^`"]*)`")?")
-$badBucket = @($entries | Where-Object { $_.Groups[2].Value -notin @('main', 'extras', 'games') })
+$scoopEntries = @($entries | Where-Object { $_.Groups[1].Value })
+$badBucket = @($scoopEntries | Where-Object { $_.Groups[2].Value -notin @('main', 'extras', 'games') })
 foreach ($b in $badBucket) { Fail "ScoopId '$($b.Groups[1].Value)' sem Bucket válido (main/extras/games)" }
-if (-not $badBucket.Count) { Ok "$($entries.Count) apps do catálogo com bucket definido" }
+$badWingetOnly = @($entries | Where-Object { -not $_.Groups[1].Value -and $_.Groups[2].Value })
+foreach ($b in $badWingetOnly) { Fail "Entrada sem ScoopId declara Bucket '$($b.Groups[2].Value)'" }
+if (-not $badBucket.Count -and -not $badWingetOnly.Count) { Ok "$($scoopEntries.Count) apps com Scoop e $($entries.Count - $scoopEntries.Count) somente winget" }
 
 Write-Host "`n================ RESULTADO: $($script:fail) falha(s), $($script:warn) aviso(s) ================" -ForegroundColor $(if ($script:fail) { 'Red' } else { 'Green' })
 exit ([int]($script:fail -gt 0))

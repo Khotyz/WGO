@@ -13,6 +13,7 @@ $script:Tasks = @{}          # "dir|leaf" -> State
 $script:Videos = @()         # nomes de adaptadores
 $script:Appx = @()
 $script:ThrowIn = $null
+$script:Battery = $null
 
 function Norm([string]$p) { return $p.TrimEnd('\').ToLowerInvariant() }
 function Get-ItemProperty {
@@ -56,7 +57,7 @@ function Get-PnpDevice { param($Class, $ErrorAction) @() }
 function Get-PhysicalDisk { param($ErrorAction) foreach ($d in $script:Disks) { [pscustomobject]$d } }
 function Get-Partition { param($DriveLetter, $ErrorAction) [pscustomobject]@{ DiskNumber = 0 } }
 $coreAst = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $Root 'Modules/Wgo.Core/Wgo.Core.psm1'), [ref]$null, [ref]$null)
-foreach ($fn in @($coreAst.FindAll({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -in @('Get-WgoDiskKinds', 'Get-WgoDiskSummary', 'Test-WgoSystemDriveIsSsd') }, $true))) { . ([scriptblock]::Create($fn.Extent.Text)) }
+foreach ($fn in @($coreAst.FindAll({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -in @('Get-WgoDiskKinds', 'Get-WgoDiskSummary', 'Test-WgoSystemDriveIsSsd', 'Test-WgoUserInstalledPackage', 'Get-WgoPackageInstallTime', 'Test-WgoBloatwareMatch') }, $true))) { . ([scriptblock]::Create($fn.Extent.Text)) }
 function Get-NetTCPSetting { param($SettingName, $ErrorAction) [pscustomobject]@{ AutoTuningLevelLocal = $script:AutoTuning } }
 function Get-Content { param($LiteralPath, [switch]$Raw, $ErrorAction) return $script:HostsText }
 function Test-Path { param($LiteralPath, $Path, $ErrorAction) return $false }
@@ -68,7 +69,7 @@ function Get-CimInstance {
         'Win32_OperatingSystem'   { [pscustomobject]@{ Caption = 'Microsoft Windows 11 Pro'; BuildNumber = '22631' } }
         'Win32_Processor'         { [pscustomobject]@{ Name = 'AMD Ryzen 7 7800X3D 8-Core Processor'; Manufacturer = 'AuthenticAMD'; NumberOfCores = 8; NumberOfLogicalProcessors = 16 } }
         'Win32_ComputerSystem'    { [pscustomobject]@{ TotalPhysicalMemory = 32GB; Manufacturer = 'ASUS'; Model = 'System Product Name'; UserName = 'PC\user'; AutomaticManagedPagefile = $script:AutoPf } }
-        'Win32_Battery'           { $null }
+        'Win32_Battery'           { if ($script:Battery) { $script:Battery } }
         'Win32_SystemEnclosure'   { [pscustomobject]@{ ChassisTypes = @(3) } }
         'Win32_VideoController'   { foreach ($n in $script:Videos) { [pscustomobject]@{ Name = $n; AdapterCompatibility = ''; DriverVersion = '1.0' } } }
         'Win32_PageFileSetting'   { if ($script:PfSet) { [pscustomobject]@{ Name = "$env:SystemDrive\pagefile.sys"; InitialSize = 2048; MaximumSize = 4096 } } }
@@ -181,7 +182,7 @@ $script:Reg[(Norm 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers') + '|
 
 $hw = Get-WgoHardwareProfile
 $st = Get-WgoOptimizationStatus -Hardware $hw
-$regBased = @('chkSearch','chkVisual','chkPrivacy','chkDrivers','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency','chkHungAppTimeout','chkDisableSysMain','chkDisableWSearch','chkDisableSpooler','chkHibernation','chkPowerPlan','chkFastStartup','chkPrefetchSSD','chkLargeSystemCache','chkFastShutdown','chkDisableCoreParking','chkHagsGameMode','chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction','chkHotCorners','chkOfficeTelemetry','chkSearchIndexOptimize','chkResidualServices','chkAutoStandbyClean','chkDisableNagle','chkDisableIPv6','chkRssOptimize','chkTcpAutotuning','chkDoH','chkHostsBlock','chkPrivacyDeep','chkUiCleanup','chkDisableGameBar','chkDisableStore','chkDisableWer','chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight','chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry','chkPagefile','chkBootTimeout','chkDisableHPET','chkDiskOptimize','chkExtraSchedTasks','chkUltimatePerf')
+$regBased = @('chkSearch','chkVisual','chkPrivacy','chkDrivers','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency','chkHungAppTimeout','chkDisableSysMain','chkDisableWSearch','chkDisableSpooler','chkHibernation','chkPowerPlan','chkFastStartup','chkPrefetchSSD','chkLargeSystemCache','chkFastShutdown','chkDisableCoreParking','chkHagsGameMode','chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction','chkHotCorners','chkOfficeTelemetry','chkSearchIndexOptimize','chkResidualServices','chkAutoStandbyClean','chkDisableNagle','chkDisableIPv6','chkRssOptimize','chkTcpAutotuning','chkDoH','chkHostsBlock','chkPrivacyDeep','chkUiCleanup','chkDisableGameBar','chkDisableStore','chkDisableWer','chkPauseUpdates','chkEdgeTelemetryIsolated','chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent','chkDisableSpotlight','chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry','chkPagefile','chkBootTimeout','chkDisableHPET','chkDiskOptimize','chkExtraSchedTasks','chkUltimatePerf')
 foreach ($n in $regBased) {
     $s = $st[$n]
     Assert ($s -and $s.State -eq 'Applied') ("{0,-26} -> {1}{2}" -f $n, $(if ($s) { $s.State } else { '(ausente)' }), $(if ($s -and $s.State -ne 'Applied') { "  [$($s.Reason) $($s.Detail)]" } else { '' }))
@@ -241,6 +242,7 @@ Assert $true "$checked pares nome/valor conferidos contra o Core ($($checked - $
 
 Section "F. System Tuning"
 Reset-World
+$script:Battery = [pscustomobject]@{ Name = 'Li-Ion Battery'; DeviceID = 'BAT0'; EstimatedChargeRemaining = 82 }
 $tune = @('chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast')
 $stT = Get-WgoOptimizationStatus -Hardware (Get-WgoHardwareProfile)
 foreach ($n in $tune) { Assert ($stT[$n].State -eq 'Pending') "$n limpo -> Pending" }
@@ -263,6 +265,40 @@ Assert ($stT['chkIndexerThrottle'].State -eq 'Partial') "indexador com apenas um
 $script:Reg["$ws|disableremovabledriveindexing"] = 1
 $stT = Get-WgoOptimizationStatus -Hardware (Get-WgoHardwareProfile)
 foreach ($n in @('chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast')) { Assert ($stT[$n].State -eq 'Applied') "$n gravado -> Applied" }
+$script:Battery = $null
+$stDesk = Get-WgoOptimizationStatus -Hardware (Get-WgoHardwareProfile)
+Assert ($stDesk['chkIndexerThrottle'].State -eq 'NotApplicable' -and $stDesk['chkIndexerThrottle'].Reason -eq 'NoBattery') "sem bateria (desktop): chkIndexerThrottle -> NotApplicable/NoBattery"
+$script:Battery = [pscustomobject]@{ Name = 'Li-Ion Battery'; DeviceID = 'BAT0'; EstimatedChargeRemaining = 82 }
+
+Section "F2. Clipboard history, Paint e Photo Viewer"
+$script:Reg[(Norm 'HKCU:\Software\Microsoft\Clipboard') + '|enableclipboardhistory'] = 0
+$script:Reg[(Norm 'HKCU:\Software\Microsoft\Clipboard') + '|cloudclipboardautomaticupload'] = 0
+$script:Reg[(Norm 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint') + '|disablecocreator'] = 1
+$script:Reg[(Norm 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint') + '|disablegenerativefill'] = 1
+$script:Reg[(Norm 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint') + '|disableimagecreator'] = 1
+$stNew = Get-WgoOptimizationStatus -Hardware (Get-WgoHardwareProfile)
+Assert ($stNew['chkClipboardHistory'].State -eq 'Applied') "clipboard history desativado -> chkClipboardHistory Applied"
+Assert ($stNew['chkPaintNoCopilot'].State -eq 'Applied') "políticas de IA do Paint gravadas -> chkPaintNoCopilot Applied"
+Assert ($stNew['chkClassicPhotoViewer'].State -eq 'Pending') "sem associação do Photo Viewer -> chkClassicPhotoViewer Pending"
+$paintPolicy = Norm 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'
+foreach ($k in @($script:Reg.Keys)) { if ($k.StartsWith($paintPolicy + '|')) { $script:Reg.Remove($k) } }
+$stNew2 = Get-WgoOptimizationStatus -Hardware (Get-WgoHardwareProfile)
+Assert ($stNew2['chkPaintNoCopilot'].State -eq 'Pending') "políticas do Paint removidas -> chkPaintNoCopilot Pending"
+
+Section "G. Bloatware: apps instalados pelo usuário"
+$osDate = (Get-Date).AddDays(-120)
+$provTable = @{ 'Microsoft.BingNews' = '11.0.0.0'; 'Microsoft.WindowsStore' = '22502.0.0.0' }
+$userNanaZip = [pscustomobject]@{ Name = '40174MouriNaruto.NanaZip'; SignatureKind = 'Store'; Version = '4.0.0.0'; InstallLocation = ''; PackageFullName = '' }
+$userWhatsapp = [pscustomobject]@{ Name = '5319275A.WhatsAppDesktop'; SignatureKind = 'Store'; Version = '2.2400.0.0'; InstallLocation = ''; PackageFullName = '' }
+$inboxBing = [pscustomobject]@{ Name = 'Microsoft.BingNews'; SignatureKind = 'Store'; Version = '11.0.0.0'; InstallLocation = ''; PackageFullName = '' }
+$updatedProvisioned = [pscustomobject]@{ Name = 'Microsoft.BingNews'; SignatureKind = 'Store'; Version = '12.5.0.0'; InstallLocation = ''; PackageFullName = '' }
+Assert ((Test-WgoUserInstalledPackage -Package $userNanaZip -OsInstallDate $osDate -ProvisionedPackages $provTable)) "NanaZip (Store, sem local de instalação, fora da lista provisionada) -> preservado"
+Assert ((Test-WgoUserInstalledPackage -Package $userWhatsapp -OsInstallDate $osDate -ProvisionedPackages $provTable)) "WhatsApp Desktop (Store, fora da lista provisionada) -> preservado"
+Assert (-not (Test-WgoUserInstalledPackage -Package $inboxBing -OsInstallDate $osDate -ProvisionedPackages $provTable)) "Bing News provisionado na mesma versão -> removível"
+Assert ((Test-WgoUserInstalledPackage -Package $updatedProvisioned -OsInstallDate $osDate -ProvisionedPackages $provTable)) "Bing News provisionado mas atualizado (versão diferente) -> tratado como do usuário"
+Assert ((Test-WgoUserInstalledPackage -Package $userNanaZip -OsInstallDate ([datetime]::MinValue) -ProvisionedPackages $provTable)) "sem data de instalação do Windows -> preservado (conservador)"
+Assert ((Test-WgoBloatwareMatch -Name 'Microsoft.BingNews_8wekyb3d8bbwe' -Target 'Microsoft.BingNews')) "match por prefixo de pacote trata a família como alvo"
+Assert ((Test-WgoBloatwareMatch -Name '40174MouriNaruto.NanaZip' -Target 'Microsoft.BingNews') -eq $false) "NanaZip não casa com alvo da Microsoft"
 
 Write-Host "`n================ RESULTADO: $($script:fails) falha(s) ================" -ForegroundColor $(if ($script:fails) { 'Red' } else { 'Green' })
 exit ([int]($script:fails -gt 0))

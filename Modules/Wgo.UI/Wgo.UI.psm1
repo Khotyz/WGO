@@ -26,7 +26,9 @@ $Global:WgoUI_OptimizationCheckboxNames = @(
     'chkDoH','chkFastShutdown','chkPrefetchSSD','chkTcpIpReset',
     'chkRemoveOnedrive','chkDisableGameBar','chkDisableStore','chkDisableWer',
     'chkClearEventLogs','chkDeleteMinidump','chkClearStoreCache',
-    'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight',
+    'chkPauseUpdates','chkDisableSpotlight',
+    'chkEdgeTelemetryIsolated','chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
+    'chkClipboardHistory','chkPaintNoCopilot','chkClassicPhotoViewer','chkClassicNotepad',
     'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel'
 )
 
@@ -38,7 +40,7 @@ $Global:WgoUI_RiskyCheckboxNames = @(
 # Vendor-specific checkboxes are added/removed from profile presets at runtime
 # based on the detected GPU (see Set-WgoUIProfilePreset), since a static
 # profile list can't know the hardware in advance.
-$Global:WgoUI_OptInCheckboxNames = @('chkStandbyListClean','chkAutoStandbyClean')
+$Global:WgoUI_OptInCheckboxNames = @('chkStandbyListClean','chkAutoStandbyClean','chkEdgeTelemetryIsolated','chkClipboardHistory','chkKeyboardFast','chkPaintNoCopilot','chkClassicPhotoViewer','chkClassicNotepad')
 $Global:WgoUI_NvidiaOnlyCheckboxNames = @('chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry')
 $Global:WgoUI_AmdOnlyCheckboxNames = @('chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel')
 
@@ -50,7 +52,8 @@ $Global:WgoUI_Profiles = @{
         'chkTempCleanup','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
         'chkSearchIndexOptimize','chkResidualServices',
         'chkCacheClean','chkPrefetchSSD','chkFastShutdown',
-        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast'
+        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
+        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle'
     )
     Laptop = @(
         'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
@@ -59,7 +62,8 @@ $Global:WgoUI_Profiles = @{
         'chkTempCleanup','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
         'chkSearchIndexOptimize','chkResidualServices','chkGhostAdapters',
         'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkDoH','chkPrivacyDeep',
-        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast'
+        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
+        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle'
     )
     Gamer = @(
         'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
@@ -72,14 +76,16 @@ $Global:WgoUI_Profiles = @{
         'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkSteamBoost','chkLargeSystemCache',
         'chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle',
         'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel',
-        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle','chkKeyboardFast'
+        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
+        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle'
     )
     Privacy = @(
         'chkBloat','chkSearch','chkPrivacy',
         'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
         'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground',
         'chkOfficeTelemetry','chkExtraSchedTasks',
-        'chkHostsBlock','chkPrivacyDeep','chkDoH','chkUiCleanup','chkCacheClean'
+        'chkHostsBlock','chkPrivacyDeep','chkDoH','chkUiCleanup','chkCacheClean',
+        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent'
     )
     Esports = @(
         'chkVisual','chkPagefile',
@@ -92,7 +98,8 @@ $Global:WgoUI_Profiles = @{
         'chkDisableCoreParking','chkTimerResolution','chkHungAppTimeout',
         'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
         'chkDisableNagle','chkRssOptimize',
-        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel'
+        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel',
+        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent'
     )
 }
 
@@ -185,6 +192,8 @@ function Update-WgoUILanguage {
     $c['chkCopilotBlock'].ToolTip                        = $t.TipCopilotBlock
     $c['chkInputTelemetry'].Content                  = $t.ChkInputTelemetry
     $c['chkInputTelemetry'].ToolTip                        = $t.TipInputTelemetry
+    $c['chkClipboardHistory'].Content                = $t.ChkClipboardHistory
+    $c['chkClipboardHistory'].ToolTip                = $t.TipClipboardHistory
     $c['grpAdvancedTweaks'].Header                   = $t.GrpAdvancedTweaks
     $c['chkEdgeWidgets'].Content                     = $t.ChkEdgeWidgets
     $c['chkEdgeWidgets'].ToolTip                        = $t.TipEdgeWidgets
@@ -405,8 +414,6 @@ function Update-WgoUILanguage {
     $c['txtRtssDesc'].Text                           = $t.AppRtssDesc
     $c['chkDlssSwapper'].Content                     = "DLSS Swapper"
     $c['txtDlssSwapperDesc'].Text                    = $t.AppDlssSwapperDesc
-    $c['chkDdu'].Content                             = "Display Driver Uninstaller"
-    $c['txtDduDesc'].Text                            = $t.AppDduDesc
     $c['chkHwMonitor'].Content                       = "HWMonitor"
     $c['txtHwMonitorDesc'].Text                      = $t.AppHwMonitorDesc
     $c['grpAppsProductivity'].Header                 = $t.GrpAppsProductivity
@@ -443,6 +450,7 @@ function Update-WgoUILanguage {
     $c['chkAmdHwAccel'].Content                       = $t.ChkAmdHwAccel
     $c['chkAmdHwAccel'].ToolTip                       = $t.TipAmdHwAccel
     Update-WgoVendorAvailability
+    Update-WgoBatteryAvailability
     $c['txtMassgraveTitle'].Text                     = $t.TxtMassgraveTitle
     $c['txtMassgraveDesc'].Text                      = $t.TxtMassgraveDesc
     $c['btnRunMassgrave'].Content                    = $t.BtnRunMassgrave
@@ -487,10 +495,29 @@ function Update-WgoUILanguage {
     $c['chkClearStoreCache'].ToolTip                        = $t.TipClearStoreCache
     $c['chkPauseUpdates'].Content                    = $t.ChkPauseUpdates
     $c['chkPauseUpdates'].ToolTip                        = $t.TipPauseUpdates
-    $c['chkDisableEdgeTelemetry'].Content             = $t.ChkDisableEdgeTelemetry
-    $c['chkDisableEdgeTelemetry'].ToolTip                        = $t.TipDisableEdgeTelemetry
     $c['chkDisableSpotlight'].Content                = $t.ChkDisableSpotlight
     $c['chkDisableSpotlight'].ToolTip                        = $t.TipDisableSpotlight
+    $c['grpEdgeTelemetry'].Header                    = $t.GrpEdgeTelemetry
+    $c['chkEdgeTelemetryIsolated'].Content           = $t.ChkEdgeTelemetryIsolated
+    $c['chkEdgeTelemetryIsolated'].ToolTip           = $t.TipEdgeTelemetryIsolated
+    $c['grpAiCloud'].Header                       = $t.GrpAiCloud
+    $c['chkWin11AiAgentBlock'].Content               = $t.ChkWin11AiAgentBlock
+    $c['chkWin11AiAgentBlock'].ToolTip               = $t.TipWin11AiAgentBlock
+    $c['chkWin11AgentConnectors'].Content            = $t.ChkWin11AgentConnectors
+    $c['chkWin11AgentConnectors'].ToolTip            = $t.TipWin11AgentConnectors
+    $c['chkWin11CloudContent'].Content               = $t.ChkWin11CloudContent
+    $c['chkWin11CloudContent'].ToolTip               = $t.TipWin11CloudContent
+    $c['grpClassicApps'].Header                      = $t.GrpClassicApps
+    $c['chkPaintNoCopilot'].Content                  = $t.ChkPaintNoCopilot
+    $c['chkPaintNoCopilot'].ToolTip                  = $t.TipPaintNoCopilot
+    $c['chkClassicPhotoViewer'].Content              = $t.ChkClassicPhotoViewer
+    $c['chkClassicPhotoViewer'].ToolTip              = $t.TipClassicPhotoViewer
+    $c['chkClassicNotepad'].Content                  = $t.ChkClassicNotepad
+    $c['chkClassicNotepad'].ToolTip                  = $t.TipClassicNotepad
+    $c['grpLtscComponents'].Header                   = $t.GrpLtscComponents
+    $c['txtLtscComponentsDesc'].Text                 = $t.TxtLtscComponentsDesc
+    $c['btnInstallStore'].Content                    = $t.BtnInstallStore
+    $c['btnInstallAppInstaller'].Content             = $t.BtnInstallAppInstaller
     $c['txtReleaseRenewTitle'].Text                  = $t.TxtReleaseRenewTitle
     $c['txtReleaseRenewDesc'].Text                   = $t.TxtReleaseRenewDesc
     $c['btnReleaseRenewIP'].Content                  = $t.BtnReleaseRenewIP
@@ -531,6 +558,15 @@ function Resolve-WgoUIConflicts {
     if ($c['chkSteamBoost'] -and $c['chkTcpAutotuning'] -and $c['chkSteamBoost'].IsChecked -and $c['chkTcpAutotuning'].IsChecked) {
         $c['chkTcpAutotuning'].IsChecked = $false
     }
+}
+
+function Update-WgoBatteryAvailability {
+    $c = $Global:WgoUI_Ctrl
+    if (-not $c['chkIndexerThrottle']) { return }
+    $hasBattery = $true
+    if ($Global:WgoHardware) { $hasBattery = [bool]$Global:WgoHardware.HasBattery }
+    $c['chkIndexerThrottle'].IsEnabled = $hasBattery
+    if (-not $hasBattery) { $c['chkIndexerThrottle'].IsChecked = $false }
 }
 
 function Update-WgoVendorAvailability {
@@ -595,6 +631,7 @@ function Update-WgoScanDecorations {
         if ($tip) { $ctrl.ToolTip = $tip.Trim() }
     }
     Update-WgoVendorAvailability
+    Update-WgoBatteryAvailability
 }
 
 function Set-WgoScanSelection {
@@ -701,6 +738,7 @@ function Complete-WgoSystemScan {
     $Global:WgoHardware = $box['Hardware']
     $Global:WgoScanResults = $box['Status']
     $Global:WgoPreflight = @($box['Preflight'])
+    Update-WgoBatteryAvailability
     Set-WgoScanSelection
     Update-WgoScanDecorations
     Update-WgoScanSummary
@@ -935,7 +973,7 @@ function Initialize-WgoUI {
         'grpPrivacy','chkPrivacy',
         'grpDrivers','chkDrivers',
         'grpPagefile','chkPagefile',
-        'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
+        'grpExtraPrivacy','chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry','chkClipboardHistory',
         'grpAdvancedTweaks','chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency',
         'grpServiceMgmt','chkDisableSysMain','chkDisableWSearch','chkDisableSpooler','chkWinSxSCleanup',
         'txtXboxServicesNote','grpXboxServices','chkDisableXboxServices',
@@ -955,7 +993,10 @@ function Initialize-WgoUI {
         'grpProfiles','btnProfileBasic','btnProfileLaptop','btnProfileGamer','btnProfilePrivacy','btnProfileEsports','btnProfileMax',
         'btnRunSelected','btnRestoreDefaults','lblRestoreCategory','cmbRestoreCategory','btnExportProfile','btnImportProfile',
         'chkClearEventLogs','chkDeleteMinidump','chkClearStoreCache',
-        'chkPauseUpdates','chkDisableEdgeTelemetry','chkDisableSpotlight',
+        'chkPauseUpdates','chkDisableSpotlight','grpEdgeTelemetry','chkEdgeTelemetryIsolated',
+        'grpAiCloud','chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
+        'grpClassicApps','chkPaintNoCopilot','chkClassicPhotoViewer','chkClassicNotepad',
+        'grpLtscComponents','txtLtscComponentsDesc','btnInstallStore','btnInstallAppInstaller',
         'btnInstallApps',
         'txtScoopRequired','txtScoopStatus','btnInstallScoop',
         'grpAppsBrowsers','chkFirefox','txtFirefoxDesc','chkBrave','txtBraveDesc',
@@ -966,7 +1007,7 @@ function Initialize-WgoUI {
         'chkMoonlight','txtMoonlightDesc','chkSunshine','txtSunshineDesc',
         'grpAppsMonitoring','chkCpuz','txtCpuzDesc','chkHwinfo','txtHwinfoDesc',
         'chkMemreduct','txtMemreductDesc','chkBleachbit','txtBleachbitDesc','chkDnsJumper','txtDnsJumperDesc',
-        'chkCapFrameX','txtCapFrameXDesc','chkMsiAfterburner','txtMsiAfterburnerDesc','chkRtss','txtRtssDesc','chkDlssSwapper','txtDlssSwapperDesc','chkDdu','txtDduDesc','chkHwMonitor','txtHwMonitorDesc',
+        'chkCapFrameX','txtCapFrameXDesc','chkMsiAfterburner','txtMsiAfterburnerDesc','chkRtss','txtRtssDesc','chkDlssSwapper','txtDlssSwapperDesc','chkHwMonitor','txtHwMonitorDesc',
         'grpAppsProductivity','chkNilesoftShell','txtNilesoftShellDesc',
         'chkFlowLauncher','txtFlowLauncherDesc',
         'chkShareX','txtShareXDesc',
@@ -1086,6 +1127,8 @@ function Initialize-WgoUI {
     })
     $c['btnProfileMax'].Add_Click({
         Set-WgoUIProfilePreset -EnabledNames $Global:WgoUI_OptimizationCheckboxNames -ProfileLabel (T 'BtnProfileMax')
+        if ($c['chkKeyboardFast']) { $c['chkKeyboardFast'].IsChecked = $true }
+        if ($c['chkClipboardHistory']) { $c['chkClipboardHistory'].IsChecked = $true }
     })
 
     # Create Restore Point
@@ -1156,7 +1199,14 @@ function Initialize-WgoUI {
         $doDeleteMinidump = [bool]$c['chkDeleteMinidump'].IsChecked
         $doClearStoreCache = [bool]$c['chkClearStoreCache'].IsChecked
         $doPauseUpdates = [bool]$c['chkPauseUpdates'].IsChecked
-        $doDisableEdgeTelemetry = [bool]$c['chkDisableEdgeTelemetry'].IsChecked
+        $doEdgeTelemetryIsolated = [bool]$c['chkEdgeTelemetryIsolated'].IsChecked
+        $doWin11AiAgentBlock = [bool]$c['chkWin11AiAgentBlock'].IsChecked
+        $doWin11AgentConnectors = [bool]$c['chkWin11AgentConnectors'].IsChecked
+        $doWin11CloudContent = [bool]$c['chkWin11CloudContent'].IsChecked
+        $doClipboardHistory = [bool]$c['chkClipboardHistory'].IsChecked
+        $doPaintNoCopilot = [bool]$c['chkPaintNoCopilot'].IsChecked
+        $doClassicPhotoViewer = [bool]$c['chkClassicPhotoViewer'].IsChecked
+        $doClassicNotepad = [bool]$c['chkClassicNotepad'].IsChecked
         $doDisableSpotlight = [bool]$c['chkDisableSpotlight'].IsChecked
         $doAmdUlps = [bool]$c['chkAmdUlps'].IsChecked
         $doAmdMpo = [bool]$c['chkAmdMpo'].IsChecked
@@ -1228,7 +1278,9 @@ function Initialize-WgoUI {
                   $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
                   $doDisableXboxServices,
                   $doClearEventLogs, $doDeleteMinidump, $doClearStoreCache,
-                  $doPauseUpdates, $doDisableEdgeTelemetry, $doDisableSpotlight,
+                  $doPauseUpdates, $doDisableSpotlight,
+                  $doEdgeTelemetryIsolated, $doWin11AiAgentBlock, $doWin11AgentConnectors, $doWin11CloudContent,
+                  $doClipboardHistory, $doPaintNoCopilot, $doClassicPhotoViewer, $doClassicNotepad,
                   $doAmdUlps, $doAmdMpo, $doAmdTdr, $doAmdCrashDefender, $doAmdHdcp, $doAmdTelemetry, $doAmdHwAccel,
                   $doDryRun)
             try {
@@ -1300,7 +1352,14 @@ function Initialize-WgoUI {
                         @{ Flag = $doRiskyNvidiaMaxPerf; Key = 'ChkRiskyNvidiaMaxPerf' },
                         @{ Flag = $doDisableXboxServices; Key = 'ChkDisableXboxServices' },
                         @{ Flag = $doPauseUpdates;        Key = 'ChkPauseUpdates' },
-                        @{ Flag = $doDisableEdgeTelemetry; Key = 'ChkDisableEdgeTelemetry' },
+                        @{ Flag = $doEdgeTelemetryIsolated; Key = 'ChkEdgeTelemetryIsolated' },
+                        @{ Flag = $doWin11AiAgentBlock; Key = 'ChkWin11AiAgentBlock' },
+                        @{ Flag = $doWin11AgentConnectors; Key = 'ChkWin11AgentConnectors' },
+                        @{ Flag = $doWin11CloudContent; Key = 'ChkWin11CloudContent' },
+                        @{ Flag = $doClipboardHistory; Key = 'ChkClipboardHistory' },
+                        @{ Flag = $doPaintNoCopilot; Key = 'ChkPaintNoCopilot' },
+                        @{ Flag = $doClassicPhotoViewer; Key = 'ChkClassicPhotoViewer' },
+                        @{ Flag = $doClassicNotepad; Key = 'ChkClassicNotepad' },
                         @{ Flag = $doDisableSpotlight;     Key = 'ChkDisableSpotlight' },
                         @{ Flag = $doAmdUlps;              Key = 'ChkAmdUlps' },
                         @{ Flag = $doAmdMpo;               Key = 'ChkAmdMpo' },
@@ -1334,7 +1393,8 @@ function Initialize-WgoUI {
                     if ($doDrivers)  { Set-WgoBlockDriverUpdates }
                     if ($doPagefile) { Set-WgoPagefile }
                     Set-WgoExtraPrivacy -AdvertisingId $doAdvertisingId -TailoredExp $doTailoredExp `
-                        -DiagTrackSvc $doDiagTrackSvc -CopilotBlock $doCopilotBlock -InputTelemetry $doInputTelemetry
+                        -DiagTrackSvc $doDiagTrackSvc -CopilotBlock $doCopilotBlock -InputTelemetry $doInputTelemetry `
+                        -ClipboardHistory $doClipboardHistory
                     Set-WgoAdvancedTweaks -EdgeWidgets $doEdgeWidgets `
                         -DeliveryOpt $doDeliveryOpt -AppsBackground $doAppsBackground -NetworkLatency $doNetworkLatency
                     Set-WgoServiceMgmt -DisableSysMain $doDisableSysMain -DisableWSearch $doDisableWSearch -DisableSpooler $doDisableSpooler
@@ -1343,7 +1403,12 @@ function Initialize-WgoUI {
                         -UiCleanup $doUiCleanup -TcpAutotuning $doTcpAutotuning -DoH $doDoH `
                         -FastShutdown $doFastShutdown -PrefetchSSD $doPrefetchSSD -TcpIpReset $doTcpIpReset `
                         -RemoveOnedrive $doRemoveOnedrive -DisableGameBar $doDisableGameBar -DisableStore $doDisableStore -DisableWer $doDisableWer `
-                        -PauseUpdates $doPauseUpdates -DisableEdgeTelemetry $doDisableEdgeTelemetry -DisableSpotlight $doDisableSpotlight
+                        -PauseUpdates $doPauseUpdates -DisableSpotlight $doDisableSpotlight
+                    Set-WgoEdgeTelemetryIsolation -EdgeTelemetryOnly $doEdgeTelemetryIsolated
+                    Set-WgoAiCloudPrivacy -AiAgentBlock $doWin11AiAgentBlock -AgentConnectors $doWin11AgentConnectors -CloudContent $doWin11CloudContent
+                    Set-WgoPaintWithoutCopilot -RemoveCopilot $doPaintNoCopilot
+                    Set-WgoClassicPhotoViewer -Register $doClassicPhotoViewer
+                    Set-WgoClassicNotepad -Restore $doClassicNotepad
                     Set-WgoCpuTimerTweaks -DisableCoreParking $doDisableCoreParking -DisableHPET $doDisableHPET `
                         -TimerResolution $doTimerResolution -HungAppTimeout $doHungAppTimeout
                     Set-WgoGpuTweaks -IncreaseTdrNvidia $doIncreaseTdrNvidia -DisableNvidiaTelemetry $doDisableNvidiaTelemetry
@@ -1399,7 +1464,9 @@ function Initialize-WgoUI {
                            $doRiskyDisableFirewall, $doRiskyDisableDEP, $doRiskyNvidiaMaxPerf,
                            $doDisableXboxServices,
                            $doClearEventLogs, $doDeleteMinidump, $doClearStoreCache,
-                           $doPauseUpdates, $doDisableEdgeTelemetry, $doDisableSpotlight,
+                           $doPauseUpdates, $doDisableSpotlight,
+                           $doEdgeTelemetryIsolated, $doWin11AiAgentBlock, $doWin11AgentConnectors, $doWin11CloudContent,
+                           $doClipboardHistory, $doPaintNoCopilot, $doClassicPhotoViewer, $doClassicNotepad,
                            $doAmdUlps, $doAmdMpo, $doAmdTdr, $doAmdCrashDefender, $doAmdHdcp, $doAmdTelemetry, $doAmdHwAccel,
                            $doDryRun) `
           -OnCompleted {
@@ -1494,6 +1561,36 @@ function Initialize-WgoUI {
         }
     })
 
+    $c['btnInstallStore'].Add_Click({
+        try {
+            $c['btnInstallStore'].IsEnabled = $false
+            Start-WgoBackgroundTask -ScriptBlock {
+                try { Install-WgoStoreApp | Out-Null } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
+            } -OnCompleted {
+                $c['btnInstallStore'].IsEnabled = $true
+                Update-WgoScoopStatus
+            }
+        } catch {
+            Show-WgoFatalError "btnInstallStore click handler failed: $($_.Exception.Message)"
+            $c['btnInstallStore'].IsEnabled = $true
+        }
+    })
+
+    $c['btnInstallAppInstaller'].Add_Click({
+        try {
+            $c['btnInstallAppInstaller'].IsEnabled = $false
+            Start-WgoBackgroundTask -ScriptBlock {
+                try { Install-WgoAppInstaller | Out-Null } catch { Write-Log (T 'LogUnhandledError' $_.Exception.Message) "ERROR" }
+            } -OnCompleted {
+                $c['btnInstallAppInstaller'].IsEnabled = $true
+                Update-WgoScoopStatus
+            }
+        } catch {
+            Show-WgoFatalError "btnInstallAppInstaller click handler failed: $($_.Exception.Message)"
+            $c['btnInstallAppInstaller'].IsEnabled = $true
+        }
+    })
+
     # Install Apps (now in action bar)
     $c['btnInstallApps'].Add_Click({
         try {
@@ -1519,7 +1616,6 @@ function Initialize-WgoUI {
                 @{ Chk = $c['chkMsiAfterburner']; Name = "MSI Afterburner" },
                 @{ Chk = $c['chkRtss']; Name = "RivaTuner Statistics Server" },
                 @{ Chk = $c['chkDlssSwapper']; Name = "DLSS Swapper" },
-                @{ Chk = $c['chkDdu']; Name = "Display Driver Uninstaller" },
                 @{ Chk = $c['chkHwMonitor']; Name = "HWMonitor" },
                 @{ Chk = $c['chkMoonlight']; Name = "Moonlight" },
                 @{ Chk = $c['chkSunshine'];  Name = "Sunshine" },

@@ -1,6 +1,7 @@
 # Wgo.AppInstaller.psm1 - Application installation via winget, falling back to Scoop
 
 $Global:WgoWingetPath = $null
+$Global:WgoWingetSourceCache = $null
 $Global:WgoScoopPath = $null
 $Global:WgoScoopReadyLogged = $false
 
@@ -8,11 +9,11 @@ $Global:WgoAppCatalog = @{
     'firefox'                 = @{ Name = "Mozilla Firefox";        WingetId = "Mozilla.Firefox";                      ScoopId = "firefox"; Bucket = "extras" }
     'nanazip'                 = @{ Name = "NanaZip";                 WingetId = "M2Team.NanaZip";                       ScoopId = "nanazip"; Bucket = "main" }
     'notepadplusplus.install' = @{ Name = "Notepad++";                WingetId = "Notepad++.Notepad++";                  ScoopId = "notepadplusplus"; Bucket = "extras" }
-    'freedownloadmanager'     = @{ Name = "Free Download Manager";    WingetId = "FreeDownloadManager.FreeDownloadManager"; ScoopId = "freedownloadmanager"; Bucket = "extras" }
+    'freedownloadmanager'     = @{ Name = "Free Download Manager";    WingetId = "FreeDownloadManager.FreeDownloadManager"; ScoopId = ""; Bucket = "" }
     'qbittorrent'             = @{ Name = "qBittorrent";               WingetId = "qBittorrent.qBittorrent";              ScoopId = "qbittorrent"; Bucket = "extras" }
     'steam'                   = @{ Name = "Steam";                     WingetId = "Valve.Steam";                          ScoopId = "steam"; Bucket = "games" }
-    'epicgameslauncher'       = @{ Name = "Epic Games Launcher";       WingetId = "EpicGames.EpicGamesLauncher";          ScoopId = "epic-games-launcher"; Bucket = "games" }
-    'goggalaxy'               = @{ Name = "GOG Galaxy";                WingetId = "GOG.Galaxy";                           ScoopId = "goggalaxy"; Bucket = "games" }
+    'epicgameslauncher'       = @{ Name = "Epic Games Launcher";       WingetId = "EpicGames.EpicGamesLauncher";          ScoopId = ""; Bucket = "" }
+    'goggalaxy'               = @{ Name = "GOG Galaxy";                WingetId = "GOG.Galaxy";                           ScoopId = ""; Bucket = "" }
     '7zip'                    = @{ Name = "7-Zip";                     WingetId = "7zip.7zip";                            ScoopId = "7zip"; Bucket = "main" }
     'wiztree'                 = @{ Name = "WizTree";                   WingetId = "AntibodySoftware.WizTree";             ScoopId = "wiztree"; Bucket = "extras" }
     'memreduct'               = @{ Name = "Mem Reduct";                WingetId = "Henry++.MemReduct";                    ScoopId = "memreduct"; Bucket = "extras" }
@@ -20,17 +21,16 @@ $Global:WgoAppCatalog = @{
     'moonlight'               = @{ Name = "Moonlight";                 WingetId = "MoonlightGameStreamingProject.Moonlight"; ScoopId = "moonlight"; Bucket = "extras" }
     'sunshine'                = @{ Name = "Sunshine";                  WingetId = "LizardByte.Sunshine";                  ScoopId = "sunshine"; Bucket = "extras" }
     'nilesoftshell'           = @{ Name = "Nilesoft Shell";            WingetId = "Nilesoft.Shell";                       ScoopId = "nilesoft-shell"; Bucket = "extras" }
-    'flowlauncher'            = @{ Name = "Flow Launcher";             WingetId = "Flow-Launcher.Flow-Launcher";          ScoopId = "flow-launcher"; Bucket = "extras" }
+    'flowlauncher'            = @{ Name = "Flow Launcher";             WingetId = "Flow-Launcher.Flow-Launcher";          ScoopId = ""; Bucket = "" }
     'sharex'                  = @{ Name = "ShareX";                    WingetId = "ShareX.ShareX";                        ScoopId = "sharex"; Bucket = "extras" }
     'cpuz'                    = @{ Name = "CPU-Z";                     WingetId = "CPUID.CPU-Z";                          ScoopId = "cpu-z"; Bucket = "extras" }
-    'hwinfo'                  = @{ Name = "HWiNFO";                    WingetId = "REALiX.HWiNFO";                        ScoopId = "hwinfo"; Bucket = "extras" }
+    'hwinfo'                  = @{ Name = "HWiNFO";                    WingetId = "REALiX.HWiNFO";                        ScoopId = ""; Bucket = "" }
     'brave'                   = @{ Name = "Brave";                     WingetId = "Brave.Brave";                          ScoopId = "brave"; Bucket = "extras" }
     'dnsjumper'               = @{ Name = "DNS Jumper";                WingetId = "";                                     ScoopId = "dnsjumper"; Bucket = "extras" }
     'capframex'               = @{ Name = "CapFrameX";                 WingetId = "CXWorld.CapFrameX";                    ScoopId = "capframex"; Bucket = "extras" }
     'msiafterburner'          = @{ Name = "MSI Afterburner";           WingetId = "Guru3D.Afterburner";                   ScoopId = "msiafterburner"; Bucket = "extras" }
     'rtss'                    = @{ Name = "RivaTuner Statistics Server"; WingetId = "Guru3D.RTSS";                        ScoopId = "rtss"; Bucket = "extras" }
-    'dlssswapper'             = @{ Name = "DLSS Swapper";               WingetId = "beeradmoore.dlss-swapper";             ScoopId = "dlss-swapper"; Bucket = "games" }
-    'ddu'                     = @{ Name = "Display Driver Uninstaller"; WingetId = "";                                     ScoopId = "ddu"; Bucket = "extras" }
+    'dlssswapper'             = @{ Name = "DLSS Swapper";               WingetId = "beeradmoore.dlss-swapper";             ScoopId = ""; Bucket = "" }
     'hwmonitor'               = @{ Name = "HWMonitor";                 WingetId = "CPUID.HWMonitor";                      ScoopId = "hwmonitor"; Bucket = "extras" }
 }
 
@@ -107,8 +107,198 @@ function Get-WgoLastLogLine {
     return ''
 }
 
+function Test-WgoWingetSource {
+    param([string]$Source)
+    if (-not $Source) { return $false }
+    if ($null -eq $Global:WgoWingetSourceCache) {
+        $found = @()
+        try {
+            $wingetExe = Find-WgoWinget
+            if ($wingetExe) {
+                $out = & $wingetExe source list --accept-source-agreements --disable-interactivity 2>$null
+                if ($LASTEXITCODE -eq 0) {
+                    foreach ($line in @($out)) {
+                        $text = ([string]$line).Trim()
+                        if (-not $text -or $text -match '^-+$') { continue }
+                        $name = ($text -split '\s+')[0]
+                        if ($name -and $name -ne 'Name' -and $found -notcontains $name) { $found += $name }
+                    }
+                }
+            }
+        } catch { }
+        $Global:WgoWingetSourceCache = @($found)
+    }
+    return [bool]($Global:WgoWingetSourceCache -contains $Source)
+}
+
+function Test-WgoStorePresent {
+    try {
+        return [bool](Get-AppxPackage -Name 'Microsoft.WindowsStore' -ErrorAction Ignore)
+    } catch {
+        return $false
+    }
+}
+
+function Initialize-WgoWingetSources {
+    $wingetExe = Find-WgoWinget
+    if (-not $wingetExe) { return $false }
+    try {
+        $null = & $wingetExe source reset --force 2>&1
+        $null = & $wingetExe source update --disable-interactivity 2>&1
+        $Global:WgoWingetSourceCache = $null
+        if (-not (Test-WgoWingetSource 'winget')) {
+            $null = & $wingetExe source add winget https://cdn.winget.microsoft.com/cache --accept-source-agreements 2>&1
+            $Global:WgoWingetSourceCache = $null
+        }
+        if (-not (Test-WgoWingetSource 'msstore')) {
+            $null = & $wingetExe source add msstore https://storeedgefd.dsx.mp.microsoft.com/v9.0 --accept-source-agreements 2>&1
+            $Global:WgoWingetSourceCache = $null
+        }
+        $null = & $wingetExe source update --disable-interactivity 2>&1
+        $Global:WgoWingetSourceCache = $null
+        $ok = (Test-WgoWingetSource 'winget')
+        if ($ok) { Write-Log (T 'LogWingetSourcesOk') "OK" } else { Write-Log (T 'LogWingetSourcesFail') "WARN" }
+        return $ok
+    } catch {
+        Write-Log (T 'LogWingetSourcesFail') "WARN"
+        return $false
+    }
+}
+
+function Get-WgoPackageArchitecture {
+    $arch = [string]$env:PROCESSOR_ARCHITECTURE
+    if ($arch -eq 'ARM64') { return 'arm64' }
+    if ([Environment]::Is64BitOperatingSystem) { return 'x64' }
+    return 'x86'
+}
+
+function Install-WgoAppInstaller {
+    Write-Log (T 'LogAppInstallerStart') "INFO"
+    $existing = Find-WgoWinget
+    if ($existing) {
+        Write-Log (T 'LogAppInstallerAlready') "OK"
+        Initialize-WgoWingetSources | Out-Null
+        return $existing
+    }
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+        $arch = Get-WgoPackageArchitecture
+        $tempDir = Join-Path $env:TEMP "wgo_winget_bootstrap"
+        Remove-Item -Path $tempDir -Recurse -Force -ErrorAction Ignore
+        New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+        $bundlePath = Join-Path $tempDir 'Microsoft.DesktopAppInstaller.msixbundle'
+        $vclibsPath = Join-Path $tempDir 'Microsoft.VCLibs.Desktop.appx'
+        $xamlPath = Join-Path $tempDir 'Microsoft.UI.Xaml.2.8.appx'
+        Write-Log (T 'LogAppInstallerDownload') "INFO"
+        Invoke-WebRequest -Uri 'https://aka.ms/getwinget' -OutFile $bundlePath -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://aka.ms/Microsoft.VCLibs.$arch.14.00.Desktop.appx" -OutFile $vclibsPath -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.$arch.appx" -OutFile $xamlPath -UseBasicParsing -ErrorAction Stop
+        foreach ($dependency in @($vclibsPath, $xamlPath)) {
+            try { Add-AppxPackage -Path $dependency -ForceApplicationShutdown -ErrorAction Stop }
+            catch { Write-Log (T 'LogAppInstallerDependency' (Split-Path $dependency -Leaf) $_.Exception.Message) "WARN" }
+        }
+        Add-AppxPackage -Path $bundlePath -ForceApplicationShutdown -ErrorAction Stop
+        Update-WgoSessionEnvironment
+        Start-Sleep -Seconds 3
+        $resolved = Find-WgoWinget
+        if (-not $resolved) {
+            Write-Log (T 'LogAppInstallerFail') "ERROR"
+            return $null
+        }
+        Write-Log (T 'LogAppInstallerOk') "OK"
+        Initialize-WgoWingetSources | Out-Null
+        return $resolved
+    } catch {
+        Write-Log (T 'LogAppInstallerError' $_.Exception.Message) "ERROR"
+        return $null
+    }
+}
+
+function Install-WgoStoreApp {
+    Write-Log (T 'LogStoreInstallStart') "INFO"
+    if (Test-WgoStorePresent) {
+        Write-Log (T 'LogStoreAlready') "OK"
+        return $true
+    }
+    try {
+        $wsreset = Join-Path $env:SystemRoot 'System32\wsreset.exe'
+        if (Test-Path -LiteralPath $wsreset) {
+            Write-Log (T 'LogStoreWsreset') "INFO"
+            Start-Process -FilePath $wsreset -ArgumentList '-i' -NoNewWindow -ErrorAction Stop
+            for ($i = 0; $i -lt 60; $i++) {
+                Start-Sleep -Seconds 5
+                if (Test-WgoStorePresent) { break }
+            }
+        }
+    } catch {
+        Write-Log (T 'LogStoreWsresetFail' $_.Exception.Message) "WARN"
+    }
+    if (Test-WgoStorePresent) {
+        Write-Log (T 'LogStoreInstallOk') "OK"
+        return $true
+    }
+    $wingetExe = Find-WgoWinget
+    if (-not $wingetExe) {
+        $wingetExe = Install-WgoAppInstaller
+    }
+    if ($wingetExe) {
+        Write-Log (T 'LogStoreWingetFallback') "INFO"
+        if (Install-ViaWingetSource -WingetId '9WZDNCRFJBMP' -DisplayName 'Microsoft Store' -Source 'msstore' -TimeoutSec 900) {
+            if (Test-WgoStorePresent) {
+                Write-Log (T 'LogStoreInstallOk') "OK"
+                return $true
+            }
+        }
+        if (Install-ViaWingetSource -WingetId 'Microsoft.WindowsStore' -DisplayName 'Microsoft Store' -Source 'winget' -TimeoutSec 900) {
+            if (Test-WgoStorePresent) {
+                Write-Log (T 'LogStoreInstallOk') "OK"
+                return $true
+            }
+        }
+    }
+    Write-Log (T 'LogStoreFail') "ERROR"
+    return $false
+}
+
+function Install-ViaWingetSource {
+    param(
+        [string]$WingetId,
+        [string]$DisplayName,
+        [string]$Source = 'winget',
+        [int]$TimeoutSec = 1200
+    )
+    if (-not $WingetId) { return $false }
+    $wingetExe = Find-WgoWinget
+    if (-not $wingetExe) { return $false }
+    try {
+        $safeId = $WingetId -replace '[^\w\.-]','_'
+        $logFile = "$env:TEMP\wgo_winget_$($Source)_$safeId.log"
+        $installArgs = @(
+            "install", "--id", $WingetId, "-e",
+            "--source", $Source,
+            "--silent",
+            "--accept-package-agreements",
+            "--accept-source-agreements",
+            "--disable-interactivity"
+        )
+        $run = Invoke-WgoProcess -FilePath $wingetExe -ArgumentList $installArgs -LogFile $logFile -TimeoutSec $TimeoutSec
+        if ($run.TimedOut) {
+            Write-Log (T 'LogInstallTimeout' $DisplayName) "WARN"
+            return $false
+        }
+        if ($run.ExitCode -eq 0 -or (Test-WgoWingetInstalled -WingetId $WingetId)) { return $true }
+        $detail = Get-WgoLastLogLine -LogFile $logFile
+        if (-not $detail) { $detail = "winget exit code $($run.ExitCode)" }
+        Write-Log (T 'LogWingetSourceFailed' $DisplayName $Source $detail) "WARN"
+        return $false
+    } catch {
+        Write-Log (T 'LogWingetSourceFailed' $DisplayName $Source $_.Exception.Message) "WARN"
+        return $false
+    }
+}
+
 function Install-ViaWinget {
-    param([string]$WingetId, [string]$DisplayName)
+    param([string]$WingetId, [string]$DisplayName, [string]$StoreId = "")
     if (-not $WingetId) { return $false }
     $wingetExe = Find-WgoWinget
     if (-not $wingetExe) {
@@ -120,25 +310,21 @@ function Install-ViaWinget {
             Write-Log (T 'LogInstallAlready' $DisplayName) "OK"
             return $true
         }
-        Write-Log (T 'LogTryingWinget' $DisplayName) "INFO"
-        $logFile = "$env:TEMP\wgo_winget_$($WingetId -replace '[^\w\.-]','_').log"
-        $installArgs = @(
-            "install", "--id", $WingetId, "-e",
-            "--silent",
-            "--accept-package-agreements",
-            "--accept-source-agreements",
-            "--disable-interactivity"
-        )
-        $run = Invoke-WgoProcess -FilePath $wingetExe -ArgumentList $installArgs -LogFile $logFile -TimeoutSec 1200
-        if ($run.TimedOut) {
-            Write-Log (T 'LogInstallTimeout' $DisplayName) "WARN"
-            return $false
+        if (Test-WgoWingetSource 'msstore') {
+            $storeCandidate = if ($StoreId) { $StoreId } else { $WingetId }
+            Write-Log (T 'LogTryingMsStore' $DisplayName) "INFO"
+            if (Install-ViaWingetSource -WingetId $storeCandidate -DisplayName $DisplayName -Source 'msstore' -TimeoutSec 600) {
+                Write-Log (T 'LogInstallOk' $DisplayName) "OK"
+                return $true
+            }
+            Write-Log (T 'LogMsStoreFallback' $DisplayName) "INFO"
         }
-        if ($run.ExitCode -eq 0 -or (Test-WgoWingetInstalled -WingetId $WingetId)) {
+        Write-Log (T 'LogTryingWinget' $DisplayName) "INFO"
+        if (Install-ViaWingetSource -WingetId $WingetId -DisplayName $DisplayName -Source 'winget') {
             Write-Log (T 'LogInstallOk' $DisplayName) "OK"
             return $true
         }
-        Write-Log (T 'LogWingetFailedFallback' $DisplayName $run.ExitCode) "WARN"
+        Write-Log (T 'LogWingetFailedFallback' $DisplayName 'winget and msstore sources failed') "WARN"
         return $false
     } catch {
         Write-Log (T 'LogWingetFailedFallback' $DisplayName $_.Exception.Message) "WARN"
@@ -393,7 +579,10 @@ function New-WgoScoopAppShortcut {
                 if ($exe) { $targetExe = $exe.FullName }
             }
         }
-        if (-not $targetExe) { return }
+        if (-not $targetExe) {
+            Write-Log (T 'LogShortcutSkipped' $DisplayName) "WARN"
+            return
+        }
         if (New-WgoDesktopShortcut -TargetExe $targetExe -ShortcutName $DisplayName) {
             Write-Log (T 'LogShortcutCreated' $DisplayName) "OK"
         }
@@ -416,7 +605,11 @@ function Install-WgoApp {
         Write-Log (T 'LogInstallStartScoopOnly' $DisplayName) "INFO"
     }
 
-    if (Install-ViaWinget -WingetId $entry.WingetId -DisplayName $DisplayName) { return $true }
+    if (Install-ViaWinget -WingetId $entry.WingetId -DisplayName $DisplayName -StoreId $entry.StoreId) { return $true }
+    if (-not $entry.ScoopId) {
+        Write-Log (T 'LogScoopFallbackRemoved' $DisplayName) "WARN"
+        return $false
+    }
     if (Install-ViaScoop -ScoopId $entry.ScoopId -DisplayName $DisplayName -Bucket $entry.Bucket) {
         New-WgoScoopAppShortcut -ScoopId $entry.ScoopId -DisplayName $DisplayName
         if ($Key -eq 'msiafterburner') { [void](Install-WgoApp -Key 'rtss' -DisplayName $Global:WgoAppCatalog['rtss'].Name) }
@@ -427,7 +620,9 @@ function Install-WgoApp {
 }
 
 Export-ModuleMember -Function @(
-    'Find-WgoWinget', 'Install-ViaWinget', 'Test-WgoWingetInstalled', 'Invoke-WgoProcess', 'Get-WgoLastLogLine',
+    'Find-WgoWinget', 'Test-WgoWingetSource', 'Initialize-WgoWingetSources', 'Get-WgoPackageArchitecture',
+    'Install-WgoAppInstaller', 'Install-WgoStoreApp', 'Test-WgoStorePresent',
+    'Install-ViaWingetSource', 'Install-ViaWinget', 'Test-WgoWingetInstalled', 'Invoke-WgoProcess', 'Get-WgoLastLogLine',
     'Get-WgoScoopRoot', 'Test-WgoScoopBucket', 'Initialize-WgoScoopBucket',
     'Find-WgoScoop', 'Test-WgoScoopCore', 'Install-WgoScoop', 'Update-WgoSessionEnvironment', 'Update-WgoScoopStatus', 'Install-ViaScoop',
     'Install-WgoApp', 'New-WgoDesktopShortcut', 'New-WgoScoopAppShortcut'

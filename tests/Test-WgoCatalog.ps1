@@ -8,7 +8,10 @@ function Assert([bool]$Cond, [string]$Msg) {
 
 $catText = [IO.File]::ReadAllText((Join-Path $Root 'Modules/Wgo.AppInstaller/Wgo.AppInstaller.psm1'))
 $entries = [regex]::Matches($catText, "'([^']+)'\s*=\s*@\{\s*Name = `"([^`"]*)`";\s*WingetId = `"([^`"]*)`";\s*ScoopId = `"([^`"]*)`"; Bucket = `"([^`"]*)`"")
-Write-Host "`n== Catálogo: $($entries.Count) apps" -ForegroundColor Cyan
+$scoopEntries = @($entries | Where-Object { $_.Groups[4].Value })
+$wingetOnlyEntries = @($entries | Where-Object { -not $_.Groups[4].Value })
+Write-Host "`n== Catálogo: $($entries.Count) apps ($($scoopEntries.Count) com Scoop, $($wingetOnlyEntries.Count) somente winget)" -ForegroundColor Cyan
+foreach ($e in $wingetOnlyEntries) { Assert (-not $e.Groups[5].Value) "Entrada '$($e.Groups[1].Value)' sem ScoopId não declara Bucket" }
 
 $repos = @{ main = 'Main'; extras = 'Extras'; games = 'Games' }
 $manifests = @{}
@@ -25,11 +28,21 @@ foreach ($b in $repos.Keys) {
 }
 
 Write-Host "`n== ScoopId existe no bucket declarado" -ForegroundColor Cyan
-foreach ($e in $entries) {
+foreach ($e in $scoopEntries) {
     $key = $e.Groups[1].Value; $sid = $e.Groups[4].Value; $bucket = $e.Groups[5].Value
     $ok = $manifests[$bucket].ContainsKey($sid)
     $other = @($manifests.Keys | Where-Object { $manifests[$_].ContainsKey($sid) }) -join ','
     Assert $ok ("{0,-26} {1,-22} bucket={2}{3}" -f $key, $sid, $bucket, $(if (-not $ok -and $other) { "  (encontrado em: $other)" } else { '' }))
+}
+
+Write-Host "`n== Manifestos Scoop com shim (bin) e sem script installer" -ForegroundColor Cyan
+foreach ($e in $scoopEntries) {
+    $key = $e.Groups[1].Value; $sid = $e.Groups[4].Value; $bucket = $e.Groups[5].Value
+    if (-not $manifests[$bucket].ContainsKey($sid)) { continue }
+    $raw = Get-Content -LiteralPath $manifests[$bucket][$sid] -Raw
+    $hasBin = [bool]($raw -match '"bin"\s*:')
+    $hasInstaller = [bool]($raw -match '"installer"\s*:')
+    Assert ($hasBin -and -not $hasInstaller) ("{0,-26} {1,-22} bin={2} installer={3}" -f $key, $sid, $hasBin, $hasInstaller)
 }
 
 $xaml = [IO.File]::ReadAllText((Join-Path $Root 'xaml/MainWindow.xaml'))

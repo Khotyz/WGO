@@ -26,6 +26,10 @@ This downloads the latest version to a temporary folder, starts the UI, and clea
 
 ---
 
+**Current release:** 6.5 – see [CHANGELOG.md](CHANGELOG.md) for the full list of changes since 6.0.
+
+---
+
 ## ✨ Key Features
 
 ### 🎨 Interface, Theme & Languages
@@ -42,14 +46,19 @@ This downloads the latest version to a temporary folder, starts the UI, and clea
 - Status badges (✔ / ◐ / ⊘) are appended directly to checkbox labels and every option gets a rich tooltip with what was detected.
 
 ### 🧹 Privacy & System Hardening
-- Remove pre‑installed bloatware and AI apps (Copilot, Recall, Paint 3D, Your Phone, etc.) while keeping Store, Xbox, Edge/WebView2, and runtimes.
+- Remove pre‑installed bloatware and AI apps (Copilot, Recall, Paint 3D, Your Phone, Bing apps, Dev Home, Cross Device, etc. – 54 package patterns) while keeping Store, Xbox, Edge/WebView2, and runtimes.
+- **Ownership-aware removal:** a package is only deleted when Windows provisioned it *and* the installed version still matches the provisioned one. Anything you installed or updated yourself from the Store later (NanaZip, WhatsApp Desktop, …) is preserved, and every ambiguous case is preserved too – the rule fails closed and logs each decision.
 - Force 100% local search (disable Bing/Edge web results).
 - Block telemetry, WER, CEIP, Activity Feed, and location via Group Policy.
 - Disable advertising ID, tailored experiences, Copilot/Recall, and input personalisation.
+- **Clipboard history and cloud clipboard sync** as a separate switch, fully split from input personalization – off by default and absent from every profile except **Maximum**, because plenty of people use `Win+V`.
+- **Classic apps (opt‑in):** remove Copilot / Cocreator / Generative Fill / Image Creator from Paint (and register a `Classic Apps` Paint layout when present), restore the classic **Windows Photo Viewer** for 13 image extensions, and restore **classic Notepad** through the official `Notepad (system)` feature with the Store alias disabled (fully reversible).
 - Block telemetry domains via the `hosts` file.
 - Disable Shared Experiences, Cortana, and Windows Spotlight.
-- Disable Edge telemetry and Windows Error Reporting.
+- Remove Edge telemetry as a **standalone, opt-in action** that never disables the browser's built-in password manager (`PasswordManagerEnabled=1` is re-asserted and verified after applying).
+- Disable Windows Error Reporting.
 - Pause Windows Update for 7 days (same registry keys Settings uses).
+- **AI and cloud content blocks** – Settings AI agent, Click to Do, Recall export, Paint AI components, MCP agent connectors, fresh agent-consent windows, Get Started, the Copilot pin screen and the cloud-content surfaces. Written to both the machine and the user scope, with the scanner accepting either one; builds that do not implement a value simply ignore it, so the same switches work on Windows 10 and on every Windows 11 release.
 
 ### ⚡ Performance & Memory
 - Apply a performance visual‑effects profile (disable animations, shadows, transparency).
@@ -101,17 +110,19 @@ This downloads the latest version to a temporary folder, starts the UI, and clea
 > The AMD tab auto‑detects whether a Radeon GPU is present. On NVIDIA/Intel‑only machines the group is disabled and the banner explains why. The tab is also a first‑class restore category (**AMD**) so changes can be reverted independently.
 
 ### 📦 App Installer (winget + Scoop)
-Install popular apps via **winget** (built into Windows) with automatic fallback to **Scoop**.  
-Bulk installs run in the background, report per‑app results, and log everything to `%TEMP%`.
+Install popular apps through a three‑stage chain: **Microsoft Store source (`msstore`) → community `winget` source → Scoop**.  
+The Store stage runs only when the `msstore` source is registered in `winget source list`; it uses the catalog's `StoreId` when present and the `WingetId` otherwise, with a shorter timeout so a missing Store listing never blocks the install. Bulk installs run in the background, report per‑app results, and log everything to `%TEMP%`.
 
 **Browsers:** Firefox, Brave  
 **Files & Archives:** NanaZip, 7‑Zip, Notepad++, WizTree  
 **Downloads:** Free Download Manager, qBittorrent  
 **Gaming:** Steam, Epic Games Launcher, GOG Galaxy, Moonlight, Sunshine  
-**Monitoring & Cleanup:** CPU‑Z, HWiNFO, Mem Reduct, BleachBit, DNS Jumper, CapFrameX, MSI Afterburner, RivaTuner Statistics Server, DLSS Swapper, Display Driver Uninstaller (DDU), HWMonitor  
+**Monitoring & Cleanup:** CPU‑Z, HWiNFO, Mem Reduct, BleachBit, DNS Jumper, CapFrameX, MSI Afterburner, RivaTuner Statistics Server, DLSS Swapper, HWMonitor  
 **Productivity:** Nilesoft Shell, Flow Launcher, ShareX
 
-> **Note:** Scoop is installed automatically the first time it's needed. Buckets are added via Git when available, with a ZIP‑download fallback. Desktop shortcuts are created for Scoop‑installed apps where possible. MSI Afterburner automatically pulls RTSS as a companion install.
+**Windows LTSC / IoT Enterprise bootstrap:** the *Windows LTSC components* group installs the **Microsoft Store** (via `wsreset -i`, then the Store package through winget) and **App Installer / winget** (`aka.ms/getwinget` with the VCLibs and `Microsoft.UI.Xaml.2.8` dependencies). After either flow the `winget` and `msstore` sources are reset and re-added, so winget works out of the box on builds that ship without the Store.
+
+> **Note:** Each source attempt is logged (`LogTryingMsStore`, `LogWingetSourceFailed`, `LogMsStoreFallback`) so you can see exactly where an app came from. Scoop is installed automatically the first time it's needed. Buckets are added via Git when available, with a ZIP‑download fallback. Desktop shortcuts are created for Scoop‑installed apps that expose a shim. Since 6.5, packages whose manifests are installer‑based or ship no shim (Free Download Manager, Epic Games Launcher, GOG Galaxy, HWiNFO, Flow Launcher, DLSS Swapper) are installed through winget only, and DDU was removed because it had no winget package and no reliable Scoop shim. MSI Afterburner automatically pulls RTSS as a companion install.
 
 ### 🧰 Utilities & Recovery
 - **Restart utilities:** Safe Mode with Networking, UEFI Firmware Settings, or Normal restart (with a *bootcfg* reset reminder).
@@ -120,13 +131,14 @@ Bulk installs run in the background, report per‑app results, and log everythin
 - **System information:** read‑only CPU/RAM/GPU/OS/disk/battery‑health summary.
 - **Startup Programs manager:** list and toggle Run‑key + Startup‑folder entries (disabled items are safely moved aside, with a fallback if a rename fails).
 - **Scheduled optimization:** create a daily, weekly, or custom (every N days) task that runs the *Basic* profile silently.
-- **Advanced cleanup:** Clear Windows Event Logs, Delete Minidumps, Clear Store Cache, Pause Updates for 7 days, Disable Edge Telemetry, Disable Windows Spotlight.
+- **Advanced cleanup:** Clear Windows Event Logs, Delete Minidumps, Clear Store Cache, Pause Updates for 7 days, isolated Edge telemetry removal, Disable Windows Spotlight.
 - Create System Restore Points.
 
 ### 🧾 Profiles & Safety
 - Predefined profiles: **Basic**, **Laptop**, **Gamer**, **Privacy**, **eSports**, **Maximum**.
 - Profiles automatically filter out options that don't apply to your hardware (no NVIDIA → no NVIDIA tweaks; no AMD → no AMD tweaks) and skip already‑applied options when *Skip options already applied* is on.
-- Opt‑in actions (`Standby List Clean`, `Auto Standby Clean`) are **never** selected by profiles or by *Select All* – they must be chosen deliberately.
+- Opt‑in actions (`Standby List Clean`, `Auto Standby Clean`, isolated `Edge Telemetry`, `Clipboard History`, `Keyboard Repeat Delay`, `Paint without Copilot`, `Classic Photo Viewer`, `Classic Notepad`) are never auto‑selected by *Select All*, and only **Maximum** turns the keyboard tweak and the clipboard option on (it is a 100 % performance preset); the other profiles leave them alone, so they must be chosen deliberately. The AI and cloud content blocks ship in **Basic**, **Laptop**, **Gamer**, **eSports** and **Privacy**, since the telemetry they block is harmless to normal and gaming use.
+- **Battery‑only options are hardware‑aware:** on a desktop the indexing‑on‑battery option is reported as *not applicable*, unchecked and disabled instead of silently doing nothing.
 - Export/import your own settings as JSON.
 - Last‑run state is saved automatically (`%LOCALAPPDATA%\WGO\last-run.json`).
 - **Dry‑run mode** – see what would be changed without applying anything.
