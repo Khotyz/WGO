@@ -37,70 +37,43 @@ $Global:WgoUI_RiskyCheckboxNames = @(
     'chkRiskyDisableFirewall','chkRiskyDisableDEP','chkRiskyNvidiaMaxPerf'
 )
 
-# Vendor-specific checkboxes are added/removed from profile presets at runtime
-# based on the detected GPU (see Set-WgoUIProfilePreset), since a static
-# profile list can't know the hardware in advance.
+# Automatic presets contain only the reviewed, low-impact baseline. Advanced
+# actions remain available for explicit selection, not bulk/profile activation.
 $Global:WgoUI_OptInCheckboxNames = @('chkStandbyListClean','chkAutoStandbyClean','chkEdgeTelemetryIsolated','chkClipboardHistory','chkKeyboardFast','chkPaintNoCopilot','chkClassicPhotoViewer','chkClassicNotepad')
 $Global:WgoUI_NvidiaOnlyCheckboxNames = @('chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry')
 $Global:WgoUI_AmdOnlyCheckboxNames = @('chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel')
 
 $Global:WgoUI_Profiles = @{
     Basic = @(
-        'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
-        'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
-        'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground',
-        'chkTempCleanup','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
-        'chkSearchIndexOptimize','chkResidualServices',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown',
-        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
-        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle'
+        'chkSearch','chkPrivacy','chkAdvertisingId','chkTailoredExp',
+        'chkInputTelemetry','chkEdgeWidgets'
     )
     Laptop = @(
-        'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
-        'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
-        'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground',
-        'chkTempCleanup','chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize',
-        'chkSearchIndexOptimize','chkResidualServices','chkGhostAdapters',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkDoH','chkPrivacyDeep',
-        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
-        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle'
+        'chkSearch','chkPrivacy','chkAdvertisingId','chkTailoredExp',
+        'chkInputTelemetry','chkEdgeWidgets','chkVisual','chkDeliveryOpt','chkIndexerThrottle'
     )
     Gamer = @(
-        'chkBloat','chkSearch','chkVisual','chkPrivacy','chkDrivers','chkPagefile',
-        'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
-        'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground','chkNetworkLatency','chkHungAppTimeout',
-        'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
-        'chkOfficeTelemetry','chkExtraSchedTasks','chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
-        'chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
-        'chkSearchIndexOptimize','chkGhostAdapters','chkFastStartup','chkResidualServices',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkSteamBoost','chkLargeSystemCache',
-        'chkDisableCoreParking','chkDisableHPET','chkTimerResolution','chkDisableNagle',
-        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel',
-        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent',
-        'chkNtfsOptimize','chkDisableLLMNR','chkMenuDelay','chkDnsCacheSize','chkIndexerThrottle'
+        'chkSearch','chkPrivacy','chkAdvertisingId','chkTailoredExp',
+        'chkInputTelemetry','chkEdgeWidgets','chkVisual','chkMenuDelay','chkDiskOptimize'
     )
     Privacy = @(
-        'chkBloat','chkSearch','chkPrivacy',
-        'chkAdvertisingId','chkTailoredExp','chkDiagTrackSvc','chkCopilotBlock','chkInputTelemetry',
-        'chkEdgeWidgets','chkDeliveryOpt','chkAppsBackground',
-        'chkOfficeTelemetry','chkExtraSchedTasks',
-        'chkHostsBlock','chkPrivacyDeep','chkDoH','chkUiCleanup','chkCacheClean',
-        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent'
+        'chkSearch','chkPrivacy','chkAdvertisingId','chkTailoredExp',
+        'chkInputTelemetry','chkEdgeWidgets','chkDisableSpotlight'
     )
     Esports = @(
-        'chkVisual','chkPagefile',
-        'chkCopilotBlock',
-        'chkHibernation','chkPowerPlan','chkTempCleanup','chkBootTimeout',
-        'chkDiskOptimize','chkHagsGameMode','chkUltimatePerf',
-        'chkKernelGamingPriority','chkGameDvrDisable','chkGameBarMicFix','chkInputLagReduction',
-        'chkGhostAdapters','chkFastStartup','chkLargeSystemCache',
-        'chkCacheClean','chkPrefetchSSD','chkFastShutdown','chkSteamBoost',
-        'chkDisableCoreParking','chkTimerResolution','chkHungAppTimeout',
-        'chkIncreaseTdrNvidia','chkDisableNvidiaTelemetry',
-        'chkDisableNagle','chkRssOptimize',
-        'chkAmdUlps','chkAmdMpo','chkAmdTdr','chkAmdCrashDefender','chkAmdHdcp','chkAmdTelemetry','chkAmdHwAccel',
-        'chkWin11AiAgentBlock','chkWin11AgentConnectors','chkWin11CloudContent'
+        'chkSearch','chkPrivacy','chkAdvertisingId','chkTailoredExp',
+        'chkInputTelemetry','chkEdgeWidgets','chkVisual','chkMenuDelay'
     )
+}
+
+function Get-WgoUIAutomaticOptions {
+    # Max is the union of reviewed presets, not every checkbox in the app.
+    @($Global:WgoUI_Profiles.Values | ForEach-Object { $_ } | Sort-Object -Unique)
+}
+
+function Get-WgoUIMaximumPreset {
+    # These are the only additional automatic opt-ins requested for Max.
+    @((Get-WgoUIAutomaticOptions) + @('chkClipboardHistory','chkEdgeTelemetryIsolated') | Sort-Object -Unique)
 }
 
 function Set-WgoUITheme {
@@ -748,19 +721,28 @@ function Complete-WgoSystemScan {
 function Set-WgoUIProfilePreset {
     param(
         [string[]]$EnabledNames,
-        [string]$ProfileLabel
+        [string]$ProfileLabel,
+        [switch]$IncludePrivacyOptIns
     )
     $c = $Global:WgoUI_Ctrl
     $hasNvidia = Test-WgoGpuVendorPresent -Vendor 'NVIDIA'
     $hasAmd = Test-WgoGpuVendorPresent -Vendor 'AMD'
+    $automatic = @(Get-WgoUIAutomaticOptions)
+    if ($IncludePrivacyOptIns) { $automatic += @('chkClipboardHistory', 'chkEdgeTelemetryIsolated') }
     $filtered = @($EnabledNames | Where-Object {
+        ($automatic -contains $_) -and $c[$_] -and $c[$_].IsEnabled -and
         (-not ($Global:WgoUI_NvidiaOnlyCheckboxNames -contains $_) -or $hasNvidia) -and
         (-not ($Global:WgoUI_AmdOnlyCheckboxNames -contains $_) -or $hasAmd) -and
-        -not ($Global:WgoUI_OptInCheckboxNames -contains $_) -and
+        (-not ($Global:WgoUI_OptInCheckboxNames -contains $_) -or
+            ($IncludePrivacyOptIns -and $_ -in @('chkClipboardHistory', 'chkEdgeTelemetryIsolated'))) -and
         -not (Test-WgoUISkipOption $_)
     })
     foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
         if ($c[$n]) { $c[$n].IsChecked = ($filtered -contains $n) }
+    }
+    # A previously selected dangerous action must not survive a safe preset.
+    foreach ($n in @($Global:WgoUI_RiskyCheckboxNames) + @('chkDisableXboxServices')) {
+        if ($c[$n]) { $c[$n].IsChecked = $false }
     }
     Resolve-WgoUIConflicts
     $c['chkSelectAll'].IsChecked = $false
@@ -1099,10 +1081,12 @@ function Initialize-WgoUI {
 
     $c['chkSelectAll'].Add_Click({
         $isChecked = [bool]$c['chkSelectAll'].IsChecked
-        foreach ($n in $Global:WgoUI_OptimizationCheckboxNames) {
-            if (-not $c[$n]) { continue }
-            if ($isChecked -and (($Global:WgoUI_OptInCheckboxNames -contains $n) -or (Test-WgoUISkipOption $n))) { $c[$n].IsChecked = $false } else { $c[$n].IsChecked = $isChecked }
+        if ($isChecked) {
+            Set-WgoUIProfilePreset -EnabledNames (Get-WgoUIAutomaticOptions) -ProfileLabel (T 'ChkSelectAll')
+        } else {
+            Set-WgoUIProfilePreset -EnabledNames @() -ProfileLabel (T 'ChkSelectAll')
         }
+        $c['chkSelectAll'].IsChecked = $isChecked
         Resolve-WgoUIConflicts
     })
     $c['btnRescan'].Add_Click({ Invoke-WgoSystemScan })
@@ -1126,9 +1110,7 @@ function Initialize-WgoUI {
         Set-WgoUIProfilePreset -EnabledNames $Global:WgoUI_Profiles.Esports -ProfileLabel (T 'BtnProfileEsports')
     })
     $c['btnProfileMax'].Add_Click({
-        Set-WgoUIProfilePreset -EnabledNames $Global:WgoUI_OptimizationCheckboxNames -ProfileLabel (T 'BtnProfileMax')
-        if ($c['chkKeyboardFast']) { $c['chkKeyboardFast'].IsChecked = $true }
-        if ($c['chkClipboardHistory']) { $c['chkClipboardHistory'].IsChecked = $true }
+        Set-WgoUIProfilePreset -EnabledNames (Get-WgoUIMaximumPreset) -ProfileLabel (T 'BtnProfileMax') -IncludePrivacyOptIns
     })
 
     # Create Restore Point
@@ -1244,7 +1226,11 @@ function Initialize-WgoUI {
 
         $anyRisky = $doRiskyUAC -or $doRiskySmartScreen -or $doRiskyDefenderRT -or $doRiskyWinUpdateSvc -or $doRiskyBits -or
                     $doRiskyDisableFirewall -or $doRiskyDisableDEP -or $doRiskyNvidiaMaxPerf
-        if ($anyRisky -and -not $doDryRun) {
+        $automatic = @(Get-WgoUIMaximumPreset)
+        $manualSelected = @($Global:WgoUI_OptimizationCheckboxNames | Where-Object {
+            $c[$_] -and $c[$_].IsChecked -and $_ -notin $automatic
+        }).Count -gt 0
+        if (($anyRisky -or $manualSelected) -and -not $doDryRun) {
             if (-not (Show-WgoConfirm -Message (T 'LogRiskyConfirm') -Title "WGO")) {
                 $c['btnRunSelected'].IsEnabled = $true
                 return
@@ -1385,6 +1371,7 @@ function Initialize-WgoUI {
                         -ClearEventLogs $doClearEventLogs -DeleteMinidump $doDeleteMinidump -ClearStoreCache $doClearStoreCache `
                         -DryRun $true
                 } else {
+                    $memoryBefore = Get-WgoMemorySnapshot
                     New-WgoRestorePoint | Out-Null
                     if ($doBloat)    { Remove-WgoBloatware }
                     if ($doSearch)   { Set-WgoLocalSearch }
@@ -1439,6 +1426,12 @@ function Initialize-WgoUI {
                         -AutoStandbyClean $doAutoStandbyClean `
                         -ClearEventLogs $doClearEventLogs -DeleteMinidump $doDeleteMinidump -ClearStoreCache $doClearStoreCache `
                         -DryRun $false
+                }
+                if (-not $doDryRun) {
+                    $memoryAfter = Get-WgoMemorySnapshot
+                    if ($memoryBefore -and $memoryAfter) {
+                        Write-Log (T 'LogMemorySnapshot' $memoryBefore.UsedMB $memoryAfter.UsedMB $memoryAfter.AvailableMB) "INFO"
+                    }
                 }
                 Write-Log (T 'LogOptDone') "OK"
             } catch {
@@ -1533,7 +1526,9 @@ function Initialize-WgoUI {
             if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
                 $profile = Get-Content -Path $dlg.FileName -Raw | ConvertFrom-Json
                 foreach ($prop in $profile.PSObject.Properties) {
-                    if ($c[$prop.Name]) { $c[$prop.Name].IsChecked = [bool]$prop.Value }
+                    # Ignore unknown controls and non-boolean JSON values.
+                    if ($prop.Name -in (@($Global:WgoUI_OptimizationCheckboxNames) + @('chkDryRun')) -and
+                        $prop.Value -is [bool] -and $c[$prop.Name]) { $c[$prop.Name].IsChecked = $prop.Value }
                 }
                 Resolve-WgoUIConflicts
                 Write-Log (T 'LogImportOk' $dlg.FileName) "OK"
@@ -1815,6 +1810,7 @@ function Initialize-WgoUI {
 
     # Initial UI state
     Update-WgoUILanguage -Code $Global:CurrentLangCode
+    Set-WgoUIProfilePreset -EnabledNames $Global:WgoUI_Profiles.Basic -ProfileLabel (T 'BtnProfileBasic')
     Resolve-WgoUIConflicts
     Write-Log $global:Lang[$Global:CurrentLangCode].MsgReady "INFO"
     $window.Add_ContentRendered({

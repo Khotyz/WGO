@@ -136,6 +136,8 @@ $Global:WgoCurrentTheme = "Dark"
 
 # Functions shared with background-task runspaces (see Start-WgoBackgroundTask)
 $Global:WgoSharedFunctionNames = @(
+    # Reviewed policy helper and memory metric must exist in worker runspaces.
+    'Invoke-WgoOptionalPrivacyPolicy', 'Get-WgoMemorySnapshot',
     'Write-Log', 'T', 'Show-WgoFatalError',
     'New-WgoRestorePoint', 'Remove-WgoBloatware', 'Test-WgoProtectedPackage',
     'Test-WgoBloatwareMatch', 'Test-WgoUserInstalledPackage', 'Get-WgoOsInstallDate', 'Get-WgoProvisionedPackageNames',
@@ -210,9 +212,11 @@ try {
     if ($ScheduledProfile) {
         $logDir = Join-Path $env:ProgramData 'WGO'
         if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
-        $diskIsSsd = Test-WgoSystemDriveIsSsd
-        Set-WgoExtraTweaks2 -CacheClean $true -FastShutdown $true -PrefetchSSD $diskIsSsd
-        Set-WgoMoreOptimizations -TempCleanup $true -DiskOptimize $true
+        # SYSTEM has no interactive user's HKCU. Apply only the machine-wide
+        # Basic subset; never purge caches, disable Prefetch or delete files.
+        Set-WgoPrivacyPolicies
+        Invoke-WgoOptionalPrivacyPolicy -Item InputTelemetry
+        Set-WgoAdvancedTweaks -EdgeWidgets $true
         $lines = @()
         $line = $null
         while ($Global:WgoLogQueue.TryDequeue([ref]$line)) { $lines += $line }

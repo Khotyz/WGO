@@ -319,52 +319,230 @@ function Set-WgoVisualEffects {
 
 function Set-WgoPrivacyPolicies {
     Write-Log (T 'LogPrivacyStart') "INFO"
-    try {
-        $paths = @{
-            DataCollection = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
-            AppCompat      = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
-            WER            = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting"
-            SQMClient      = "HKLM:\SOFTWARE\Policies\Microsoft\SQMClient\Windows"
-            Location       = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors"
-            ActivityFeed   = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        }
-        foreach ($p in $paths.Values) {
-            if (-not (Test-Path $p)) { New-Item -Path $p -Force | Out-Null }
-        }
-        New-ItemProperty -Path $paths.DataCollection -Name "AllowTelemetry" -Value 0 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.DataCollection -Name "LimitDiagnosticDataConfigurationSet" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.DataCollection -Name "DisableOneSettingsDownloads" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.DataCollection -Name "DoNotShowFeedbackNotifications" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.DataCollection -Name "NumberOfSIUFInPeriod" -Value 0 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.AppCompat -Name "AITEnable" -Value 0 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.AppCompat -Name "DisableInventory" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.AppCompat -Name "DisablePCA" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.WER -Name "Disabled" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.WER -Name "DoReport" -Value 0 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.SQMClient -Name "CEIPEnable" -Value 0 -PropertyType DWord -Force | Out-Null
-        $ceipTasks = @(
-            "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator",
-            "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip",
-            "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser",
-            "\Microsoft\Windows\Application Experience\ProgramDataUpdater",
-            "\Microsoft\Windows\Autochk\Proxy",
-            "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector"
-        )
-        foreach ($task in $ceipTasks) {
-            try { Disable-ScheduledTask -TaskPath ((Split-Path $task) + '\') -TaskName (Split-Path $task -Leaf) -ErrorAction Ignore | Out-Null } catch {}
-        }
-        New-ItemProperty -Path $paths.Location -Name "DisableLocation" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.Location -Name "DisableLocationScripting" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.Location -Name "DisableSensors" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.Location -Name "DisableWindowsLocationProvider" -Value 1 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.ActivityFeed -Name "EnableActivityFeed" -Value 0 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.ActivityFeed -Name "PublishUserActivities" -Value 0 -PropertyType DWord -Force | Out-Null
-        New-ItemProperty -Path $paths.ActivityFeed -Name "UploadUserActivities" -Value 0 -PropertyType DWord -Force | Out-Null
-        Write-Log (T 'LogPrivacyOk') "OK"
-    } catch {
-        Write-Log (T 'LogPrivacyError' $_.Exception.Message) "ERROR"
+    # Required diagnostics stay enabled. Do not disable WER, compatibility,
+    # location/sensors, OneSettings, security, update services, or their tasks.
+    foreach ($item in @('RequiredDiagnostics','ActivityFeed','PublishActivities','UploadActivities',
+        'DiagnosticDeviceName','FeedbackNotifications')) {
+        Invoke-WgoOptionalPrivacyPolicy -Item $item
     }
 }
+
+# ============================================================================
+# REVIEWED PRIVACY: documented DWORDs with per-value baseline and rollback.
+# Existing UI controls own these policies; no new profiles or controls.
+# Rollback: Invoke-WgoOptionalPrivacyPolicy -Item TailoredExp -Restore
+#           Invoke-WgoOptionalPrivacyPolicy -Item InputTelemetry -Restore
+# Run as the SAME user as application (HKCU); see docs/telemetry-review.md.
+# ============================================================================
+function Invoke-WgoOptionalPrivacyPolicy {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('TailoredExp', 'InputTelemetry', 'RequiredDiagnostics', 'ActivityFeed',
+            'PublishActivities', 'UploadActivities', 'AdvertisingId', 'EdgeStartup',
+            'EdgeBackground', 'Widgets', 'NewsFeeds', 'ClipboardHistory', 'ClipboardSync',
+            'EdgePersonalization', 'EdgeExperiments', 'EdgeFeedback', 'EdgeSuggestions', 'BatteryIndexing',
+            'DiagnosticDeviceName', 'FeedbackNotifications')][string]$Item,
+        [switch]$Restore,
+        [bool]$DryRun = $false
+    )
+
+    # These are Windows policy paths, not PolicyManager/CSP cache values.
+    # https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience#allowtailoredexperienceswithdiagnosticdata
+    # https://learn.microsoft.com/windows/client-management/mdm/policy-csp-textinput#allowlinguisticdatacollection
+    $policy = switch ($Item) {
+        'TailoredExp' { @{
+            Path = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
+            Name = 'DisableTailoredExperiencesWithDiagnosticData'; Value = 1
+            Backup = 'HKCU:\SOFTWARE\WGO\OptionalPrivacyRollback'; MinBuild = 15063
+        } }
+        'InputTelemetry' { @{
+            Path = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput'
+            Name = 'AllowLinguisticDataCollection'; Value = 0
+            Backup = 'HKLM:\SOFTWARE\WGO\OptionalPrivacyRollback'; MinBuild = 14393
+        } }
+        'RequiredDiagnostics' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection'
+            Name = 'AllowTelemetry'; Value = 1; MinBuild = 10240
+        } }
+        # The CSP name differs from the documented ADMX registry value name.
+        # https://learn.microsoft.com/windows/client-management/mdm/policy-csp-system#allowdevicenameindiagnosticdata
+        # https://learn.microsoft.com/troubleshoot/windows-server/installing-updates-features-roles/wubr-troubleshooting-device-config-using-script
+        'DiagnosticDeviceName' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection'
+            Name = 'AllowDeviceNameInTelemetry'; Value = 0; MinBuild = 17763
+        } }
+        # Suppress automatic questions, not Feedback Hub or its services.
+        # https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience#donotshowfeedbacknotifications
+        'FeedbackNotifications' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection'
+            Name = 'DoNotShowFeedbackNotifications'; Value = 1; MinBuild = 14393
+        } }
+        'ActivityFeed' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+            Name = 'EnableActivityFeed'; Value = 0; MinBuild = 16299
+        } }
+        'PublishActivities' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+            Name = 'PublishUserActivities'; Value = 0; MinBuild = 16299
+        } }
+        'UploadActivities' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+            Name = 'UploadUserActivities'; Value = 0; MinBuild = 16299
+        } }
+        'AdvertisingId' { @{
+            Path = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo'
+            Name = 'Enabled'; Value = 0; MinBuild = 10240; AnyEdition = $true
+            Backup = 'HKCU:\SOFTWARE\WGO\OptionalPrivacyRollback'
+        } }
+        'EdgeStartup' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+            Name = 'StartupBoostEnabled'; Value = 0; MinBuild = 10240; AnyEdition = $true
+        } }
+        'EdgeBackground' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+            Name = 'BackgroundModeEnabled'; Value = 0; MinBuild = 10240; AnyEdition = $true
+        } }
+        'Widgets' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Dsh'
+            Name = 'AllowNewsAndInterests'; Value = 0; MinBuild = 22000
+        } }
+        'NewsFeeds' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds'
+            Name = 'EnableFeeds'; Value = 0; MinBuild = 19043; MaxBuild = 21999
+        } }
+        'BatteryIndexing' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
+            Name = 'PreventIndexingOnBattery'; Value = 1; MinBuild = 10240
+        } }
+        'ClipboardHistory' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+            Name = 'AllowClipboardHistory'; Value = 0; MinBuild = 17763
+        } }
+        'ClipboardSync' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+            Name = 'AllowCrossDeviceClipboard'; Value = 0; MinBuild = 17763
+        } }
+        'EdgePersonalization' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+            Name = 'PersonalizationReportingEnabled'; Value = 0; MinBuild = 10240; AnyEdition = $true
+        } }
+        'EdgeExperiments' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+            Name = 'ExperimentationAndConfigurationServiceControl'; Value = 1; MinBuild = 10240; AnyEdition = $true
+        } }
+        'EdgeFeedback' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+            Name = 'UserFeedbackAllowed'; Value = 0; MinBuild = 10240; AnyEdition = $true
+        } }
+        'EdgeSuggestions' { @{
+            Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+            Name = 'SearchSuggestEnabled'; Value = 0; MinBuild = 10240; AnyEdition = $true
+        } }
+    }
+
+    if (-not $policy.Backup) { $policy.Backup = 'HKLM:\SOFTWARE\WGO\OptionalPrivacyRollback' }
+
+    try {
+        # Never guess Home/unknown edition support. Rollback remains available
+        # after an OS/edition change; it only uses an existing saved baseline.
+        if (-not $Restore) {
+            $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
+            $edition = (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name EditionID -ErrorAction Stop).EditionID
+            if ([int]$os.ProductType -ne 1 -or [int]$os.BuildNumber -lt $policy.MinBuild -or
+                ($policy.MaxBuild -and [int]$os.BuildNumber -gt $policy.MaxBuild) -or
+                (-not $policy.AnyEdition -and $edition -notin @('Professional', 'ProfessionalN', 'Enterprise', 'EnterpriseN', 'Education', 'EducationN'))) {
+                Write-Log (T 'LogOptionalPrivacyPending' $Item $edition $os.BuildNumber) 'WARN'
+                return
+            }
+        }
+        $action = if ($Restore) { T 'PrivacyActionRestore' } else { T 'PrivacyActionSet' $policy.Value }
+        if ($DryRun) {
+            Write-Log (T 'LogOptionalPrivacyDryRun' $Item $action $policy.Path $policy.Name) 'INFO'
+            return
+        }
+        if (-not $PSCmdlet.ShouldProcess("$($policy.Path)\$($policy.Name)", $action)) { return }
+        Write-Log (T 'LogOptionalPrivacyOverride' $Item) 'WARN'
+
+        $backupKey = $null
+        if (Test-Path -LiteralPath $policy.Backup -ErrorAction Stop) {
+            $backupKey = Get-Item -LiteralPath $policy.Backup -ErrorAction Stop
+        }
+        $saved = $null
+        if ($backupKey -and $backupKey.GetValueNames() -contains $Item) {
+            $saved = $backupKey.GetValue($Item) | ConvertFrom-Json -ErrorAction Stop
+            # Paths are never loaded from the backup. Only DWORD baselines are
+            # accepted; corrupt/incomplete backups fail closed and are retained.
+            if ($saved.Version -ne 1 -or $saved.Exists -isnot [bool] -or
+                $saved.Value -isnot [ValueType] -or $saved.Value -is [bool] -or
+                [double]$saved.Value -ne [int]$saved.Value) {
+                throw (T 'PrivacyInvalidBackup' $Item)
+            }
+        }
+        if ($Restore -and -not $saved) { return }
+
+        $key = $null
+        if (Test-Path -LiteralPath $policy.Path -ErrorAction Stop) {
+            $key = Get-Item -LiteralPath $policy.Path -ErrorAction Stop
+        }
+        $exists = $null -ne $key -and $key.GetValueNames() -contains $policy.Name
+        $current = 0
+        if ($exists) {
+            if ($key.GetValueKind($policy.Name) -ne [Microsoft.Win32.RegistryValueKind]::DWord) {
+                throw (T 'PrivacyUnexpectedType')
+            }
+            $current = [int]$key.GetValue($policy.Name)
+        }
+
+        if ($Restore) {
+            # Do not overwrite a third-party value. A value may be missing
+            # after older restore tools or manual removal.
+            if ($exists -and $current -ne $policy.Value -and
+                (-not $saved.Exists -or $current -ne $saved.Value)) {
+                throw (T 'PrivacyExternalChange')
+            }
+            if ($saved.Exists) {
+                if (-not $key) { New-Item -Path $policy.Path -Force -ErrorAction Stop | Out-Null }
+                if (-not $exists -or $current -ne $saved.Value) {
+                    New-ItemProperty -LiteralPath $policy.Path -Name $policy.Name -Value ([int]$saved.Value) -PropertyType DWord -Force -ErrorAction Stop | Out-Null
+                }
+                $verify = Get-Item -LiteralPath $policy.Path -ErrorAction Stop
+                if ($verify.GetValueKind($policy.Name) -ne [Microsoft.Win32.RegistryValueKind]::DWord -or
+                    [int]$verify.GetValue($policy.Name) -ne [int]$saved.Value) { throw (T 'PrivacyRollbackReadback') }
+            } elseif ($exists) {
+                Remove-ItemProperty -LiteralPath $policy.Path -Name $policy.Name -ErrorAction Stop
+            }
+            if (-not $saved.Exists -and (Test-Path -LiteralPath $policy.Path -ErrorAction Stop)) {
+                if ((Get-Item -LiteralPath $policy.Path -ErrorAction Stop).GetValueNames() -contains $policy.Name) { throw (T 'PrivacyRollbackDelete') }
+            }
+            # Never remove a whole Windows key, unrelated values, or backup keys.
+            Remove-ItemProperty -LiteralPath $policy.Backup -Name $Item -ErrorAction Stop
+            Write-Log (T 'LogOptionalPrivacyRestored' $Item) 'OK'
+            return
+        }
+
+        if (-not $saved) {
+            $record = @{ Version = 1; Exists = [bool]$exists; Value = $current } | ConvertTo-Json -Compress
+            if (-not $backupKey) { New-Item -Path $policy.Backup -Force -ErrorAction Stop | Out-Null }
+            # One serialized value per item: save BEFORE touching the target.
+            # -Force is deliberately absent: never replace an original baseline.
+            New-ItemProperty -LiteralPath $policy.Backup -Name $Item -Value $record -PropertyType String -ErrorAction Stop | Out-Null
+            if ((Get-Item -LiteralPath $policy.Backup -ErrorAction Stop).GetValue($Item) -cne $record) { throw (T 'PrivacyBackupReadback') }
+        }
+        if (-not $exists -or $current -ne $policy.Value) {
+            if (-not $key) { New-Item -Path $policy.Path -Force -ErrorAction Stop | Out-Null }
+            New-ItemProperty -LiteralPath $policy.Path -Name $policy.Name -Value $policy.Value -PropertyType DWord -Force -ErrorAction Stop | Out-Null
+        }
+        $verify = Get-Item -LiteralPath $policy.Path -ErrorAction Stop
+        if ($verify.GetValueKind($policy.Name) -ne [Microsoft.Win32.RegistryValueKind]::DWord -or
+            [int]$verify.GetValue($policy.Name) -ne $policy.Value) { throw (T 'PrivacyPolicyReadback') }
+        Write-Log (T 'LogOptionalPrivacyApplied' $Item) 'OK'
+    } catch {
+        Write-Log (T 'LogOptionalPrivacyError' $Item $_.Exception.Message) 'ERROR'
+        throw
+    }
+}
+# ==================== END REVIEWED PRIVACY HELPER ============================
 
 function Set-WgoExtraPrivacy {
     param(
@@ -377,43 +555,9 @@ function Set-WgoExtraPrivacy {
     )
     if (-not ($AdvertisingId -or $TailoredExp -or $DiagTrackSvc -or $CopilotBlock -or $InputTelemetry -or $ClipboardHistory)) { return }
     Write-Log (T 'LogExtraStart') "INFO"
-    if ($AdvertisingId) {
-        try {
-            $advKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo"
-            $advKeyM = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo"
-            if (-not (Test-Path $advKey))  { New-Item -Path $advKey -Force | Out-Null }
-            if (-not (Test-Path $advKeyM)) { New-Item -Path $advKeyM -Force | Out-Null }
-            New-ItemProperty -Path $advKey -Name "Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $advKeyM -Name "DisabledByGroupPolicy" -Value 1 -PropertyType DWord -Force | Out-Null
-            Write-Log (T 'LogExtraAdvOk') "OK"
-        } catch {
-            Write-Log (T 'LogExtraError' "AdvertisingId" $_.Exception.Message) "ERROR"
-        }
-    }
-    if ($TailoredExp) {
-        try {
-            $cdmKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
-            $cloudKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
-            if (-not (Test-Path $cdmKey))   { New-Item -Path $cdmKey -Force | Out-Null }
-            if (-not (Test-Path $cloudKey)) { New-Item -Path $cloudKey -Force | Out-Null }
-            $cdmProps = @(
-                "SubscribedContent-338388Enabled", "SubscribedContent-338389Enabled",
-                "SubscribedContent-353698Enabled", "SystemPaneSuggestionsEnabled",
-                "SoftLandingEnabled", "ContentDeliveryAllowed", "OemPreInstalledAppsEnabled",
-                "PreInstalledAppsEnabled", "PreInstalledAppsEverEnabled", "SilentInstalledAppsEnabled"
-            )
-            foreach ($prop in $cdmProps) {
-                New-ItemProperty -Path $cdmKey -Name $prop -Value 0 -PropertyType DWord -Force | Out-Null
-            }
-            New-ItemProperty -Path $cloudKey -Name "DisableWindowsConsumerFeatures" -Value 1 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $cloudKey -Name "DisableTailoredExperiencesWithDiagnosticData" -Value 1 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $cloudKey -Name "DisableSoftLanding" -Value 1 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $cloudKey -Name "DisableWindowsSpotlightFeatures" -Value 1 -PropertyType DWord -Force | Out-Null
-            Write-Log (T 'LogExtraTailoredOk') "OK"
-        } catch {
-            Write-Log (T 'LogExtraError' "TailoredExp" $_.Exception.Message) "ERROR"
-        }
-    }
+    if ($AdvertisingId) { Invoke-WgoOptionalPrivacyPolicy -Item AdvertisingId }
+    if ($TailoredExp) { Invoke-WgoOptionalPrivacyPolicy -Item TailoredExp }
+    if ($InputTelemetry) { Invoke-WgoOptionalPrivacyPolicy -Item InputTelemetry }
     if ($DiagTrackSvc) {
         try {
             $dcKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
@@ -451,30 +595,9 @@ function Set-WgoExtraPrivacy {
             Write-Log (T 'LogExtraError' "CopilotBlock" $_.Exception.Message) "ERROR"
         }
     }
-    if ($InputTelemetry) {
-        try {
-            $inputKey  = "HKCU:\SOFTWARE\Microsoft\InputPersonalization"
-            $trainKey  = "HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore"
-            if (-not (Test-Path $inputKey)) { New-Item -Path $inputKey -Force | Out-Null }
-            if (-not (Test-Path $trainKey)) { New-Item -Path $trainKey -Force | Out-Null }
-            New-ItemProperty -Path $inputKey -Name "RestrictImplicitInkCollection" -Value 1 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $inputKey -Name "RestrictImplicitTextCollection" -Value 1 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $trainKey -Name "HarvestContacts" -Value 0 -PropertyType DWord -Force | Out-Null
-            Write-Log (T 'LogExtraInputOk') "OK"
-        } catch {
-            Write-Log (T 'LogExtraError' "InputTelemetry" $_.Exception.Message) "ERROR"
-        }
-    }
     if ($ClipboardHistory) {
-        try {
-            $clipKey = "HKCU:\Software\Microsoft\Clipboard"
-            if (-not (Test-Path $clipKey)) { New-Item -Path $clipKey -Force | Out-Null }
-            New-ItemProperty -Path $clipKey -Name "EnableClipboardHistory" -Value 0 -PropertyType DWord -Force | Out-Null
-            New-ItemProperty -Path $clipKey -Name "CloudClipboardAutomaticUpload" -Value 0 -PropertyType DWord -Force | Out-Null
-            Write-Log (T 'LogClipboardOk') "OK"
-        } catch {
-            Write-Log (T 'LogExtraError' "ClipboardHistory" $_.Exception.Message) "ERROR"
-        }
+        Invoke-WgoOptionalPrivacyPolicy -Item ClipboardHistory
+        Invoke-WgoOptionalPrivacyPolicy -Item ClipboardSync
     }
     Write-Log (T 'LogExtraDone') "OK"
 }
@@ -619,32 +742,10 @@ function Set-WgoEdgeTelemetryIsolation {
     param([bool]$EdgeTelemetryOnly = $false)
     if (-not $EdgeTelemetryOnly) { return }
     Write-Log (T 'LogEdgeIsolationStart') "INFO"
-    try {
-        $edgeKey = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
-        if (-not (Test-Path $edgeKey)) { New-Item -Path $edgeKey -Force | Out-Null }
-        Remove-ItemProperty -Path $edgeKey -Name "ConfigureTelemetryForDesktop" -Force -ErrorAction Ignore
-        $telemetryPolicies = [ordered]@{
-            MetricsReportingEnabled                       = 0
-            SendSiteInfoToImproveServices                 = 0
-            PersonalizationReportingEnabled               = 0
-            ExperimentationAndConfigurationServiceControl = 2
-            UserFeedbackAllowed                           = 0
-            SearchSuggestEnabled                          = 0
-            EdgeFollowEnabled                             = 0
-            WebWidgetAllowed                              = 0
-        }
-        foreach ($policyName in $telemetryPolicies.Keys) {
-            New-ItemProperty -Path $edgeKey -Name $policyName -Value $telemetryPolicies[$policyName] -PropertyType DWord -Force | Out-Null
-        }
-        New-ItemProperty -Path $edgeKey -Name "PasswordManagerEnabled" -Value 1 -PropertyType DWord -Force | Out-Null
-        Remove-ItemProperty -Path $edgeKey -Name "DisableSavedPasswords" -Force -ErrorAction Ignore
-        $passwordManager = Get-ItemProperty -Path $edgeKey -Name "PasswordManagerEnabled" -ErrorAction Ignore
-        if (-not $passwordManager -or [int]$passwordManager.PasswordManagerEnabled -ne 1) {
-            Write-Log (T 'LogEdgePasswordManagerWarn') "WARN"
-        }
-        Write-Log (T 'LogEdgeIsolationOk') "OK"
-    } catch {
-        Write-Log (T 'LogEdgeIsolationError' $_.Exception.Message) "ERROR"
+    # Keep compatibility configuration downloads; value 2 enables experiments.
+    # Do not change password-manager, SmartScreen, update or account policies.
+    foreach ($item in @('EdgePersonalization','EdgeExperiments','EdgeFeedback','EdgeSuggestions')) {
+        Invoke-WgoOptionalPrivacyPolicy -Item $item
     }
 }
 
@@ -736,35 +837,13 @@ function Set-WgoAdvancedTweaks {
     if (-not ($EdgeWidgets -or $DeliveryOpt -or $AppsBackground -or $NetworkLatency)) { return }
     Write-Log (T 'LogAdvStart') "INFO"
     if ($EdgeWidgets) {
-        try {
-            $edgeKey = "HKLM:\SOFTWARE\Policies\Microsoft\Edge"
-            $advKey  = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-            if (-not (Test-Path $edgeKey)) { New-Item -Path $edgeKey -Force | Out-Null }
-            if (-not (Test-Path $advKey))  { New-Item -Path $advKey -Force | Out-Null }
-
-            $applied = 0
-            foreach ($prop in @(
-                @{ Path = $edgeKey; Name = "StartupBoostEnabled";   RegPath = "HKLM\SOFTWARE\Policies\Microsoft\Edge" },
-                @{ Path = $edgeKey; Name = "BackgroundModeEnabled"; RegPath = "HKLM\SOFTWARE\Policies\Microsoft\Edge" },
-                @{ Path = $advKey;  Name = "TaskbarDa";             RegPath = "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" }
-            )) {
-                try {
-                    New-ItemProperty -Path $prop.Path -Name $prop.Name -Value 0 -PropertyType DWord -Force -ErrorAction Stop | Out-Null
-                    $applied++
-                } catch {
-                    try {
-                        & reg.exe add $prop.RegPath /v $prop.Name /t REG_DWORD /d 0 /f *>$null
-                        if ($LASTEXITCODE -eq 0) { $applied++ }
-                    } catch { }
-                }
-            }
-            if ($applied -gt 0) {
-                Write-Log (T 'LogAdvEdgeWidgetsOk') "OK"
-            } else {
-                Write-Log (T 'LogAdvError' "EdgeWidgets" (T 'LogAdvEdgeWidgetsAllFailed')) "WARN"
-            }
-        } catch {
-            Write-Log (T 'LogAdvError' "EdgeWidgets" $_.Exception.Message) "ERROR"
+        Invoke-WgoOptionalPrivacyPolicy -Item EdgeStartup
+        Invoke-WgoOptionalPrivacyPolicy -Item EdgeBackground
+        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
+        if ([int]$os.BuildNumber -ge 22000) {
+            Invoke-WgoOptionalPrivacyPolicy -Item Widgets
+        } elseif ([int]$os.BuildNumber -ge 19043) {
+            Invoke-WgoOptionalPrivacyPolicy -Item NewsFeeds
         }
     }
     if ($DeliveryOpt) {
@@ -892,6 +971,20 @@ function Get-WgoGpuVendor {
     return $vendor
 }
 
+function Get-WgoMemorySnapshot {
+    try {
+        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
+        $total = [double]$os.TotalVisibleMemorySize
+        $available = [double]$os.FreePhysicalMemory
+        if ($total -le 0 -or $available -lt 0 -or $available -gt $total) { return $null }
+        [pscustomobject]@{
+            TotalMB = [math]::Round($total / 1024, 0)
+            AvailableMB = [math]::Round($available / 1024, 0)
+            UsedMB = [math]::Round(($total - $available) / 1024, 0)
+        }
+    } catch { return $null }
+}
+
 function Get-WgoActiveSchemeGuid {
     # Safely extracts the active power scheme GUID; returns $null instead of
     # throwing "cannot index into a null array" when powercfg's output
@@ -936,12 +1029,6 @@ function Set-WgoMoreOptimizations {
                $LargeSystemCache -or $AutoStandbyClean -or $ClearEventLogs -or $DeleteMinidump -or $ClearStoreCache)) { return }
     Write-Log (T 'LogMoreStart') "INFO"
 
-    # Self-heal: an older WGO version could disable Game Bar entirely (screenshots + clips)
-    # via this policy while the user only intended to disable background auto-recording.
-    # Clean it up on every run regardless of which boxes are checked this time.
-    if (-not $DryRun) {
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -ErrorAction Ignore
-    }
     if ($DryRun) { Write-Log (T 'LogDryRunNote') "WARN" }
 
     if ($Hibernation) {
@@ -1399,7 +1486,6 @@ function Restore-WgoDefaults {
     Write-Log (T 'LogRestoreDefaultsStart' $Category) "INFO"
     try {
         $privacyKeys = @(
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting",
             "HKLM:\SOFTWARE\Policies\Microsoft\SQMClient",
@@ -1408,22 +1494,18 @@ function Restore-WgoDefaults {
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy",
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy"
         )
         $networkKeys = @(
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate",
-            "HKLM:\SOFTWARE\Policies\Microsoft\Edge",
             "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization",
             "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive",
             "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching"
         )
-        $visualKeys = @(
-            "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        )
+        # System contains tracked activity policies; never remove the whole key.
+        $visualKeys = @()
         if ($Category -in @('All','Privacy')) {
             foreach ($k in $privacyKeys) { if (Test-Path $k) { Remove-Item -Path $k -Recurse -Force -ErrorAction Ignore } }
-            Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\Explorer" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Microsoft\InputPersonalization" -Recurse -Force -ErrorAction Ignore
@@ -1431,12 +1513,9 @@ function Restore-WgoDefaults {
             Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\common" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\Software\Policies\Microsoft\office\16.0\osm" -Recurse -Force -ErrorAction Ignore
             Remove-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Recurse -Force -ErrorAction Ignore
-            Remove-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Recurse -Force -ErrorAction Ignore
             foreach ($paintValue in @("DisableCocreator", "DisableGenerativeFill", "DisableImageCreator")) {
                 Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name $paintValue -Force -ErrorAction Ignore
             }
-            Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "EnableClipboardHistory" -Force -ErrorAction Ignore
-            Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "CloudClipboardAutomaticUpload" -Force -ErrorAction Ignore
             Remove-Item -Path "HKLM:\SOFTWARE\Classes\PhotoViewer.FileAssoc.Tiff" -Recurse -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKLM:\SOFTWARE\RegisteredApplications" -Name "Windows Photo Viewer" -Force -ErrorAction Ignore
             $photoAssocKey = "HKLM:\SOFTWARE\Microsoft\Windows Photo Viewer\Capabilities\FileAssociations"
@@ -1451,8 +1530,6 @@ function Restore-WgoDefaults {
             Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "ConfigureTelemetryForDesktop" -Force -ErrorAction Ignore
-            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "PasswordManagerEnabled" -Force -ErrorAction Ignore
-            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "DisableSavedPasswords" -Force -ErrorAction Ignore
             Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338388Enabled" -Force -ErrorAction Ignore
             try {
                 $pauseKey = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"
@@ -1484,7 +1561,7 @@ function Restore-WgoDefaults {
             foreach ($name in @("MaxCacheTtl","MaxNegativeCacheTtl")) {
                 Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name $name -Force -ErrorAction Ignore
             }
-            foreach ($name in @("PreventIndexingOnBattery","DisableRemovableDriveIndexing")) {
+            foreach ($name in @("DisableRemovableDriveIndexing")) {
                 Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name $name -Force -ErrorAction Ignore
             }
             try {
@@ -1596,6 +1673,24 @@ function Restore-WgoDefaults {
                 }
             }
         }
+        # Restore only tracked DWORDs with a saved baseline. Legacy untracked
+        # changes are not silently reset to guessed factory defaults.
+        if ($Category -in @('All', 'Privacy')) {
+            foreach ($item in @('TailoredExp','InputTelemetry','RequiredDiagnostics','ActivityFeed',
+                'PublishActivities','UploadActivities','AdvertisingId','Widgets','NewsFeeds','ClipboardHistory','ClipboardSync',
+                'DiagnosticDeviceName','FeedbackNotifications')) {
+                Invoke-WgoOptionalPrivacyPolicy -Item $item -Restore
+            }
+        }
+        if ($Category -in @('All', 'Network')) {
+            foreach ($item in @('EdgeStartup','EdgeBackground','EdgePersonalization','EdgeExperiments','EdgeFeedback','EdgeSuggestions')) {
+                Invoke-WgoOptionalPrivacyPolicy -Item $item -Restore
+            }
+        }
+        if ($Category -in @('All', 'Tuning')) {
+            Invoke-WgoOptionalPrivacyPolicy -Item BatteryIndexing -Restore
+        }
+        # END REVIEWED PRIVACY ROLLBACK
         Write-Log (T 'LogRestoreDefaultsOk') "OK"
     } catch {
         Write-Log (T 'LogRestoreDefaultsError' $_.Exception.Message) "ERROR"
@@ -2593,19 +2688,10 @@ function Set-WgoSystemTuning {
         }
     }
     if ($IndexerThrottle) {
-        try {
-            $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-            if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
-            $hasBattery = [bool](@(Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore |
-                Where-Object { $_ -and "$($_.Name) $($_.DeviceID)" -notmatch 'UPS' }).Count)
-            if ($hasBattery) {
-                New-ItemProperty -Path $path -Name "PreventIndexingOnBattery" -Value 1 -PropertyType DWord -Force | Out-Null
-            }
-            New-ItemProperty -Path $path -Name "DisableRemovableDriveIndexing" -Value 1 -PropertyType DWord -Force | Out-Null
-            if ($hasBattery) { Write-Log (T 'LogIndexerThrottleOk') "OK" } else { Write-Log (T 'LogIndexerThrottleNoBattery') "INFO" }
-        } catch {
-            Write-Log (T 'LogSystemTuningError' "Indexer" $_.Exception.Message) "ERROR"
-        }
+        $hasBattery = [bool](@(Get-CimInstance -ClassName Win32_Battery -ErrorAction Ignore |
+            Where-Object { $_ -and "$($_.Name) $($_.DeviceID)" -notmatch 'UPS' }).Count)
+        if ($hasBattery) { Invoke-WgoOptionalPrivacyPolicy -Item BatteryIndexing }
+        else { Write-Log (T 'LogIndexerThrottleNoBattery') "INFO" }
     }
     if ($KeyboardFast) {
         try {
@@ -2621,6 +2707,8 @@ function Set-WgoSystemTuning {
 }
 
 Export-ModuleMember -Function @(
+    # Reviewed policy helper and read-only whole-system memory snapshot.
+    'Invoke-WgoOptionalPrivacyPolicy', 'Get-WgoMemorySnapshot',
     'Set-WgoSystemTuning',
     'New-WgoRestorePoint', 'Remove-WgoBloatware', 'Test-WgoProtectedPackage',
     'Set-WgoLocalSearch', 'Set-WgoVisualEffects', 'Set-WgoPrivacyPolicies',

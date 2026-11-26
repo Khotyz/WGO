@@ -42,7 +42,7 @@ function Test-WgoGpuVendorPresent {
 
 function Get-WgoHardwareProfile {
     $p = [ordered]@{
-        OsCaption = ''; OsBuild = 0; IsWin11 = $false
+        OsCaption = ''; OsBuild = 0; IsWin11 = $false; ProductType = 0; EditionId = ''
         CpuName = ''; CpuVendor = 'Unknown'; Cores = 0; LogicalProcessors = 0
         RamGb = 0; Manufacturer = ''; Model = ''
         IsVirtualMachine = $false; IsLaptop = $false; HasBattery = $false
@@ -54,6 +54,8 @@ function Get-WgoHardwareProfile {
         $p.OsCaption = [string]$os.Caption
         $p.OsBuild   = [int]$os.BuildNumber
         $p.IsWin11   = ($p.OsBuild -ge 22000)
+        $p.ProductType = [int]$os.ProductType
+        $p.EditionId = [string](Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name EditionID -ErrorAction Stop).EditionID
     } catch { }
     try {
         $cpus = @(Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop)
@@ -243,14 +245,23 @@ function Get-WgoOptimizationStatus {
         @{ P = $advKey; N = 'TaskbarAnimations'; V = 0 },
         @{ P = 'HKCU:\Control Panel\Desktop'; N = 'MenuAnimation'; V = '0' },
         @{ P = 'HKCU:\Software\Microsoft\Windows\DWM'; N = 'EnableAeroPeek'; V = 0 }) }
-    $detectors['chkPrivacy'] = { Check-Reg @(
-        @{ P = $dcPolicy; N = 'AllowTelemetry'; V = 0 },
-        @{ P = $dcPolicy; N = 'LimitDiagnosticDataConfigurationSet'; V = 1 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat'; N = 'DisableInventory'; V = 1 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting'; N = 'Disabled'; V = 1 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\SQMClient\Windows'; N = 'CEIPEnable'; V = 0 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors'; N = 'DisableLocation'; V = 1 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; N = 'EnableActivityFeed'; V = 0 }) }
+    function Test-ReviewedPolicySupport([int]$MinBuild) {
+        return ($hw.ProductType -eq 1 -and $hw.OsBuild -ge $MinBuild -and
+            $hw.EditionId -in @('Professional','ProfessionalN','Enterprise','EnterpriseN','Education','EducationN'))
+    }
+    $detectors['chkPrivacy'] = {
+        if (-not (Test-ReviewedPolicySupport 16299)) { return (New-Status 'NotApplicable' 'PolicySupport') }
+        $checks = @(
+            @{ P = $dcPolicy; N = 'AllowTelemetry'; V = 1 },
+            @{ P = $dcPolicy; N = 'DoNotShowFeedbackNotifications'; V = 1 },
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; N = 'EnableActivityFeed'; V = 0 },
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; N = 'PublishUserActivities'; V = 0 },
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; N = 'UploadUserActivities'; V = 0 })
+        # Do not require a Windows 10 1809+ policy on older supported builds.
+        if (Test-ReviewedPolicySupport 17763) {
+            $checks += @{ P = $dcPolicy; N = 'AllowDeviceNameInTelemetry'; V = 0 }
+        }
+        Check-Reg $checks }
     $detectors['chkDrivers'] = { Check-Reg @(
         @{ P = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching'; N = 'SearchOrderConfig'; V = 0 },
         @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'; N = 'ExcludeWUDriversInQualityUpdate'; V = 1 }) }
@@ -263,14 +274,11 @@ function Get-WgoOptimizationStatus {
         return (New-Status 'Pending')
     }
     $detectors['chkAdvertisingId'] = { Check-Reg @(
-        @{ P = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo'; N = 'Enabled'; V = 0 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo'; N = 'DisabledByGroupPolicy'; V = 1 }) }
-    $detectors['chkTailoredExp'] = { Check-Reg @(
-        @{ P = $cdm; N = 'SubscribedContent-338388Enabled'; V = 0 },
-        @{ P = $cdm; N = 'SystemPaneSuggestionsEnabled'; V = 0 },
-        @{ P = $cdm; N = 'PreInstalledAppsEnabled'; V = 0 },
-        @{ P = $cdm; N = 'SilentInstalledAppsEnabled'; V = 0 },
-        @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'; N = 'DisableWindowsConsumerFeatures'; V = 1 }) }
+        @{ P = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo'; N = 'Enabled'; V = 0 }) }
+    $detectors['chkTailoredExp'] = {
+        if (-not (Test-ReviewedPolicySupport 15063)) { return (New-Status 'NotApplicable' 'PolicySupport') }
+        Check-Reg @(
+            @{ P = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'; N = 'DisableTailoredExperiencesWithDiagnosticData'; V = 1 }) }
     $detectors['chkDiagTrackSvc'] = {
         $reg = Check-Reg @(@{ P = $dcPolicy; N = 'AllowTelemetry'; V = 0 })
         $svc = Check-Services @('DiagTrack', 'dmwappushservice') @('Disabled')
@@ -281,13 +289,17 @@ function Get-WgoOptimizationStatus {
     $detectors['chkCopilotBlock'] = { Check-Reg @(
         @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot'; N = 'TurnOffWindowsCopilot'; V = 1 },
         @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'; N = 'DisableAIDataAnalysis'; V = 1 }) }
-    $detectors['chkInputTelemetry'] = { Check-Reg @(
-        @{ P = 'HKCU:\SOFTWARE\Microsoft\InputPersonalization'; N = 'RestrictImplicitInkCollection'; V = 1 },
-        @{ P = 'HKCU:\SOFTWARE\Microsoft\InputPersonalization'; N = 'RestrictImplicitTextCollection'; V = 1 },
-        @{ P = 'HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore'; N = 'HarvestContacts'; V = 0 }) }
+    $detectors['chkInputTelemetry'] = {
+        if (-not (Test-ReviewedPolicySupport 14393)) { return (New-Status 'NotApplicable' 'PolicySupport') }
+        Check-Reg @(
+            @{ P = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput'; N = 'AllowLinguisticDataCollection'; V = 0 }) }
     $detectors['chkEdgeWidgets'] = {
         $c = @(@{ P = $edgePolicy; N = 'StartupBoostEnabled'; V = 0 }, @{ P = $edgePolicy; N = 'BackgroundModeEnabled'; V = 0 })
-        if ($hw.IsWin11) { $c += @{ P = $advKey; N = 'TaskbarDa'; V = 0 } }
+        if ($hw.IsWin11 -and (Test-ReviewedPolicySupport 22000)) {
+            $c += @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Dsh'; N = 'AllowNewsAndInterests'; V = 0 }
+        } elseif (-not $hw.IsWin11 -and (Test-ReviewedPolicySupport 19043)) {
+            $c += @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds'; N = 'EnableFeeds'; V = 0 }
+        }
         Check-Reg $c }
     $detectors['chkDeliveryOpt'] = { Check-Reg @(@{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization'; N = 'DODownloadMode'; V = 0 }) }
     $detectors['chkAppsBackground'] = { Check-Reg @(
@@ -489,10 +501,10 @@ public static extern int NtQueryTimerResolution(out uint MinimumResolution, out 
     $detectors['chkMenuDelay'] = { Check-Reg @(@{ P = 'HKCU:\Control Panel\Desktop'; N = 'MenuShowDelay'; V = '0' }) }
     $detectors['chkDnsCacheSize'] = { Check-Reg @(@{ P = 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters'; N = 'MaxCacheTtl'; V = 86400 }) }
     $detectors['chkIndexerThrottle'] = {
+        if (-not (Test-ReviewedPolicySupport 10240)) { return (New-Status 'NotApplicable' 'PolicySupport') }
         if (-not $hw.HasBattery) { return (New-Status 'NotApplicable' 'NoBattery') }
         Check-Reg @(
-            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; N = 'PreventIndexingOnBattery'; V = 1 },
-            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; N = 'DisableRemovableDriveIndexing'; V = 1 }) }
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; N = 'PreventIndexingOnBattery'; V = 1 }) }
     $detectors['chkKeyboardFast'] = { Check-Reg @(@{ P = 'HKCU:\Control Panel\Keyboard'; N = 'KeyboardDelay'; V = '0' }) }
     $detectors['chkSteamBoost'] = {
         $reg = Check-Reg @(@{ P = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\steam.exe\PerfOptions'; N = 'CpuPriorityClass'; V = 3 })
@@ -543,9 +555,11 @@ public static extern int NtQueryTimerResolution(out uint MinimumResolution, out 
         }
         return (New-Status 'Pending' 'PauseExpired')
     }
-    $detectors['chkClipboardHistory'] = { Check-Reg @(
-        @{ P = 'HKCU:\Software\Microsoft\Clipboard'; N = 'EnableClipboardHistory'; V = 0 },
-        @{ P = 'HKCU:\Software\Microsoft\Clipboard'; N = 'CloudClipboardAutomaticUpload'; V = 0 }) }
+    $detectors['chkClipboardHistory'] = {
+        if (-not (Test-ReviewedPolicySupport 17763)) { return (New-Status 'NotApplicable' 'PolicySupport') }
+        Check-Reg @(
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; N = 'AllowClipboardHistory'; V = 0 },
+            @{ P = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; N = 'AllowCrossDeviceClipboard'; V = 0 }) }
     $detectors['chkPaintNoCopilot'] = { Check-Reg @(
         @{ P = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'; N = 'DisableCocreator'; V = 1 },
         @{ P = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'; N = 'DisableGenerativeFill'; V = 1 },
@@ -556,9 +570,10 @@ public static extern int NtQueryTimerResolution(out uint MinimumResolution, out 
     $detectors['chkClassicNotepad'] = { Check-Reg @(
         @{ P = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths\notepad.exe'; N = '(default)'; V = "$env:SystemRoot\System32\notepad.exe" }) }
     $detectors['chkEdgeTelemetryIsolated'] = { Check-Reg @(
-        @{ P = $edgePolicy; N = 'MetricsReportingEnabled'; V = 0 },
-        @{ P = $edgePolicy; N = 'SendSiteInfoToImproveServices'; V = 0 },
-        @{ P = $edgePolicy; N = 'PasswordManagerEnabled'; V = 1 }) }
+        @{ P = $edgePolicy; N = 'PersonalizationReportingEnabled'; V = 0 },
+        @{ P = $edgePolicy; N = 'ExperimentationAndConfigurationServiceControl'; V = 1 },
+        @{ P = $edgePolicy; N = 'UserFeedbackAllowed'; V = 0 },
+        @{ P = $edgePolicy; N = 'SearchSuggestEnabled'; V = 0 }) }
     $aiMachine = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
     $aiUser = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
     $cloudMachine = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'

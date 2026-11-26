@@ -513,7 +513,7 @@
                             <Button x:Name="btnRescan" Content="Re-scan system" Style="{StaticResource SecondaryButtonStyle}" Padding="14,6" Margin="0,0,14,0"/>
                             <CheckBox x:Name="chkSkipApplied" Content="Skip options already applied" IsChecked="True" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <CheckBox x:Name="chkSelectAll" Content="Select All / Deselect All" FontWeight="Bold" Margin="0,0,0,4" IsChecked="True"/>
+                        <CheckBox x:Name="chkSelectAll" Content="Select reviewed options / Deselect all" FontWeight="Bold" Margin="0,0,0,4" IsChecked="False"/>
                         <CheckBox x:Name="chkDryRun" Content="Dry Run (only log what would change, apply nothing)" Margin="0,0,0,10" IsChecked="False"/>
 
                         <GroupBox x:Name="grpProfiles" Header="Predefined Profiles">
@@ -534,7 +534,7 @@
                         </GroupBox>
 
                         <GroupBox x:Name="grpBloat" Header="Bloatware Removal">
-                            <CheckBox x:Name="chkBloat" Content="Remove bloatware / AI apps" IsChecked="True"/>
+                            <CheckBox x:Name="chkBloat" Content="Remove bloatware / AI apps" IsChecked="False"/>
                         </GroupBox>
 
                         <GroupBox x:Name="grpSearch" Header="Start Menu Search">
@@ -542,19 +542,19 @@
                         </GroupBox>
 
                         <GroupBox x:Name="grpVisual" Header="Visual Effects">
-                            <CheckBox x:Name="chkVisual" Content="Apply custom performance visual effects profile" IsChecked="True"/>
+                            <CheckBox x:Name="chkVisual" Content="Apply custom performance visual effects profile" IsChecked="False"/>
                         </GroupBox>
 
-                        <GroupBox x:Name="grpPrivacy" Header="Deep Privacy / Telemetry">
-                            <CheckBox x:Name="chkPrivacy" Content="Block telemetry / WER / CEIP / Activity Feed / Location" IsChecked="True"/>
+                        <GroupBox x:Name="grpPrivacy" Header="Privacy / Optional diagnostics">
+                            <CheckBox x:Name="chkPrivacy" Content="Keep required diagnostics only; disable activity history sharing" IsChecked="True"/>
                         </GroupBox>
 
                         <GroupBox x:Name="grpDrivers" Header="Windows Update Drivers">
-                            <CheckBox x:Name="chkDrivers" Content="Block automatic driver installation" IsChecked="True"/>
+                            <CheckBox x:Name="chkDrivers" Content="Block automatic driver installation" IsChecked="False"/>
                         </GroupBox>
 
                         <GroupBox x:Name="grpPagefile" Header="Virtual Memory (Pagefile)">
-                            <CheckBox x:Name="chkPagefile" Content="Set static pagefile size (RAM x 1.5)" IsChecked="True"/>
+                            <CheckBox x:Name="chkPagefile" Content="Set static pagefile size (RAM x 1.5)" IsChecked="False"/>
                         </GroupBox>
 
                         <GroupBox x:Name="grpExtraPrivacy" Header="Additional Telemetry Blocking">
@@ -563,16 +563,16 @@
                                     <CheckBox x:Name="chkAdvertisingId" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable advertising ID" IsChecked="True"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkTailoredExp" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable tailored experiences / suggestions" IsChecked="True"/>
+                                    <CheckBox x:Name="chkTailoredExp" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable tailored experiences based on diagnostic data" IsChecked="True"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkDiagTrackSvc" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable DiagTrack / dmwappushservice" IsChecked="True"/>
+                                    <CheckBox x:Name="chkDiagTrackSvc" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable DiagTrack / dmwappushservice" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkCopilotBlock" Style="{StaticResource WrapCheckBoxStyle}" Content="Block Copilot / Recall / AI data analysis" IsChecked="True"/>
+                                    <CheckBox x:Name="chkCopilotBlock" Style="{StaticResource WrapCheckBoxStyle}" Content="Block Copilot / Recall / AI data analysis" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkInputTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable input personalization and typing insights" IsChecked="True"/>
+                                    <CheckBox x:Name="chkInputTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Stop sending typing/inking samples for product improvement" IsChecked="True"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkClipboardHistory" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable clipboard history and cloud clipboard sync (opt-in)" IsChecked="False"/>
@@ -586,10 +586,10 @@
                                     <CheckBox x:Name="chkEdgeWidgets" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Edge preload and Widgets" IsChecked="True"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkDeliveryOpt" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Delivery Optimization (P2P)" IsChecked="True"/>
+                                    <CheckBox x:Name="chkDeliveryOpt" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Delivery Optimization (P2P)" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkAppsBackground" Style="{StaticResource WrapCheckBoxStyle}" Content="Suspend UWP apps in background" IsChecked="True"/>
+                                    <CheckBox x:Name="chkAppsBackground" Style="{StaticResource WrapCheckBoxStyle}" Content="Suspend UWP apps in background" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkNetworkLatency" Style="{StaticResource WrapCheckBoxStyle}" Content="Network optimization / latency reduction (TCP-IP)" IsChecked="False"/>
@@ -633,13 +633,13 @@
                         <GroupBox x:Name="grpMoreOptimizations" Header="System Cleanup &amp; Performance">
                             <WrapPanel>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkHibernation" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Hibernation" IsChecked="True"/>
+                                    <CheckBox x:Name="chkHibernation" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Hibernation" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkPowerPlan" Style="{StaticResource WrapCheckBoxStyle}" Content="Set power plan to High Performance" IsChecked="True"/>
+                                    <CheckBox x:Name="chkPowerPlan" Style="{StaticResource WrapCheckBoxStyle}" Content="Set power plan to High Performance" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkTempCleanup" Style="{StaticResource WrapCheckBoxStyle}" Content="Clean temp files / Prefetch / Windows.old / WU cache" IsChecked="True"/>
+                                    <CheckBox x:Name="chkTempCleanup" Style="{StaticResource WrapCheckBoxStyle}" Content="Clean temp files / Prefetch / Windows.old / WU cache" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkHotCorners" Style="{StaticResource WrapCheckBoxStyle}" Content="Disable Snap Assist / Aero Shake" IsChecked="False"/>
@@ -648,13 +648,13 @@
                                     <CheckBox x:Name="chkBootTimeout" Style="{StaticResource WrapCheckBoxStyle}" Content="Reduce boot menu timeout to 5s" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkOfficeTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Block Office / OneDrive telemetry" IsChecked="True"/>
+                                    <CheckBox x:Name="chkOfficeTelemetry" Style="{StaticResource WrapCheckBoxStyle}" Content="Block Office / OneDrive telemetry" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkExtraSchedTasks" Style="{StaticResource WrapCheckBoxStyle}" Content="Remove additional telemetry scheduled tasks" IsChecked="True"/>
+                                    <CheckBox x:Name="chkExtraSchedTasks" Style="{StaticResource WrapCheckBoxStyle}" Content="Remove additional telemetry scheduled tasks" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
-                                    <CheckBox x:Name="chkDiskOptimize" Style="{StaticResource WrapCheckBoxStyle}" Content="Auto-configure TRIM / scheduled defrag (SSD/HDD)" IsChecked="True"/>
+                                    <CheckBox x:Name="chkDiskOptimize" Style="{StaticResource WrapCheckBoxStyle}" Content="Auto-configure TRIM / scheduled defrag (SSD/HDD)" IsChecked="False"/>
                                 </Border>
                                 <Border Style="{StaticResource GridOptionCardStyle}">
                                     <CheckBox x:Name="chkHagsGameMode" Style="{StaticResource WrapCheckBoxStyle}" Content="Enable Game Mode and HAGS" IsChecked="False"/>
