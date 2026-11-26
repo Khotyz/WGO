@@ -26,7 +26,7 @@ This downloads the latest version to a temporary folder, starts the UI, and clea
 
 ---
 
-**Current release:** 6.5 – see [CHANGELOG.md](CHANGELOG.md) for the full list of changes since 6.0.
+**Current release:** 7 – see [CHANGELOG.md](CHANGELOG.md) for the full list of changes since 6.0.
 
 ---
 
